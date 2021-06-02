@@ -1,0 +1,40 @@
+Package: revise
+Title: Tools for formulating revise and resubmit rmarkdown documents
+Version: 0.0.0.1
+Authors@R: 
+    c(
+    person(given = "James",
+           family = "Conigrave",
+           role = c("aut", "cre"),
+           email = "james@conigrave.com",
+           comment = c(ORCID = "0000-0002-8816-6229")),
+    person(given = "Philip",
+           family = "Parker",
+           role = c("aut"),
+           email = "philip.parker@acu.edu.au",
+           comment = c(ORCID = "0000-0002-4604-8566")),
+    person(given = "Taren",
+           family = "Sanders",
+           role = c("aut"),
+           email = "taren.sanders@acu.edu.au",
+           comment = c(ORCID = "0000-0002-4504-6008")),
+    person(given = "Michael",
+           family = "Noetel",
+           role = c("aut"),
+           email = "michael.noetel@acu.edu.au",
+           comment = c(ORCID = "0000-0002-6563-8203"))
+           )
+Description: Tools for streamlining revise and resubmits.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    dplyr,
+    glue,
+    knitr,
+    rvest,
+    stringr,
+    textreadr,
+    xml2
