@@ -1,0 +1,6 @@
+Name: ReviewerComment
+Description: Provides reviewer styling for revise and resubmit documents
+Binding: reviewer_comment
+Interactive: false
+
+
