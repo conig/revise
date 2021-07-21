@@ -22,9 +22,20 @@ reviewer_comment <- function(){
 ```"
 
   before <- contents[1:start-1]
+
+  # If a counter has not been started, begin it.
+
+  contains_counter <-
+    any(grepl("\\newcounter{C}", context$contents, fixed = TRUE))
+
+  if (!contains_counter & any(grepl("---", contents))) {
+    end_yaml <-  max(which(grepl("---", contents)))
+    before <-
+      c(before[1:end_yaml], "\\newcounter{C}", before[(end_yaml + 1):length(before)])
+  }
+
   middle <- contents[start:end]
   after <- contents[(end+1) : length(contents)]
-
 
   new = c(before, start_content, middle, end_content, after)
 
