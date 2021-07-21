@@ -11,6 +11,7 @@ reviewer_comment <- function(){
   selection <- context$select[[1]]$range
   start <- selection$start[[1]]
   end <- selection$end[[1]]
+  document_end <- length(context$contents)
 
   start_content <- "```{=tex}
 \\RC{\\stepcounter{C}\\underline{Comment \\arabic{C}.}
@@ -28,14 +29,18 @@ reviewer_comment <- function(){
   contains_counter <-
     any(grepl("\\newcounter{C}", context$contents, fixed = TRUE))
 
-  if (!contains_counter & any(grepl("---", contents))) {
+  if (!contains_counter & any(grepl("---", before))) {
     end_yaml <-  max(which(grepl("---", contents)))
     before <-
       c(before[1:end_yaml], "\\newcounter{C}", before[(end_yaml + 1):length(before)])
   }
 
   middle <- contents[start:end]
-  after <- contents[(end+1) : length(contents)]
+  if(document_end != end){
+    after <- contents[(end+1) : length(contents)]
+  }else{
+    after <- ""
+  }
 
   new = c(before, start_content, middle, end_content, after)
 
