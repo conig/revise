@@ -8,7 +8,7 @@
 
 The goal of revise is to support authors in responding to revise and
 resubmit requests. These functions are designed to work with
-[crsh/papaja](https://github.com/crsh/papaja)
+[crsh/papaja](https://github.com/crsh/papaja).
 
 ## Installation
 
