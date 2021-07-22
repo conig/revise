@@ -5,8 +5,26 @@
 reviewer_comment <- function(){
 
   context <- rstudioapi::getActiveDocumentContext()
-  #assign("context", context, envir = globalenv())
+  assign("context", context, envir = globalenv())
   contents = context$contents
+
+  if(!any(grepl("^---$", contents))){
+    append_to_front <- rnr_header(detect_primary_file())
+    append_to_rear <- '\\clearpage
+
+# References
+
+\\begingroup
+
+<div id="refs"></div>
+
+\\endgroup
+'
+  }else{
+    append_to_front = NULL
+    append_to_rear = NULL
+  }
+
 
   selection <- context$select[[1]]$range
   start <- selection$start[[1]]
@@ -29,8 +47,8 @@ reviewer_comment <- function(){
   contains_counter <-
     any(grepl("\\newcounter{C}", context$contents, fixed = TRUE))
 
-  if (!contains_counter & any(grepl("---", before))) {
-    end_yaml <-  max(which(grepl("---", contents)))
+  if (!contains_counter & any(grepl("^---$", before))) {
+    end_yaml <-  max(which(grepl("^---$", contents)))
     before <-
       c(before[1:end_yaml], "\\newcounter{C}", before[(end_yaml + 1):length(before)])
   }
@@ -42,10 +60,72 @@ reviewer_comment <- function(){
     after <- ""
   }
 
-  new = c(before, start_content, middle, end_content, after)
+  new = c(append_to_front,before, start_content, middle, end_content, after, append_to_rear)
 
   rstudioapi::setDocumentContents(paste(new,collapse = "\n"), id = context$id)
 
 }
 
 
+rnr_header <- function(file){
+  yaml <- tryCatch(rmarkdown::yaml_front_matter(file), error = function(e) return(NA))
+
+title <- tryCatch(yaml["title"][[1]], error = function(e) return("paper title"))
+author <- tryCatch(yaml["author"][[1]][[1]]$name, error = function(e) return("Author name"))
+bibliography <- tryCatch(yaml["bibliography"][[1]], error = function(e) return("bibliography.json"))
+csl <- tryCatch(yaml["csl"][[1]], error = function(e) return(""))
+
+if(is.null(title)) title <- "paper title"
+if(is.null(author)) author <- "Author name"
+if(is.null(bibliography)) bibliography <- "bibliography.json"
+if(is.null(csl)) csl <- ""
+if(length(bibliography) > 1) bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
+
+glue::glue(r'(---
+title          : "!!<title>!!"
+authors        : "!!<author>!! on behalf of co-authors"
+journal        : "your journal"
+manuscript     : "MANUSCRIPT-ID"
+handling_editor: ""
+
+header-includes:
+   - \usepackage[none]{hyphenat}
+   - \usepackage{threeparttable}
+   - \usepackage{makecell}
+   - \usepackage{booktabs}
+   - \usepackage{longtable}
+   - \overfullrule=0pt
+
+class             : "draft"
+bibliography      : !!<bibliography>!!
+csl               : "!!<csl>!!"
+output            : papaja::revision_letter_pdf
+---
+
+Dear Dr. `r rmarkdown::metadata$handling_editor`,
+
+Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. The suggested changes were useful and, in our opinion, have improved the manuscript. In the following itemised list we respond to each comment point-by-point.
+
+```{r}
+manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
+get_revision <- function(id) revise::get_revision(manuscript, id, evaluate = TRUE)
+# load("manuscript_workspace.rData")
+```
+
+)', .open = "!!<", .close = ">!!")
+}
+
+detect_primary_file <- function(){
+
+  files <- list.files(pattern = ".rmd$", ignore.case = TRUE)
+  contents <- suppressWarnings(lapply(files, readLines))
+
+  out <- data.frame(files = files,
+             has_papaja = sapply(contents, function(x)
+               any(grepl("papaja::apa", x, fixed = TRUE))),
+             filesize = sapply(files, file.size))
+  if(nrow(out) == 0) return(NA)
+
+   out[order(-out$has_papaja,-out$filesize),"files"][[1]]
+
+}

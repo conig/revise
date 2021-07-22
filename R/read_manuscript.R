@@ -62,7 +62,8 @@ extract_html_sections <- function(path){
     if(grepl("\\`\\`\\`$",df$lines[i])) is_chunk <- FALSE
   }
   document <- paste(df$lines[!df$is_chunk], collapse = "\n\n")
-  tmp <- xml2::read_html(document)
+  tmp <- tryCatch(xml2::read_html(document), error = function(e) tmp <- NULL)
+  if(is.null(tmp)) return(tmp)
   tmp <- rvest::html_nodes(tmp, xpath = glue::glue('//*[@id]') )
 
   section<- rvest::html_text(tmp)
