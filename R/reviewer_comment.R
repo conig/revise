@@ -101,6 +101,7 @@ bibliography      : !!<bibliography>!!
 csl               : "!!<csl>!!"
 output            : papaja::revision_letter_pdf
 ---
+\newcounter{C}
 
 Dear Dr. `r rmarkdown::metadata$handling_editor`,
 
