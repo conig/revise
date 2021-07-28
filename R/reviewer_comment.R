@@ -5,7 +5,7 @@
 reviewer_comment <- function(){
 
   context <- rstudioapi::getActiveDocumentContext()
-  assign("context", context, envir = globalenv())
+  #assign("context", context, envir = globalenv())
   contents = context$contents
 
   if(!any(grepl("^---$", contents))){
