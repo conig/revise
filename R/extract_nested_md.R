@@ -6,7 +6,7 @@
 
 extract_md_sections2 <- function(string){
   pattern = r"(\[(?!\s*\@).*?\]\{#.+?\})"
-  nested_pattern = "\\[.*\\[(?!\\@)"
+  nested_pattern = "\\[.*\\[(?!.*\\@)"
   end = "\\]\\{\\#\\w+\\}"
   clean_end = "[\\]\\{\\#\\}]*"
 
