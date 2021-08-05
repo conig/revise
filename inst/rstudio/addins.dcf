@@ -3,4 +3,10 @@ Description: Provides reviewer styling for revise and resubmit documents
 Binding: reviewer_comment
 Interactive: false
 
+Name: AnchorTag
+Description: Tag a selection of text for extraction
+Binding: anchor_tag
+Interactive: false
+
+
 
