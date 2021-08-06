@@ -234,6 +234,10 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
   doc <- pdf_text
 
   pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
+
+
+
+
   if(length(pnum) > 0) return(paste(pnum, collapse = ", "))
 
   l <- lapply(1:length(doc$page_id), function(p){ # look at combinations of pages if no match
@@ -301,7 +305,24 @@ get_revision = function(manuscript,
   }
 
   if (!is.null(manuscript$PDF)) {
+
+    if(nchar(string) > 2000){
+
+      start_string <- substring(string, 1, 1000)
+      end_string <- substring(string, nchar(string) - 1000, nchar(string))
+
+      pnum.start <- get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
+      pnum.end <- get_pdf_pagenumber(end_string, pdf_text = manuscript$PDF)
+
+      pnum.start <- gsub("\\-.*","",pnum.start)
+      pnum.end <- gsub(".*\\-","",pnum.end)
+
+      pnum <- paste(unique(c(pnum.start, pnum.end)),collapse = "-")
+
+    }else{
     pnum = get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
+    }
+
     if (length(pnum) == 0)
       stop("Couldn't find pdf match for id: ", id)
     string = paste0(string,
