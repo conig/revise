@@ -3,4 +3,5 @@
 S3method(print,manuscript)
 export(abstract)
 export(get_revision)
+export(letter)
 export(read_manuscript)

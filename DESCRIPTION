@@ -34,6 +34,7 @@ Imports:
     dplyr,
     glue,
     knitr,
+    rmarkdown,
     rvest,
     stringr,
     textreadr,

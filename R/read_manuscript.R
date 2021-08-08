@@ -235,9 +235,6 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 
   pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
 
-
-
-
   if(length(pnum) > 0) return(paste(pnum, collapse = ", "))
 
   l <- lapply(1:length(doc$page_id), function(p){ # look at combinations of pages if no match
@@ -354,6 +351,10 @@ get_revision = function(manuscript,
   if (quote) {
     string <- gsub("\\n", "\\\n>", string)
     string <- paste0(">", string)
+  }
+
+  if(nchar(string) > 4800){
+    string <-  paste("\n\\begin{mdframed}\n", string, "\n\\end{mdframed}",collapse="")
   }
 
   string

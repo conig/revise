@@ -88,18 +88,10 @@ journal        : "your journal"
 manuscript     : "MANUSCRIPT-ID"
 handling_editor: ""
 
-header-includes:
-   - \usepackage[none]{hyphenat}
-   - \usepackage{threeparttable}
-   - \usepackage{makecell}
-   - \usepackage{booktabs}
-   - \usepackage{longtable}
-   - \overfullrule=0pt
-
 class             : "draft"
 bibliography      : !!<bibliography>!!
 csl               : "!!<csl>!!"
-output            : papaja::revision_letter_pdf
+output            : revise::letter
 ---
 \newcounter{C}
 
@@ -108,8 +100,8 @@ Dear Dr. `r rmarkdown::metadata$handling_editor`,
 Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. The suggested changes were useful and, in our opinion, have improved the manuscript. In the following itemised list we respond to each comment point-by-point.
 
 ```{r}
-manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
-get_revision <- function(id) revise::get_revision(manuscript, id, evaluate = TRUE)
+# manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
+# get_revision <- function(id) revise::get_revision(manuscript, id, evaluate = TRUE)
 # load("manuscript_workspace.rData")
 ```
 
@@ -130,3 +122,5 @@ detect_primary_file <- function(){
    out[order(-out$has_papaja,-out$filesize),"files"][[1]]
 
 }
+
+
