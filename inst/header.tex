@@ -5,3 +5,7 @@
 \usepackage{longtable}
 \overfullrule=0pt
 \usepackage{mdframed}
+
+\newcounter{rComment}
+\newcommand{\rcomm}[1]{\refstepcounter{rComment}\label{#1}\ref{#1}}
+\newcommand{\reviewer}[2]{\RC{\underline{Comment \rcomm{#1}.}\vspace{-0.1cm}{#2}}}

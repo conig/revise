@@ -5,7 +5,7 @@
 reviewer_comment <- function(){
 
   context <- rstudioapi::getActiveDocumentContext()
-  #assign("context", context, envir = globalenv())
+  assign("context", context, envir = globalenv())
   contents = context$contents
 
   if(!any(grepl("^---$", contents))){
@@ -31,27 +31,24 @@ reviewer_comment <- function(){
   end <- selection$end[[1]]
   document_end <- length(context$contents)
 
-  start_content <- "```{=tex}
-\\RC{\\stepcounter{C}\\underline{Comment \\arabic{C}.}
-\\vspace{-0.1cm}
-"
+  comment_n <- stringr::str_extract_all(contents, r"(\\reviewer\{c[0-9]*\})", simplify = TRUE)
+  if(length(comment_n) == 0){
+    comment_n <- 1
+  }else{
+    comment_n <- max(as.numeric(stringr::str_extract_all(comment_n, "\\d*", simplify = TRUE)), na.rm = TRUE)
+    comment_n <- comment_n + 1
+  }
+
+  start_content <- glue::glue("```{=tex}
+\\reviewer{c!!<comment_n>!!}{
+
+",.open = "!!<", .close = ">!!")
 
   end_content <- "
   }
 ```"
 
   before <- contents[1:start-1]
-
-  # If a counter has not been started, begin it.
-
-  contains_counter <-
-    any(grepl("\\newcounter{C}", context$contents, fixed = TRUE))
-
-  if (!contains_counter & any(grepl("^---$", before))) {
-    end_yaml <-  max(which(grepl("^---$", contents)))
-    before <-
-      c(before[1:end_yaml], "\\newcounter{C}", before[(end_yaml + 1):length(before)])
-  }
 
   middle <- contents[start:end]
   if(document_end != end){
@@ -93,7 +90,6 @@ bibliography      : !!<bibliography>!!
 csl               : "!!<csl>!!"
 output            : revise::letter
 ---
-\newcounter{C}
 
 Dear Dr. `r rmarkdown::metadata$handling_editor`,
 
