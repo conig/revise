@@ -34,8 +34,12 @@ Imports:
     dplyr,
     glue,
     knitr,
+    papaja,
     rmarkdown,
+    rstudioapi,
     rvest,
     stringr,
     textreadr,
     xml2
+Remotes:
+    crsh/papaja
