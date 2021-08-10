@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 # revise
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/conig/revise/workflows/R-CMD-check/badge.svg)](https://github.com/conig/revise/actions)
 <!-- badges: end -->
 
 The goal of revise is to support authors in responding to revise and resubmit requests. These functions are designed to work with [crsh/papaja](https://github.com/crsh/papaja).

@@ -7,6 +7,8 @@ letter <- function(...) {
   extra_tex <-
     rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
 
+  knitr::knit_engines$set(reviewer = revise:::process_chunk)
+
   papaja:::revision_letter_pdf(...,
                                includes = extra_tex)
 }

@@ -4,6 +4,8 @@
 # revise
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/conig/revise/workflows/R-CMD-check/badge.svg)](https://github.com/conig/revise/actions)
 <!-- badges: end -->
 
 The goal of revise is to support authors in responding to revise and
