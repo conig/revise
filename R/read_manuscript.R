@@ -321,7 +321,7 @@ get_revision = function(manuscript,
     }
 
     if (length(pnum) == 0)
-      stop("Couldn't find pdf match for id: ", id)
+      stop("Couldn't match the extracted text to the target PDF: ", id,". Have you knit the manuscript since making recent changes?")
     string = paste0(string,
                     "\n\n\\begin{flushright}Pg. ",
                     pnum,
