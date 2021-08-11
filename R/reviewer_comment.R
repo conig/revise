@@ -8,9 +8,9 @@ reviewer_comment <- function(){
 
     #assign("context", context, envir = globalenv())
 
-  if(context$id == "#console" | context$contents == ""){
-    return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
-  }
+    if(length(context$selection) == 0){
+      return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
+    }
 
   contents = context$contents
 

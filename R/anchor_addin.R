@@ -32,7 +32,7 @@ anchor_tag <- function(){
 
     #assign("context", context, envir = globalenv())
 
-  if(context$id == "#console" | context$contents == ""){
+  if(length(context$selection) == 0){
     return(rstudioapi::showDialog(title = ":'(", message = "The AnchorTag addin will not work in the visual markdown editor. Please switch to the source editor."))
   }
 
