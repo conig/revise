@@ -21,6 +21,7 @@ insert_at <- function(string, position, insert){
 
 }
 
+
 #' reviewer_comment
 #'
 #' A comment to style chunks for reviewer comments
@@ -28,7 +29,13 @@ insert_at <- function(string, position, insert){
 anchor_tag <- function(){
 
   context <- rstudioapi::getActiveDocumentContext()
-  #assign("context", context, envir = globalenv())
+
+    #assign("context", context, envir = globalenv())
+
+  if(context$id == "#console" | context$contents == ""){
+    return(rstudioapi::showDialog(title = ":'(", message = "The AnchorTag addin will not work in the visual markdown editor. Please switch to the source editor."))
+  }
+
   contents <- context$contents
   start <- context$selection[[1]]$range$start
   end <- context$selection[[1]]$range$end

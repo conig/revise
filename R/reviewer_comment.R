@@ -5,7 +5,13 @@
 reviewer_comment <- function(){
 
   context <- rstudioapi::getActiveDocumentContext()
-  #assign("context", context, envir = globalenv())
+
+    #assign("context", context, envir = globalenv())
+
+  if(context$id == "#console" | context$contents == ""){
+    return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
+  }
+
   contents = context$contents
 
   if(!any(grepl("^---$", contents))){
