@@ -296,6 +296,15 @@ get_revision = function(manuscript,
                         quote = TRUE,
                         evaluate = TRUE) {
   string <- manuscript$sections[id][[1]]
+  if(is.null(string)){
+    similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
+    similar_id <- paste(similar_id, collapse = " | ")
+    message = paste0("Couldn't find a section in the manuscript tagged as '", id, "'.")
+    if(nchar(similar_id) > 0){
+      message <- paste0(message, " Did you mean: ", similar_id,"?")
+    }
+    stop(message, call. = FALSE)
+  }
 
   if (evaluate) {
     string <- evaluate_inline(string)
