@@ -289,12 +289,14 @@ header_to_bold = function(string){
 #' @param id the id from a html tag
 #' @param quote is the output chunk quoted?
 #' @param evaluate bool. Should inline rchunks be executed?
+#' @param mdframed bool. Should mdframed be used?
 #' @export
 
 get_revision = function(manuscript,
                         id,
                         quote = TRUE,
-                        evaluate = TRUE) {
+                        evaluate = TRUE,
+                        mdframed = FALSE) {
   string <- manuscript$sections[id][[1]]
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
@@ -357,13 +359,14 @@ get_revision = function(manuscript,
            fixed = TRUE)
   }
 
-  if (quote) {
-    string <- gsub("\\n", "\\\n>", string)
-    string <- paste0(">", string)
-  }
+  if(nchar(string) > 4500 | mdframed){
+    string <-  paste("\n\\begin{mdframed}\n\n", string, "\n\\end{mdframed}",collapse="")
+  }else{
+    if (quote) {
+      string <- gsub("\\n", "\\\n>", string)
+      string <- paste0(">", string)
+    }
 
-  if(nchar(string) > 4800){
-    string <-  paste("\n\\begin{mdframed}\n", string, "\n\\end{mdframed}",collapse="")
   }
 
   string

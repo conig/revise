@@ -104,7 +104,7 @@ Thank you for considering our manuscript for publication at _`r rmarkdown::metad
 ```{r}
 # knitr::knit_engines$set(reviewer = revise:::process_chunk)
 # manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
-# get_revision <- function(id) revise::get_revision(manuscript, id, evaluate = TRUE)
+# get_revision <- function(id, ...) revise::get_revision(manuscript, id, evaluate = TRUE, ...)
 # load("manuscript_workspace.rData")
 ```
 
