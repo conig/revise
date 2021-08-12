@@ -359,15 +359,11 @@ get_revision = function(manuscript,
            fixed = TRUE)
   }
 
-  if(nchar(string) > 4500 | mdframed){
-    string <-  paste("\n\\begin{mdframed}\n\n", string, "\n\\end{mdframed}",collapse="")
-  }else{
-    if (quote) {
-      string <- gsub("\\n", "\\\n>", string)
-      string <- paste0(">", string)
-    }
-
+  if (quote) {
+    string <- gsub("\\n", "\\\n>", string)
+    string <- paste0(">", string)
   }
+
 
   string
 }
