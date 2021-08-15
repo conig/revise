@@ -102,7 +102,7 @@ extract_md_sections <- function(path){
 #' @param PDF if TRUE, or path provided, a PDF will be loaded for page matching.
 #' @export
 
-read_manuscript <- function(address, id = NULL, PDF = NULL){
+read_manuscript <- function(address, id = NULL, PDF = FALSE){
   if(!is.null(id)) return(read_spans(address, id))
   rmd <- paste(read_md(address),collapse = "\n")
   sections <- rbind(extract_md_sections2(rmd), extract_html_sections(address))
