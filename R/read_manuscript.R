@@ -272,10 +272,10 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 
 header_to_bold = function(string){
 
-  while(grepl("#{1,}.{0,100}\\\n",string)){
-    target <- stringr::str_extract(string, "#{1,}.+?(\\n){1,}")
+  while(grepl("(?<!\\{)#{1,}.{0,100}\\\n",string, perl = TRUE)){
+    target <- stringr::str_extract(string, "(?<!\\{)#{1,}.+?(\\n){1,}")
     n_hash <- sum(strsplit(target, split = "")[[1]]=="#")
-    replacement <- gsub("#{1,}\\s?","**", target)
+    replacement <- gsub("(?<!\\{)#{1,}\\s?","**", target, perl = TRUE)
     if(n_hash < 3){
       replacement <- gsub("\\n{1,}","**\\\n\\\n", replacement)
     } else{
