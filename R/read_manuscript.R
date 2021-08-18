@@ -237,18 +237,25 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 
   if(length(pnum) > 0) return(paste(pnum, collapse = ", "))
 
-  l <- lapply(1:length(doc$page_id), function(p){ # look at combinations of pages if no match
+  l <- lapply(seq_len(length(doc$page_id)), function(p){ # look at combinations of pages if no match
 
     pages = sapply(c(doc$text[p], doc$text[p + 1]), function(x){
       gsub(glue::glue("^{attr(doc,'running_head')}") , "", tolower(unlist(x)))
     })
-    pages <- trimws(pages)
+
+    pages <- lapply(seq_along(pages), function(i){
+      page <- pages[[i]]
+      page <- gsub("\\\n", " ", page)
+      page <- gsub(r"(\s{2,})", " ", page)
+      page <- trimws(page)
+      page
+    })
 
     data.frame(
       page_id = glue::glue("{p}-{p + 1}"),
       text = trimws(paste(pages, collapse = " "))
     )
-  })
+  }) # ---
 
   doc <- do.call(rbind, l)
   pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
