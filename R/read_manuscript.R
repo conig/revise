@@ -122,7 +122,6 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
     PDF <- NULL
   }
   refs <- extract_refs(address)
-
   manuscript <- list(sections = sections,PDF = PDF, refs = refs, rmd = rmd)
   class(manuscript) <- "manuscript"
   manuscript
@@ -167,7 +166,7 @@ read_spans <- function(address, id){
   if(missing(id)|!is.character(id)) stop("Please specify an id string")
   # Read in data and parse
   tmp = rvest::html_nodes(xml2::read_html(address),
-                      xpath = glue::glue('//*[@id="{id}"]'))
+                          xpath = glue::glue('//*[@id="{id}"]'))
   # Test if id is unique
   if(length(tmp)>1) warning("ID is not unique")
   # Extract
@@ -198,10 +197,16 @@ process_pdf <- function(path){
   }
 
   doc <- textreadr::read_pdf(path)
-  running_head = gsub("running head: ", "" , tolower(doc$text[1]))
+  running_head = gsub("\n.*","",doc$text[2])
   running_head = trimws(gsub("[0-9]","",running_head))
+  running_head = gsub("\\s{1,}"," ", running_head)
+  is_head <- unlist(lapply(doc$text, function(x) grepl(running_head,x)))
+  prop_head <- prop.table(table(is_head))
 
-  doc$text <- stringr::str_remove_all(tolower(doc$text), glue::glue("^{running_head}"))
+  doc$text <- tolower(doc$text)
+  if(!is.null(running_head)){
+    doc$text <- stringr::str_remove_all(doc$text, tolower(glue::glue("^{running_head}")))
+  }
 
   doc <-  dplyr::summarise(
     dplyr::group_by(doc, page_id),
@@ -213,7 +218,11 @@ process_pdf <- function(path){
   doc$text <- stringr::str_remove_all(doc$text, "\\[.{0,50}\\]") # remove square brackets
   doc$text <- stringr::str_remove_all(doc$text, "\\(.{0,50}\\)") # remove parentheses
   doc$text <- trimws(stringr::str_remove_all(doc$text, "[[:punct:]]")) # remove all punctuation
-  attr(doc, "running_head") <- running_head
+  if(prop_head > .7){
+    attr(doc, "running_head") <- running_head
+  }else{
+    attr(doc, "running_head") <- NULL
+  }
   doc
 }
 
@@ -224,7 +233,7 @@ process_pdf <- function(path){
 #' @param pdf_text text to search
 #' @param max.distance argument passed to agrep
 
-get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
+get_pdf_pagenumber = function(string, pdf_text, max.distance = .15, running_head){
   string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
   string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
   string <- gsub("[0-9]","", string) # remove numbers
@@ -240,7 +249,7 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
   l <- lapply(seq_len(length(doc$page_id)), function(p){ # look at combinations of pages if no match
 
     pages = sapply(c(doc$text[p], doc$text[p + 1]), function(x){
-      gsub(glue::glue("^{attr(doc,'running_head')}") , "", tolower(unlist(x)))
+      tolower(unlist(x))
     })
 
     pages <- lapply(seq_along(pages), function(i){
@@ -326,8 +335,10 @@ get_revision = function(manuscript,
       start_string <- substring(string, 1, 1000)
       end_string <- substring(string, nchar(string) - 1000, nchar(string))
 
-      pnum.start <- get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
-      pnum.end <- get_pdf_pagenumber(end_string, pdf_text = manuscript$PDF)
+      pnum.start <-
+        get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
+      pnum.end <-
+        get_pdf_pagenumber(end_string, pdf_text = manuscript$PDF)
 
       pnum.start <- gsub("\\-.*","",pnum.start)
       pnum.end <- gsub(".*\\-","",pnum.end)
@@ -335,7 +346,7 @@ get_revision = function(manuscript,
       pnum <- paste(unique(c(pnum.start, pnum.end)),collapse = "-")
 
     }else{
-    pnum = get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
+      pnum = get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
     }
 
     if (length(pnum) == 0)
