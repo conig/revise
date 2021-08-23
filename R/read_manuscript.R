@@ -111,6 +111,15 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
   names(sections) <- section_names
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
+      floats_in_text <-
+      tryCatch({
+        rmarkdown::yaml_front_matter(address)$floatsintext
+      }, error = function(e) return(FALSE))
+
+      if(floats_in_text){
+        warning("floatsintext is set to TRUE in target rmarkdown. This may disrupt page number matching where target strings cross pages.")
+      }
+
       PDF <- gsub(tools::file_ext(address), "pdf", address)
     }
     if (class(PDF) == "character") {
@@ -233,12 +242,13 @@ process_pdf <- function(path){
 #' @param pdf_text text to search
 #' @param max.distance argument passed to agrep
 
-get_pdf_pagenumber = function(string, pdf_text, max.distance = .15, running_head){
+get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
   string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
   string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
   string <- gsub("[0-9]","", string) # remove numbers
   string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
   string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
+  string <- gsub("\\s{2,}", " ", string) # remove additional spaces
 
   doc <- pdf_text
 
@@ -305,14 +315,12 @@ header_to_bold = function(string){
 #' @param id the id from a html tag
 #' @param quote is the output chunk quoted?
 #' @param evaluate bool. Should inline rchunks be executed?
-#' @param mdframed bool. Should mdframed be used?
 #' @export
 
 get_revision = function(manuscript,
                         id,
                         quote = TRUE,
-                        evaluate = TRUE,
-                        mdframed = FALSE) {
+                        evaluate = TRUE) {
   string <- manuscript$sections[id][[1]]
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
