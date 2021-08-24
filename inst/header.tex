@@ -1,7 +1,5 @@
 % \usepackage[none]{hyphenat}
-
 \usepackage{hyphenat}
-
 \usepackage{threeparttable}
 \usepackage{makecell}
 \usepackage{booktabs}
@@ -13,12 +11,20 @@
 \newcounter{rComment}
 \newcommand{\rcomm}[1]{\refstepcounter{rComment}\label{#1}\ref{#1}}
 \newcommand{\reviewer}[2]{\RC{\underline{Comment \rcomm{#1}.}\vspace{-0.1cm}{#2}}}
-
+%replace quote with mdframed
 \renewenvironment{quote}
   {% \begin{quote}
    \begin{mdframed}%
   }{% \end{quote}
    \end{mdframed}%
   }
+
+%use hyphens sparingly
 \hyphenpenalty=50
+
+%reset counter
 \newcommand{\newreviewer}{\setcounter{rComment}{0}}
+
+%commands for linking to colours
+\newcommand{\comment}[1]{\hyperref[#1]{comment }\ref{#1}}
+\newcommand{\Comment}[1]{\hyperref[#1]{Comment }\ref{#1}}
