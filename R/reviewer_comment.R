@@ -97,7 +97,7 @@ csl               : "!!<csl>!!"
 output            : revise::letter
 ---
 
-Dear Dr. `r rmarkdown::metadata$handling_editor`,
+Dear Dr `r rmarkdown::metadata$handling_editor`,
 
 Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. The suggested changes were useful and, in our opinion, have improved the manuscript. In the following itemised list we respond to each comment point-by-point.
 

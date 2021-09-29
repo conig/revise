@@ -235,6 +235,33 @@ process_pdf <- function(path){
   doc
 }
 
+#' find_pages
+#'
+#' Searches through a manuscript for a page reference
+#' @manuscript the manuscript object to search
+#' @string the string to find
+#' @export
+
+find_pages <- function(manuscript, string){
+  if(is.null(manuscript$PDF)) stop("No PDF attached to the manuscript object: not possible to identify page numbers.")
+  get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
+}
+
+#' clean_string
+#'
+#' Cleaning steps for identifying strings
+#' @param string
+
+clean_string <- function(string){
+  string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
+  string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
+  string <- gsub("[0-9]","", string) # remove numbers
+  string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
+  string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
+  string <- gsub("\\s{2,}", " ", string) # remove additional spaces
+  string
+}
+
 #' get_page_number
 #'
 #' Finds page number from pdf based on text matching
@@ -243,22 +270,17 @@ process_pdf <- function(path){
 #' @param max.distance argument passed to agrep
 
 get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
-  string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
-  string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
-  string <- gsub("[0-9]","", string) # remove numbers
-  string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
-  string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
-  string <- gsub("\\s{2,}", " ", string) # remove additional spaces
+  string <- clean_string(string)
 
-  doc <- pdf_text
+  doc <- clean_string(pdf_text$text)
 
-  pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
+  pnum <- agrep(string, doc, ignore.case = TRUE, max.distance = max.distance)
 
   if(length(pnum) > 0) return(paste(pnum, collapse = ", "))
 
-  l <- lapply(seq_len(length(doc$page_id)), function(p){ # look at combinations of pages if no match
+  l <- lapply(seq_len(length(doc)), function(p){ # look at combinations of pages if no match
 
-    pages = sapply(c(doc$text[p], doc$text[p + 1]), function(x){
+    pages = sapply(c(doc[p], doc[p + 1]), function(x){
       tolower(unlist(x))
     })
 
@@ -278,8 +300,7 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 
   doc <- do.call(rbind, l)
   pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
-  pnum <- doc$page_id[pnum]
-  pnum
+  doc$page_id[pnum]
 
 }
 
