@@ -1,0 +1,40 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+
+\newcounter{counter}[section]
+
+\renewcommand{\thecounter}{\arabic{counter}}
+
+\newenvironment{reviewercomment}[1][]{%
+ \refstepcounter{counter}%
+ \noindent\textsc{Comment}~\thecounter. #1
+ }%
+ {\par}%
+
+\newcommand{\rcomm}[1]{\begin{reviewercomment}\label{#1}\end{reviewercomment}}
+\newcommand{\reviewer}[2]{\RC{\underline{Comment \rcomm{#1}.}\vspace{-0.1cm}{#2}}}
+
+\begin{document}
+
+See Definitions~\ref{first}, \ref{second}, \ref{third} and \ref{last}.
+
+\section{Reviewer 1}
+\rcomm{first}
+\rcomm{c2}
+\rcomm{c3}
+
+\section{Reviewer 2}
+\rcomm{second}
+
+\section{Reviewer 3}
+\begin{reviewercomment}\label{third}Some reviewercomment\end{reviewercomment}
+\begin{reviewercomment}Some reviewercomment\end{reviewercomment}
+\begin{reviewercomment}Some reviewercomment\end{reviewercomment}
+
+\section{Reviewer 4}
+\begin{reviewercomment}\label{last}Some reviewercomment\end{reviewercomment}
+\begin{reviewercomment}Some reviewercomment\end{reviewercomment}
+\begin{reviewercomment}Some reviewercomment\end{reviewercomment}
+
+\end{document}

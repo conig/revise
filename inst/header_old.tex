@@ -8,18 +8,9 @@
 \usepackage[draft]{todonotes}
 \overfullrule=0pt
 
-% set up reviewer comments
-\newcounter{counter}[section]
-\renewcommand{\thecounter}{\arabic{counter}}
-
-\newenvironment{reviewercomment}[1][]{%
- \refstepcounter{counter}%
- \noindent\textsc{Comment}~\thecounter.#1
- }%
- {\par}%
-
-\newcommand{\rcomm}[1]{\begin{reviewercomment}\label{#1}\end{reviewercomment}}
-\newcommand{\reviewer}[2]{\RC{\underline{\rcomm{#1}}\vspace{-0.1cm}{#2}}}
+\newcounter{rComment}
+\newcommand{\rcomm}[1]{\refstepcounter{rComment}\label{#1}\ref{#1}}
+\newcommand{\reviewer}[2]{\RC{\underline{Comment \rcomm{#1}.}\vspace{-0.1cm}{#2}}}
 %replace quote with mdframed
 \renewenvironment{quote}
   {% \begin{quote}
@@ -32,7 +23,7 @@
 \hyphenpenalty=50
 
 %reset counter
-\newcommand{\newreviewer}{\section}
+\newcommand{\newreviewer}{\setcounter{rComment}{0}}
 
 %commands for linking to colours
 \newcommand{\comment}[1]{\underline{\hyperref[#1]{comment }\ref{#1}}}
