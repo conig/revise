@@ -14,7 +14,7 @@
 
 \newenvironment{reviewercomment}[1][]{%
  \refstepcounter{counter}%
- \noindent\textsc{Comment}~\thecounter.#1
+ \noindent\textsc{Comment}~\thecounter
  }%
  {\par}%
 
@@ -30,9 +30,6 @@
 
 %use hyphens sparingly
 \hyphenpenalty=50
-
-%reset counter
-\newcommand{\newreviewer}{\section}
 
 %commands for linking to colours
 \newcommand{\comment}[1]{\underline{\hyperref[#1]{comment }\ref{#1}}}
