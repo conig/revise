@@ -30,7 +30,7 @@ anchor_tag <- function(){
 
   context <- rstudioapi::getActiveDocumentContext()
 
-    #assign("context", context, envir = globalenv())
+  #assign("context", context, envir = globalenv())
 
   if(length(context$selection) == 0){
     return(rstudioapi::showDialog(title = ":'(", message = "The AnchorTag addin will not work in the visual markdown editor. Please switch to the source editor."))
@@ -40,6 +40,7 @@ anchor_tag <- function(){
   start <- context$selection[[1]]$range$start
   end <- context$selection[[1]]$range$end
 
+  #browser()
   end_line <- contents[end[[1]]]
   end_position <- end[[2]] - 1
   if(end_position > (nchar(end_line))) end_position <- nchar(end_line)
@@ -52,8 +53,7 @@ anchor_tag <- function(){
   contents[start[[1]]] <- insert_at(contents[start[[1]]],start_position,"[")
 
   rstudioapi::setDocumentContents(paste(contents,collapse = "\n"), id = context$id)
-
-  col <- stringr::str_locate(contents[end[[1]]], "\\{\\#")[2] + 1
-  pos <- rstudioapi::document_position(end[[1]],col)
+  #col <- stringr::str_locate(contents[end[[1]]], "\\{\\#")[2] + 1
+  pos <- rstudioapi::document_position(end[[1]],end_position + 5)
   rstudioapi::setCursorPosition(pos, id = context$id)
 }
