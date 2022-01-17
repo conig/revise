@@ -53,24 +53,22 @@ reviewer_comment <- function(){
     output_format <- tools::file_ext(output_format)
   }
 
-  if (output_format == "pdf") {
-    start_content <- glue::glue("```{=tex}
-\\reviewer{c!!<comment_n>!!}{
+#   if (output_format == "pdf") {
+#     start_content <- glue::glue("```{=tex}
+# \\reviewer{c!!<comment_n>!!}{
+#
+# ",
+# .open = "!!<",
+# .close = ">!!")
+#
+#     end_content <- "
+#   }
+# ```"
+#   }
 
-",
-.open = "!!<",
-.close = ">!!")
-
+    start_content <- "```{asis}"
     end_content <- "
-  }
 ```"
-  }
-
-  if(output_format == "txt"){
-    start_content <- "```{reviewer}"
-    end_content <- "
-```"
-  }
 
   before <- contents[1:start-1]
 

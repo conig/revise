@@ -7,7 +7,8 @@ letter.pdf <- function(...) {
   extra_tex <-
     rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
 
-  knitr::knit_engines$set(reviewer = process_chunk)
+  knitr::knit_engines$set(reviewer = process_chunk_pdf,
+                          asis = process_chunk_pdf)
 
   papaja::revision_letter_pdf(...,
                                includes = extra_tex)
@@ -20,15 +21,12 @@ letter.pdf <- function(...) {
 #' @export
 
 letter.docx <- function(...) {
-  extra_tex <-
-    rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
+  knitr::knit_engines$set(reviewer = process_chunk_docx,
+                          asis = process_chunk_docx)
 
-  knitr::knit_engines$set(reviewer = process_chunk)
+  bookdown::word_document2(...,
+                           reference_docx = system.file("response_letter_template.docx", package = "revise"))
 
-    bookdown::word_document2(
-      ...,
-      reference_docx = system.file("response_letter_template.docx", package = "revise")
-    )
 }
 
 #' letter.txt
@@ -41,7 +39,8 @@ letter.txt <- function(...) {
   extra_tex <-
     rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
 
-  knitr::knit_engines$set(reviewer = process_chunk)
+  knitr::knit_engines$set(reviewer = process_chunk_txt,
+                          asis = process_chunk_txt)
 
     rmarkdown::output_format(
       rmarkdown::knitr_options(opts_chunk = list(echo = FALSE,
