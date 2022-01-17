@@ -6,6 +6,9 @@
 \usage{
 letter(...)
 }
+\arguments{
+\item{...}{arguments passed to letter.pdf}
+}
 \description{
 This function is deprecated
 }

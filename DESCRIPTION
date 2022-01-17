@@ -33,6 +33,7 @@ RoxygenNote: 7.1.2
 Depends:
     R (>= 4.0.0)
 Imports: 
+    bookdown,
     dplyr,
     glue,
     knitr,

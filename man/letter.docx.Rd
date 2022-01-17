@@ -7,7 +7,7 @@
 letter.docx(...)
 }
 \arguments{
-\item{...}{additional arguments passed to rmarkdown::output_format}
+\item{...}{additional arguments passed to rmarkdown::word_document}
 }
 \description{
 Revise and resubmit letter as a txt doc

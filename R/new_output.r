@@ -16,7 +16,7 @@ letter.pdf <- function(...) {
 #' letter.docx
 #'
 #' Revise and resubmit letter as a txt doc
-#' @param ... additional arguments passed to rmarkdown::output_format
+#' @param ... additional arguments passed to rmarkdown::word_document
 #' @export
 
 letter.docx <- function(...) {
@@ -25,11 +25,9 @@ letter.docx <- function(...) {
 
   knitr::knit_engines$set(reviewer = process_chunk)
 
-    rmarkdown::output_format(
-      rmarkdown::knitr_options(opts_chunk = list(echo = FALSE,
-                                                 format = "word")),
-      pandoc = rmarkdown::pandoc_options(to = "docx"),
-      ...
+    bookdown::word_document2(
+      ...,
+      reference_docx = system.file("response_letter_template.docx", package = "revise")
     )
 }
 
@@ -77,6 +75,7 @@ letter_post_txt <- function(front_matter, input , output_file, clean, quiet = FA
 #' letter
 #'
 #' This function is deprecated
+#' @param ... arguments passed to letter.pdf
 #' @export
 
 letter <- function(...){
