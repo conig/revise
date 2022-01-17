@@ -6,9 +6,6 @@
 \usage{
 letter(...)
 }
-\arguments{
-\item{...}{arguments passed to papaja:::revision_letter_pdf}
-}
 \description{
-Revise and resubmit letter
+This function is deprecated
 }

@@ -6,6 +6,11 @@
 \usage{
 find_pages(manuscript, string)
 }
+\arguments{
+\item{manuscript}{the manuscript object to search}
+
+\item{string}{the string to find}
+}
 \description{
 Searches through a manuscript for a page reference
 }

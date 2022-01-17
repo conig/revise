@@ -238,8 +238,8 @@ process_pdf <- function(path){
 #' find_pages
 #'
 #' Searches through a manuscript for a page reference
-#' @manuscript the manuscript object to search
-#' @string the string to find
+#' @param manuscript the manuscript object to search
+#' @param string the string to find
 #' @export
 
 find_pages <- function(manuscript, string){

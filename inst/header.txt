@@ -1,0 +1,12 @@
+Authors response to reviews of
+
+Manuscript {{ID}}
+
+{{Title}}
+
+{{Author}}
+Submitted to {{Journal}}
+========================================================================
+RC: Reviewer Comment
+
+

@@ -26,9 +26,12 @@ reviewer_comment <- function(){
 
 \\endgroup
 '
+  output_format = "pdf"
+
   }else{
     append_to_front = NULL
     append_to_rear = NULL
+    output_format <- NULL
   }
 
 
@@ -45,14 +48,29 @@ reviewer_comment <- function(){
     comment_n <- comment_n + 1
   }
 
-  start_content <- glue::glue("```{=tex}
+  if (is.null(output_format)) {
+    output_format <- rmarkdown::yaml_front_matter(context$path)$output
+    output_format <- tools::file_ext(output_format)
+  }
+
+  if (output_format == "pdf") {
+    start_content <- glue::glue("```{=tex}
 \\reviewer{c!!<comment_n>!!}{
 
-",.open = "!!<", .close = ">!!")
+",
+.open = "!!<",
+.close = ">!!")
 
-  end_content <- "
+    end_content <- "
   }
 ```"
+  }
+
+  if(output_format == "txt"){
+    start_content <- "```{reviewer}"
+    end_content <- "
+```"
+  }
 
   before <- contents[1:start-1]
 
@@ -84,7 +102,7 @@ if(is.null(bibliography)) bibliography <- "bibliography.json"
 if(is.null(csl)) csl <- ""
 if(length(bibliography) > 1) bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
 
-glue::glue(r'(---
+header <- glue::glue(r'(---
 title          : "!!<title>!!"
 authors        : "!!<author>!! on behalf of co-authors"
 journal        : "your journal"
@@ -99,9 +117,9 @@ output            : revise::letter
 
 Dear Dr `r rmarkdown::metadata$handling_editor`,
 
-Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. The suggested changes were useful and, in our opinion, have improved the manuscript. In the following itemised list we respond to each comment point-by-point.
+Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. In the following itemised list we respond to each comment point-by-point.
 
-```{r}
+```{r setup-chunk}
 # knitr::knit_engines$set(reviewer = revise:::process_chunk)
 # manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
 # get_revision <- function(id, ...) revise::get_revision(manuscript, id, ...)
@@ -109,6 +127,11 @@ Thank you for considering our manuscript for publication at _`r rmarkdown::metad
 ```
 
 )', .open = "!!<", .close = ">!!")
+
+header <- gsub("csl\\s*:\\s*\"NA\"", "" , header)
+header <- gsub("bibliography\\s*:\\s*NA", "" , header)
+header
+
 }
 
 detect_primary_file <- function(){
