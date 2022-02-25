@@ -250,7 +250,7 @@ find_pages <- function(manuscript, string){
 #' clean_string
 #'
 #' Cleaning steps for identifying strings
-#' @param string
+#' @param string string to clean
 
 clean_string <- function(string){
   string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets

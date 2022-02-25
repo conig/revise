@@ -6,6 +6,9 @@
 \usage{
 clean_string(string)
 }
+\arguments{
+\item{string}{string to clean}
+}
 \description{
 Cleaning steps for identifying strings
 }

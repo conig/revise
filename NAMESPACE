@@ -2,6 +2,7 @@
 
 S3method(print,manuscript)
 export(abstract)
+export(drive_comments)
 export(find_pages)
 export(get_revision)
 export(letter)
