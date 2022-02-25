@@ -117,7 +117,7 @@ Dear Dr `r rmarkdown::metadata$handling_editor`,
 
 Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. In the following itemised list we respond to each comment point-by-point.
 
-```{r setup-chunk}
+```{r setup-chunk, include = FALSE}
 # manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
 # get_revision <- function(id, ...) revise::get_revision(manuscript, id, ...)
 # load("manuscript_workspace.rData")
