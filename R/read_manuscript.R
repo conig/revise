@@ -111,10 +111,13 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
   names(sections) <- section_names
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
+
       floats_in_text <-
       tryCatch({
         rmarkdown::yaml_front_matter(address)$floatsintext
       }, error = function(e) return(FALSE))
+
+      if(is.null(floats_in_text)) floats_in_text <- FALSE
 
       if(floats_in_text){
         warning("floatsintext is set to TRUE in target rmarkdown. This may disrupt page number matching where target strings cross pages.")
@@ -210,7 +213,7 @@ process_pdf <- function(path){
   running_head = trimws(gsub("[0-9]","",running_head))
   running_head = gsub("\\s{1,}"," ", running_head)
   is_head <- unlist(lapply(doc$text, function(x) grepl(running_head,x)))
-  prop_head <- prop.table(table(is_head))
+  prop_head <- prop.table(table(is_head))["TRUE"]
 
   doc$text <- tolower(doc$text)
   if(!is.null(running_head)){
