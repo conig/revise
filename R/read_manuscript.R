@@ -352,7 +352,7 @@ get_revision = function(manuscript,
                         quote = TRUE,
                         evaluate = TRUE,
                         split_string = FALSE,
-                        search_length = 500,
+                        search_length = 300,
                         include_pgnum = TRUE) {
   string <- manuscript$sections[id][[1]]
   if(is.null(string)){

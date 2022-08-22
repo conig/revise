@@ -10,7 +10,7 @@ get_revision(
   quote = TRUE,
   evaluate = TRUE,
   split_string = FALSE,
-  substring_length = 1000,
+  search_length = 300,
   include_pgnum = TRUE
 )
 }
@@ -25,7 +25,7 @@ get_revision(
 
 \item{split_string}{should only the start and end of the string be searched for?}
 
-\item{substring_length}{what length of string should be searched for if split?}
+\item{search_length}{numeric. Searches for the first n and n characters in a string. Shroten if difficult to find passages split by floats.}
 
 \item{include_pgnum}{logical. include PDF page number?}
 }
