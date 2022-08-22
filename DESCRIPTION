@@ -1,6 +1,6 @@
 Package: revise
 Title: Tools for formulating revise and resubmit rmarkdown documents
-Version: 0.0.1.6
+Version: 0.0.2.0
 Authors@R: 
     c(
     person(given = "James",
