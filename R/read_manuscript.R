@@ -343,7 +343,7 @@ header_to_bold = function(string){
 #' @param quote is the output chunk quoted?
 #' @param evaluate logical. Should inline rchunks be executed?
 #' @param split_string should only the start and end of the string be searched for?
-#' @param substring_length what length of string should be searched for if split?
+#' @param search_length numeric. Searches for the first n and n characters in a string. Shroten if difficult to find passages split by floats.
 #' @param include_pgnum logical. include PDF page number?
 #' @export
 
@@ -352,7 +352,7 @@ get_revision = function(manuscript,
                         quote = TRUE,
                         evaluate = TRUE,
                         split_string = FALSE,
-                        substring_length = 1000,
+                        search_length = 500,
                         include_pgnum = TRUE) {
   string <- manuscript$sections[id][[1]]
   if(is.null(string)){
@@ -371,10 +371,10 @@ get_revision = function(manuscript,
 
   if (!is.null(manuscript$PDF) & include_pgnum) {
 
-    if((nchar(string) > 2000) | split_string){
+    if((nchar(string) > search_length) | split_string){
 
-      start_string <- substring(string, 1, substring_length)
-      end_string <- substring(string, nchar(string) - substring_length, nchar(string))
+      start_string <- substring(string, 1, search_length)
+      end_string <- substring(string, nchar(string) - search_length, nchar(string))
 
       pnum.start <-
         get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
