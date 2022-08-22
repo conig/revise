@@ -341,9 +341,10 @@ header_to_bold = function(string){
 #' @param manuscript the manuscript object from which to extract revisions
 #' @param id the id from a html tag
 #' @param quote is the output chunk quoted?
-#' @param evaluate bool. Should inline rchunks be executed?
+#' @param evaluate logical. Should inline rchunks be executed?
 #' @param split_string should only the start and end of the string be searched for?
 #' @param substring_length what length of string should be searched for if split?
+#' @param include_pgnum logical. include PDF page number?
 #' @export
 
 get_revision = function(manuscript,
@@ -351,7 +352,8 @@ get_revision = function(manuscript,
                         quote = TRUE,
                         evaluate = TRUE,
                         split_string = FALSE,
-                        substring_length = 1000) {
+                        substring_length = 1000,
+                        include_pgnum = TRUE) {
   string <- manuscript$sections[id][[1]]
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
@@ -367,7 +369,7 @@ get_revision = function(manuscript,
     string <- evaluate_inline(string)
   }
 
-  if (!is.null(manuscript$PDF)) {
+  if (!is.null(manuscript$PDF) & include_pgnum) {
 
     if((nchar(string) > 2000) | split_string){
 

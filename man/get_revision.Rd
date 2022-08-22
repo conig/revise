@@ -4,7 +4,15 @@
 \alias{get_revision}
 \title{get_revision}
 \usage{
-get_revision(manuscript, id, quote = TRUE, evaluate = TRUE)
+get_revision(
+  manuscript,
+  id,
+  quote = TRUE,
+  evaluate = TRUE,
+  split_string = FALSE,
+  substring_length = 1000,
+  include_pgnum = TRUE
+)
 }
 \arguments{
 \item{manuscript}{the manuscript object from which to extract revisions}
@@ -13,7 +21,13 @@ get_revision(manuscript, id, quote = TRUE, evaluate = TRUE)
 
 \item{quote}{is the output chunk quoted?}
 
-\item{evaluate}{bool. Should inline rchunks be executed?}
+\item{evaluate}{logical. Should inline rchunks be executed?}
+
+\item{split_string}{should only the start and end of the string be searched for?}
+
+\item{substring_length}{what length of string should be searched for if split?}
+
+\item{include_pgnum}{logical. include PDF page number?}
 }
 \description{
 Extract and format revision
