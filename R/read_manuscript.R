@@ -134,7 +134,8 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
     PDF <- NULL
   }
   refs <- extract_refs(address)
-  manuscript <- list(sections = sections,PDF = PDF, refs = refs, rmd = rmd)
+  manuscript <- list(sections = sections,PDF = PDF, refs = refs, rmd = rmd,
+                     mtime = file.info(address)$mtime)
   class(manuscript) <- "manuscript"
   manuscript
 
@@ -262,6 +263,7 @@ clean_string <- function(string){
   string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
   string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
   string <- gsub("\\s{2,}", " ", string) # remove additional spaces
+  string <- gsub("\\n", " ", string)
   string
 }
 
@@ -273,6 +275,7 @@ clean_string <- function(string){
 #' @param max.distance argument passed to agrep
 
 get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
+
   string <- clean_string(string)
 
   doc <- clean_string(pdf_text$text)
@@ -339,12 +342,16 @@ header_to_bold = function(string){
 #' @param id the id from a html tag
 #' @param quote is the output chunk quoted?
 #' @param evaluate bool. Should inline rchunks be executed?
+#' @param split_string should only the start and end of the string be searched for?
+#' @param substring_length what length of string should be searched for if split?
 #' @export
 
 get_revision = function(manuscript,
                         id,
                         quote = TRUE,
-                        evaluate = TRUE) {
+                        evaluate = TRUE,
+                        split_string = FALSE,
+                        substring_length = 1000) {
   string <- manuscript$sections[id][[1]]
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
@@ -362,10 +369,10 @@ get_revision = function(manuscript,
 
   if (!is.null(manuscript$PDF)) {
 
-    if(nchar(string) > 2000){
+    if((nchar(string) > 2000) | split_string){
 
-      start_string <- substring(string, 1, 1000)
-      end_string <- substring(string, nchar(string) - 1000, nchar(string))
+      start_string <- substring(string, 1, substring_length)
+      end_string <- substring(string, nchar(string) - substring_length, nchar(string))
 
       pnum.start <-
         get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
