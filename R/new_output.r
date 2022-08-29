@@ -7,6 +7,8 @@ letter.pdf <- function(...) {
   extra_tex <-
     rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
 
+  knitr::opts_chunk$set(escape = TRUE)
+
   knitr::knit_engines$set(reviewer = process_chunk_pdf,
                           asis = process_chunk_pdf)
 
