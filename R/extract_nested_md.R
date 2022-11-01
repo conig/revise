@@ -5,33 +5,42 @@
 #' @param string string to extract md sections from
 
 extract_md_sections2 <- function(string){
-  pattern = r"(\[(?!\s*\@).*?\]\{#.+?\})"
-  nested_pattern = "\\[.*\\[(?!.*\\@)"
-  end = "\\]\\{\\#\\w+\\}"
-  clean_end = "[\\]\\{\\#\\}]*"
+  string <- paste0(string, collapse = "\r\n")
+  sectionheaders <- regmatches(string, gregexpr("(?<=\\{#)[^{}]+(?=\\})", string, perl=TRUE))[[1]]
 
-  section_list <- list()
+  sectionends <- gregexpr(pattern = "\\{#.+?\\}", text = string)[[1]]
+  sections <- lapply(sectionends, function(i){
+    substring(string, first = 1, last = i)
+  })
+  # sections <- strsplit(x = string, split = "\\{#.+?\\}")[[1]]
+  sections <- sections[grepl(pattern = "\\]\\{$", x = sections)]
+  sections_clean <- lapply(sections, function(x){
+    openbrackets <- list(position = gregexpr(pattern = "[", text = x, fixed = TRUE)[[1]])
+    openbrackets$type <- rep("open", times = length(openbrackets$position))
+    closingbrackets <- list(position = gregexpr(pattern = "]", text = x, fixed = TRUE)[[1]])
+    closingbrackets$type <- rep("closed", times = length(closingbrackets$position))
+    allbrackets <- openbrackets
+    allbrackets$position <- c(allbrackets$position, closingbrackets$position)
+    ordr <- order(allbrackets$position, decreasing = FALSE)
+    allbrackets$type <- c(openbrackets$type, closingbrackets$type)[ordr]
+    allbrackets$position <- allbrackets$position[ordr]
+    substring(text = x, first = (findposition(x = allbrackets)+1), last = (nchar(x)-2))
+  })
+  data.frame(tag = sectionheaders, section = unlist(sections_clean))
+}
 
-  while(grepl(pattern, string, perl = TRUE)){
 
-  extracted_text <- stringr::str_match(string, pattern)
-
-  if(grepl(nested_pattern, extracted_text, perl = TRUE)){
-   extracted_text  <- gsub(nested_pattern, "", extracted_text, perl = TRUE)
-   extracted_text  <- paste0("[",extracted_text)
+findposition <- function(x, level = 0){
+  len <- length(x$position)
+  x$position <- x$position[-len]
+  x$type <- x$type[-len]
+  if(tail(x$type, 1) == "open"){
+    if(level == 0){
+      return(tail(x$position, 1))
+    } else {
+      findposition(x = x, level = level -1)
+    }
+  } else {
+    findposition(x = x, level = level+1)
   }
-  section_content <- gsub(end, "", extracted_text, perl = TRUE)
-  section_content <- substr(section_content,2,nchar(section_content))
-  section <- stringr::str_extract(extracted_text, end)
-  section <- gsub(clean_end,"",section, perl = TRUE)
-  out <- data.frame(tag = section, section = section_content)
-
-  string <- gsub(extracted_text, section_content, string, fixed = TRUE)
-
-  section_list  <- append(section_list, list(out))
-
-  }
-
-    do.call(rbind, section_list)
-
 }
