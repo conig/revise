@@ -343,7 +343,7 @@ header_to_bold = function(string){
 #' @param quote is the output chunk quoted?
 #' @param evaluate logical. Should inline rchunks be executed?
 #' @param split_string should only the start and end of the string be searched for?
-#' @param search_length numeric. Searches for the first n and n characters in a string. Shroten if difficult to find passages split by floats.
+#' @param search_length numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.
 #' @param include_pgnum logical. include PDF page number?
 #' @export
 
