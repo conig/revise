@@ -205,8 +205,7 @@ process_pdf <- function(path){
   if(!ext %in% c("pdf")){
     stop("Extracting page numbers only works for pdf documents")
   }
-
-  doc <- textreadr::read_pdf(path)
+  doc <- get_pdf_text(path)
   running_head = gsub("\n.*","",doc$text[2])
   running_head = trimws(gsub("[0-9]","",running_head))
   running_head = gsub("\\s{1,}"," ", running_head)
