@@ -1,11 +1,11 @@
 
-#' extract_md_sections2
+#' extract_sections
 #'
-#' Extract text when there are nested parentheses
+#' Extract sections from text string
 #' @param string string to extract md sections from
 #' @param is_span logical, whether to extract sections in square brackets (default) or spans
 
-extract_md_sections2 <- function(string,
+extract_sections <- function(string,
                                  is_span = FALSE
 ){
 
@@ -49,12 +49,14 @@ extract_md_sections2 <- function(string,
     sections_clean <- lapply(sections_clean, gsub, pattern = "^.+?>(.+)<.+?$", replacement = "\\1")
   }
 
-  data.frame(tag = sectionheaders, section = unlist(sections_clean))
+  out <- sections_clean
+  names(out) <- sectionheaders
+  return(out)
 }
 
 
 
-
+#' @importFrom utils tail
 findposition <- function(x, level = 0){
   len <- length(x$position)
   x$position <- x$position[-len]

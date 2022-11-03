@@ -105,10 +105,7 @@ extract_md_sections <- function(path){
 read_manuscript <- function(address, id = NULL, PDF = FALSE){
   if(!is.null(id)) return(read_spans(address, id))
   rmd <- paste(read_md(address),collapse = "\n")
-  sections <- rbind(extract_md_sections2(rmd), extract_html_sections(address))
-  section_names <- sections$tag
-  sections <- as.list(sections$section)
-  names(sections) <- section_names
+  sections <- c(extract_sections(rmd), extract_sections(rmd, is_span = TRUE))
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
 
@@ -125,7 +122,7 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
 
       PDF <- gsub(tools::file_ext(address), "pdf", address)
     }
-    if (class(PDF) == "character") {
+    if (inherits(PDF, "character")) {
       PDF <- process_pdf(PDF)
     } else{
       PDF <- NULL
