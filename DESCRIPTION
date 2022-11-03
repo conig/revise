@@ -44,8 +44,6 @@ Imports:
     stringr,
     textreadr,
     xml2
-Remotes:
-    crsh/papaja
 Suggests: 
     googledrive,
     docxtractr,
