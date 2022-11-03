@@ -1,5 +1,5 @@
 Package: revise
-Title: Tools for formulating revise and resubmit rmarkdown documents
+Title: Tools for Formulating Revise and Resubmit Rmarkdown Documents
 Version: 0.0.2.1
 Authors@R: 
     c(
