@@ -105,7 +105,9 @@ extract_md_sections <- function(path){
 read_manuscript <- function(address, id = NULL, PDF = FALSE){
   if(!is.null(id)) return(read_spans(address, id))
   rmd <- paste(read_md(address),collapse = "\n")
-  sections <- c(extract_sections(rmd), extract_sections(rmd, is_span = TRUE))
+  sections <- c(extract_sections(rmd),
+                extract_sections(rmd, is_span = TRUE))
+  check_dup_sections(sections)
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
 
@@ -350,7 +352,8 @@ get_revision = function(manuscript,
                         split_string = FALSE,
                         search_length = 300,
                         include_pgnum = TRUE) {
-  string <- manuscript$sections[id][[1]]
+  check_dup_sections(manuscript$sections)
+  string <- manuscript$sections[[id]]
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
     similar_id <- paste(similar_id, collapse = " | ")
@@ -424,3 +427,9 @@ get_revision = function(manuscript,
 }
 
 utils::globalVariables(c("text", "page_id"))
+
+check_dup_sections <- function(sections){
+  if(any(duplicated(names(sections)))){
+    warning("The following sections have duplicate names. When referencing sections by name, the section with that name will be selected. Please use unique section names:\n", paste0("  '", names(sections)[duplicated(names(sections))], "'\n"), call. = FALSE)
+  }
+}

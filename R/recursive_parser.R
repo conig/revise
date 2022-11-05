@@ -10,7 +10,7 @@ extract_sections <- function(string,
 ){
 
   if(is_span){
-    regex_header = "<span.+?id.+?=.+?\\b(.+?)\\b.+?>"
+    regex_header = "<span.+?id.{0,}?=.{0,}?\\b(.+?)\\b.+?>"
     regex_end = "(?<=</span>)"
     regex_issection = "</span>"
     open = "<span"
@@ -45,7 +45,7 @@ extract_sections <- function(string,
   })
 
   if(is_span){
-    sectionheaders <- gsub("^.+?[\"'](.+?)[\"'].*$", "\\1", sectionheaders)
+    sectionheaders <- gsub("^.+?id.{0,}?=.{0,}?[\"'](.+?)[\"'].*$", "\\1", sectionheaders)
     sections_clean <- lapply(sections_clean, gsub, pattern = "^.+?>(.+)<.+?$", replacement = "\\1")
   }
 
