@@ -25,3 +25,20 @@ test_that("regex handles other attributes in span tag:", {
   ),
   c("hai" = "works"))})
 
+
+test_that("regex handles different quotes:", {
+  expect_equal(unlist(
+    revise:::extract_sections("<span id= 'hai'>works</span>", is_span = TRUE)
+  ),
+  c("hai" = "works"))
+  expect_equal(unlist(
+    revise:::extract_sections("<span id= \"hai\">works</span>", is_span = TRUE)
+  ),
+  c("hai" = "works"))
+  expect_equal(unlist(
+    revise:::extract_sections("<span style=\"color:blue\" id= 'hai'>works</span>", is_span = TRUE)
+  ),
+  c("hai" = "works"))
+
+  })
+
