@@ -14,8 +14,8 @@ test_that("tempfile has expected sections", {
   expect_equal(names(out$sections), c("mdmethod", "spanmethod"))
 
   expect_equal(unname(unlist(out$sections)),
-               c("\nFirst line\nSecond line",
-                 "\nFirst line\nSecond line\n"))
+               c("\n\nFirst line\n\nSecond line",
+                 "\n\nFirst line\n\nSecond line\n\n"))
 })
 
 test_that("rendered tempfile has no brackets", {

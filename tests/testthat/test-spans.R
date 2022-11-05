@@ -5,9 +5,9 @@ test_that("new parser works for spans", {
            "", "Second line]{#mdmethod}")
 
 
-  out <- revise:::extract_sections(string = lnz, is_span = TRUE)
+  out <- revise:::extract_sections(string = paste0(lnz, collapse = "\n"), is_span = TRUE)
   expect_equal(names(out), c("spanmethod"))
-  expect_equal(unname(unlist(out)), c("\r\n\r\nFirst line\r\n\r\nSecond line\r\n\r\n"))
+  expect_equal(unname(unlist(out)), c("\n\nFirst line\n\nSecond line\n\n"))
 })
 
 test_that("new parser works for square brackets", {
@@ -17,9 +17,9 @@ test_that("new parser works for square brackets", {
            "", "Second line]{#mdmethod}")
 
 
-  out <- revise:::extract_sections(string = lnz)
+  out <- revise:::extract_sections(string = paste0(lnz, collapse = "\n"))
   expect_equal(names(out), c("mdmethod"))
-  expect_equal(unname(unlist(out)), c("\r\n\r\nFirst line\r\n\r\nSecond line"))
+  expect_equal(unname(unlist(out)), c("\n\nFirst line\n\nSecond line"))
 })
 
 test_that("new parser works with nested spans", {
@@ -27,9 +27,9 @@ test_that("new parser works with nested spans", {
            "", "<span id = \"spanmethod\">", "", "First line", "<span id = \"anotherone\">a second span...</span>",
            "Second line", "", "</span>")
 
-  out <- revise:::extract_sections(string = lnz, is_span = TRUE)
+  out <- revise:::extract_sections(string = paste0(lnz, collapse = "\n"), is_span = TRUE)
   expect_equal(names(out), c("spanmethod", "anotherone"))
-  expect_equal(unname(unlist(out)), c("a second span...", '\r\n\r\nFirst line\r\n<span id = "anotherone">a second span...</span>\r\nSecond line\r\n\r\n'))
+  expect_equal(unname(unlist(out)), c("a second span...", '\n\nFirst line\n<span id = "anotherone">a second span...</span>\nSecond line\n\n'))
 })
 
 test_that("nested example works", {

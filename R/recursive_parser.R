@@ -8,7 +8,6 @@
 extract_sections <- function(string,
                                  is_span = FALSE
 ){
-
   if(is_span){
     regex_header = "<span.+?id.{0,}?=.{0,}?\\b(.+?)\\b.+?>"
     regex_end = "(?<=</span>)"
@@ -22,7 +21,6 @@ extract_sections <- function(string,
     open = "["
     close = "]"
   }
-  string <- paste0(string, collapse = "\r\n")
   sectionheaders <- regmatches(string, gregexpr(regex_header, string, perl=TRUE))[[1]]
 
   sectionends <- gregexpr(pattern = regex_end, text = string, perl = TRUE)[[1]]

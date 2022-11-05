@@ -5,9 +5,9 @@ test_that("multiple sections on one line works", {
 })
 
 test_that("section on multiple lines works", {
-  out <- revise:::extract_sections("this is silly billy bla [blabala\r\nalso da da da]{#first} also fred and hank")
+  out <- revise:::extract_sections("this is silly billy bla [blabala\nalso da da da]{#first} also fred and hank")
   expect_equal(names(out), c("first"))
-  expect_equal(unname(unlist(out)), c("blabala\r\nalso da da da"))
+  expect_equal(unname(unlist(out)), c("blabala\nalso da da da"))
 })
 
 test_that("nested example works", {

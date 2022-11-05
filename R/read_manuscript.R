@@ -104,7 +104,7 @@ extract_md_sections <- function(path){
 
 read_manuscript <- function(address, id = NULL, PDF = FALSE){
   if(!is.null(id)) return(read_spans(address, id))
-  rmd <- paste(read_md(address),collapse = "\n")
+  rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
   sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
   check_dup_sections(sections)
