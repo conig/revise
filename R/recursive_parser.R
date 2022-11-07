@@ -21,6 +21,13 @@ extract_sections <- function(string,
     open = "["
     close = "]"
   }
+  # Are there any sections?
+  if(!all(grepl(regex_header, string, perl = TRUE),
+          grepl(regex_end, string, perl = TRUE),
+          grepl(regex_issection, string),
+          grepl(open, string, fixed = TRUE),
+          grepl(close, string, fixed = TRUE))) return(NULL)
+
   sectionheaders <- regmatches(string, gregexpr(regex_header, string, perl=TRUE))[[1]]
 
   sectionends <- gregexpr(pattern = regex_end, text = string, perl = TRUE)[[1]]
