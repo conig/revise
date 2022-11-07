@@ -352,6 +352,7 @@ get_revision = function(manuscript,
                         split_string = FALSE,
                         search_length = 300,
                         include_pgnum = TRUE) {
+  if(is.null(manuscript[["sections"]])) return(NULL)
   check_dup_sections(manuscript$sections)
   string <- manuscript$sections[[id]]
   if(is.null(string)){
