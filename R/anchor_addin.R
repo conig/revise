@@ -40,7 +40,6 @@ anchor_tag <- function(){
   start <- context$selection[[1]]$range$start
   end <- context$selection[[1]]$range$end
 
-  #browser()
   end_line <- contents[end[[1]]]
   end_position <- end[[2]] - 1
   if(end_position > (nchar(end_line))) end_position <- nchar(end_line)

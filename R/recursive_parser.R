@@ -15,7 +15,7 @@ extract_sections <- function(string,
     open = "<span"
     close = "</span>"
   } else {
-    regex_header = "(?<=\\{#)[^{}]+(?=\\})"
+    regex_header = "(?<=\\]\\{#)[^{}]+(?=\\})"
     regex_end = "\\{#.+?\\}"
     regex_issection = "\\]\\{$"
     open = "["
@@ -24,7 +24,6 @@ extract_sections <- function(string,
   # Are there any sections?
   if(!all(grepl(regex_header, string, perl = TRUE),
           grepl(regex_end, string, perl = TRUE),
-          grepl(regex_issection, string),
           grepl(open, string, fixed = TRUE),
           grepl(close, string, fixed = TRUE))) return(NULL)
 
@@ -55,7 +54,10 @@ extract_sections <- function(string,
   }
 
   out <- sections_clean
-  names(out) <- sectionheaders
+  if(!length(sectionheaders) == length(out)){
+    warning("The number of section headers does not correspond to the number of sections. Extracted the following sectionheaders:\n", paste0("  ", sectionheaders, "\n", collapse = ""))
+  }
+  names(out) <- sectionheaders[1:length(out)]
   return(out)
 }
 
