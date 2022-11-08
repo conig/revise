@@ -18,7 +18,33 @@ read_manuscript(
 \item{id}{if provided, text tagged with the given id will be returned}
 
 \item{PDF}{if TRUE, or path provided, a PDF will be loaded for page matching.}
+
+\item{to_envir}{Logical, indicating whether or not the manuscript should
+be assigned to an invisible environment variable (\code{.revise_manuscript}).
+Defaults to \code{TRUE}.}
+
+\item{envir}{The environment to which the manuscript should be assigned.}
+}
+\value{
+Invisibly returns a list of class \code{manuscript}, containing
+the following elements:
+\itemize{
+\item $sections: Extracted revisions
+\item $PDF: Optionally, the PDF document
+\item $refs: References to figures and tables
+\item $rmd: The raw rmarkdown
+\item $mtime: When the rmarkdown file was created
+}
 }
 \description{
 Reads in rmarkdown manuscript and an associated PDF as possible
+}
+\examples{
+tempfile <- tempfile("tmp", fileext = ".txt")
+writeLines("[Maecenas mollis consectetur purus.]{#test}", con = tempfile)
+read_manuscript(tempfile)
+}
+\seealso{
+\code{\link[rmarkdown]{yaml_front_matter}}
+\code{\link[tools]{fileutils}}
 }

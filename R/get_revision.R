@@ -1,8 +1,10 @@
 #' get_revision
 #'
 #' Extract and format revision
-#' @param manuscript the manuscript object from which to extract revisions
 #' @param id the id from a html tag
+#' @param manuscript Optional; a manuscript object in which to search
+#' for `id`. Defaults to `NULL`, in which case the manuscript object
+#' is found in the environment.
 #' @param quote is the output chunk quoted?
 #' @param evaluate logical. Should inline rchunks be executed?
 #' @param split_string should only the start and end of the string be searched for?
@@ -18,7 +20,6 @@ get_revision = function(id,
                         search_length = 300,
                         include_pgnum = TRUE) {
   if(is.null(manuscript)){
-    browser()
     if(".revise_manuscripts" %in% objects(envir = parent.frame(1), all.names = TRUE)){
       manuscript <- .revise_manuscripts
     } else {

@@ -199,7 +199,7 @@ header_to_bold = function(string){
 }
 
 
-utils::globalVariables(c("text", "page_id"))
+utils::globalVariables(c("text", "page_id", ".revise_manuscripts"))
 
 check_dup_sections <- function(sections){
   if(any(duplicated(names(sections)))){

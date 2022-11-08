@@ -4,8 +4,29 @@
 #' @param address path to a rmarkdown file
 #' @param id if provided, text tagged with the given id will be returned
 #' @param PDF if TRUE, or path provided, a PDF will be loaded for page matching.
+#' @param to_envir Logical, indicating whether or not the manuscript should
+#' be assigned to an invisible environment variable (`.revise_manuscript`).
+#' Defaults to `TRUE`.
+#' @param envir The environment to which the manuscript should be assigned.
+#' @return Invisibly returns a list of class `manuscript`, containing
+#' the following elements:
+#'
+#' * $sections: Extracted revisions
+#' * $PDF: Optionally, the PDF document
+#' * $refs: References to figures and tables
+#' * $rmd: The raw rmarkdown
+#' * $mtime: When the rmarkdown file was created
+#' @examples
+#' tempfile <- tempfile("tmp", fileext = ".txt")
+#' writeLines("[Maecenas mollis consectetur purus.]{#test}", con = tempfile)
+#' read_manuscript(tempfile)
+#' @seealso
+#'  \code{\link[rmarkdown]{yaml_front_matter}}
+#'  \code{\link[tools]{fileutils}}
+#' @rdname read_manuscript
 #' @export
-
+#' @importFrom rmarkdown yaml_front_matter
+#' @importFrom tools file_ext
 read_manuscript <- function(address, id = NULL, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
   rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
   sections <- c(extract_sections(rmd),
@@ -44,7 +65,7 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE, to_envir = TRUE, en
   class(manuscript) <- "manuscript"
   if (to_envir) {
     if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
-      warning("A manuscript has already been loaded, and will be replaced with the contents of '", fn, "'.")
+      warning("A manuscript has already been loaded, and will be replaced with the contents of '", basename(address), "'.")
     }
     assign(".revise_manuscripts", manuscript, envir = envir)
   }

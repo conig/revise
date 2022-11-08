@@ -45,10 +45,8 @@ Imports:
     papaja,
     rmarkdown,
     rstudioapi,
-    rvest,
     stringr,
-    pdftools,
-    xml2
+    pdftools
 Suggests: 
     googledrive,
     docxtractr,
