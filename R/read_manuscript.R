@@ -104,11 +104,10 @@ extract_md_sections <- function(path){
 
 read_manuscript <- function(address, id = NULL, PDF = FALSE){
   if(!is.null(id)) return(read_spans(address, id))
-  rmd <- paste(read_md(address),collapse = "\n")
-  sections <- rbind(extract_md_sections2(rmd), extract_html_sections(address))
-  section_names <- sections$tag
-  sections <- as.list(sections$section)
-  names(sections) <- section_names
+  rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
+  sections <- c(extract_sections(rmd),
+                extract_sections(rmd, is_span = TRUE))
+  check_dup_sections(sections)
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
 
@@ -125,7 +124,7 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
 
       PDF <- gsub(tools::file_ext(address), "pdf", address)
     }
-    if (class(PDF) == "character") {
+    if (inherits(PDF, "character")) {
       PDF <- process_pdf(PDF)
     } else{
       PDF <- NULL
@@ -208,8 +207,7 @@ process_pdf <- function(path){
   if(!ext %in% c("pdf")){
     stop("Extracting page numbers only works for pdf documents")
   }
-
-  doc <- textreadr::read_pdf(path)
+  doc <- get_pdf_text(path)
   running_head = gsub("\n.*","",doc$text[2])
   running_head = trimws(gsub("[0-9]","",running_head))
   running_head = gsub("\\s{1,}"," ", running_head)
@@ -343,7 +341,7 @@ header_to_bold = function(string){
 #' @param quote is the output chunk quoted?
 #' @param evaluate logical. Should inline rchunks be executed?
 #' @param split_string should only the start and end of the string be searched for?
-#' @param search_length numeric. Searches for the first n and n characters in a string. Shroten if difficult to find passages split by floats.
+#' @param search_length numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.
 #' @param include_pgnum logical. include PDF page number?
 #' @export
 
@@ -354,7 +352,9 @@ get_revision = function(manuscript,
                         split_string = FALSE,
                         search_length = 300,
                         include_pgnum = TRUE) {
-  string <- manuscript$sections[id][[1]]
+  if(is.null(manuscript[["sections"]])) return(NULL)
+  check_dup_sections(manuscript$sections)
+  string <- manuscript$sections[[id]]
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
     similar_id <- paste(similar_id, collapse = " | ")
@@ -428,3 +428,9 @@ get_revision = function(manuscript,
 }
 
 utils::globalVariables(c("text", "page_id"))
+
+check_dup_sections <- function(sections){
+  if(any(duplicated(names(sections)))){
+    warning("The following sections have duplicate names. When referencing sections by name, the section with that name will be selected. Please use unique section names:\n", paste0("  '", names(sections)[duplicated(names(sections))], "'\n"), call. = FALSE)
+  }
+}

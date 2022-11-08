@@ -1,5 +1,5 @@
 Package: revise
-Title: Tools for formulating revise and resubmit rmarkdown documents
+Title: Tools for Formulating Revise and Resubmit Rmarkdown Documents
 Version: 0.0.2.1
 Authors@R: 
     c(
@@ -22,8 +22,13 @@ Authors@R:
            family = "Noetel",
            role = c("aut"),
            email = "michael.noetel@acu.edu.au",
-           comment = c(ORCID = "0000-0002-6563-8203"))
-           )
+           comment = c(ORCID = "0000-0002-6563-8203")),
+    person(given = c("Caspar", "J."),
+           family = "Van Lissa", 
+           role = c("aut"),
+           email = "c.j.vanlissa@tilburguniversity.edu",
+           comment = c(ORCID = "0000-0002-0808-5024"))
+    )
 Description: Tools for streamlining revise and resubmits.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -42,10 +47,10 @@ Imports:
     rstudioapi,
     rvest,
     stringr,
-    textreadr,
+    pdftools,
     xml2
-Remotes:
-    crsh/papaja
 Suggests: 
     googledrive,
-    docxtractr
+    docxtractr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

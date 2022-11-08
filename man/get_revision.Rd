@@ -25,7 +25,7 @@ get_revision(
 
 \item{split_string}{should only the start and end of the string be searched for?}
 
-\item{search_length}{numeric. Searches for the first n and n characters in a string. Shroten if difficult to find passages split by floats.}
+\item{search_length}{numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.}
 
 \item{include_pgnum}{logical. include PDF page number?}
 }
