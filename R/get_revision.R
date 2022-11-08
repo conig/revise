@@ -37,7 +37,8 @@ get_revision = function(id,
     if(nchar(similar_id) > 0){
       message <- paste0(message, " Did you mean: ", similar_id,"?")
     }
-    stop(message, call. = FALSE)
+    warning(message, call. = FALSE)
+    return(message)
   }
 
   if (evaluate) {
@@ -65,8 +66,11 @@ get_revision = function(id,
       pnum = get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
     }
 
-    if (length(pnum) == 0)
-      stop("Couldn't match the extracted text to the target PDF: ", id,". Have you knit the manuscript since making recent changes?")
+    if (length(pnum) == 0){
+      warning("Couldn't match the extracted text to the target PDF: ", id,". Have you knit the manuscript since making recent changes?")
+      pnum <- "?"
+    }
+
     string = paste0(string,
                     "\n\n\\begin{flushright}Pg. ",
                     pnum,
