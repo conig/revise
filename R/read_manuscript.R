@@ -1,30 +1,3 @@
-
-#' read_md
-#'
-#' Read in a markdown document for further analysis
-#' @param path to markdown manuscript
-
-read_md <- function(path){
-  unname(unlist(utils::read.delim(path, sep = "\n", quote = "", header = FALSE)))
-}
-
-#' extract_refs
-#'
-#' Extract table and figure references
-#' @param path to markdown manuscript
-
-extract_refs <- function(path){
-  lines <- read_md(path)
-  lines <- paste(lines, collapse = "\n")
-  references <- unlist(stringr::str_extract_all(lines, "\\\\\\@ref.+?\\)"))
-  figures <- data.frame(text = unique(grep("fig:",references, value = TRUE)))
-  tables <- data.frame(text = unique(grep("tab:",references, value = TRUE)))
-  figures$ref <- seq_along(figures[,1])
-  tables$ref <- seq_along(tables[,1])
-  list(figures = figures, tables = tables)
-
-}
-
 #' read_manuscript
 #'
 #' Reads in rmarkdown manuscript and an associated PDF as possible
@@ -33,7 +6,7 @@ extract_refs <- function(path){
 #' @param PDF if TRUE, or path provided, a PDF will be loaded for page matching.
 #' @export
 
-read_manuscript <- function(address, id = NULL, PDF = FALSE){
+read_manuscript <- function(address, id = NULL, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
   rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
   sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
@@ -45,9 +18,9 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
     if (PDF == TRUE) {
 
       floats_in_text <-
-      tryCatch({
-        rmarkdown::yaml_front_matter(address)$floatsintext
-      }, error = function(e) return(FALSE))
+        tryCatch({
+          rmarkdown::yaml_front_matter(address)$floatsintext
+        }, error = function(e) return(FALSE))
 
       if(is.null(floats_in_text)) floats_in_text <- FALSE
 
@@ -69,281 +42,11 @@ read_manuscript <- function(address, id = NULL, PDF = FALSE){
   manuscript <- list(sections = sections,PDF = PDF, refs = refs, rmd = rmd,
                      mtime = file.info(address)$mtime)
   class(manuscript) <- "manuscript"
-  manuscript
-
-}
-
-#' print.manuscript
-#'
-#' Print method for manuscripts
-#' @param x an object of class "manuscript"
-#' @param ... other arguments
-#' @export
-
-print.manuscript = function(x, ...){
-
-  n_sections <- glue::glue("\033[34m- {length(x$sec)} sections\033[39m")
-  if(is.null(x$PDF)){
-    PDF_info <- "\033[31mNo PDF attached\033[39m"
-  }else{
-    PDF_info <- glue::glue("\033[32m- {nrow(x$PDF)} pages\033[39m")
-  }
-
-  cat("<Manuscript>")
-  cat("\n")
-  cat(n_sections)
-  cat("\n")
-  cat(PDF_info)
-
-
-
-}
-
-#' evaluate_inline
-#'
-#' Evaluates embedded rchunks within a string of text
-#' @param string a section of text with includes inline elements
-#' @examples
-#' revise:::evaluate_inline("1+1 = `r 1+1`")
-
-evaluate_inline <- function(string){
-  glue::glue(string, .open = "`r", .close = "`")
-}
-
-#' process_pdf
-#'
-#' process pdf file
-#' @param path path to pdf
-
-process_pdf <- function(path){
-  ext <- tolower(tools::file_ext(path))
-  if(!ext %in% c("pdf")){
-    stop("Extracting page numbers only works for pdf documents")
-  }
-  doc <- get_pdf_text(path)
-  running_head = gsub("\n.*","",doc$text[2])
-  running_head = trimws(gsub("[0-9]","",running_head))
-  running_head = gsub("\\s{1,}"," ", running_head)
-  is_head <- unlist(lapply(doc$text, function(x) grepl(running_head,x)))
-  prop_head <- prop.table(table(is_head))["TRUE"]
-
-  doc$text <- tolower(doc$text)
-  if(!is.null(running_head)){
-    doc$text <- stringr::str_remove_all(doc$text, tolower(glue::glue("^{running_head}")))
-  }
-
-  doc <-  dplyr::summarise(
-    dplyr::group_by(doc, page_id),
-    text = paste(text, collapse = " "),
-    .groups = "drop"
-  )
-
-  doc$text <- trimws(stringr::str_remove_all(doc$text, "[[:digit:]]")) # remove all numbers
-  doc$text <- stringr::str_remove_all(doc$text, "\\[.{0,50}\\]") # remove square brackets
-  doc$text <- stringr::str_remove_all(doc$text, "\\(.{0,50}\\)") # remove parentheses
-  doc$text <- trimws(stringr::str_remove_all(doc$text, "[[:punct:]]")) # remove all punctuation
-  if(prop_head > .7){
-    attr(doc, "running_head") <- running_head
-  }else{
-    attr(doc, "running_head") <- NULL
-  }
-  doc
-}
-
-#' find_pages
-#'
-#' Searches through a manuscript for a page reference
-#' @param manuscript the manuscript object to search
-#' @param string the string to find
-#' @export
-
-find_pages <- function(manuscript, string){
-  if(is.null(manuscript$PDF)) stop("No PDF attached to the manuscript object: not possible to identify page numbers.")
-  get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
-}
-
-#' clean_string
-#'
-#' Cleaning steps for identifying strings
-#' @param string string to clean
-
-clean_string <- function(string){
-  string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
-  string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
-  string <- gsub("[0-9]","", string) # remove numbers
-  string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
-  string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
-  string <- gsub("\\s{2,}", " ", string) # remove additional spaces
-  string <- gsub("\\n", " ", string)
-  string
-}
-
-#' get_page_number
-#'
-#' Finds page number from pdf based on text matching
-#' @param string text to match
-#' @param pdf_text text to search
-#' @param max.distance argument passed to agrep
-
-get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
-
-  string <- clean_string(string)
-
-  doc <- clean_string(pdf_text$text)
-
-  pnum <- agrep(string, doc, ignore.case = TRUE, max.distance = max.distance)
-
-  if(length(pnum) > 0) return(paste(pnum, collapse = ", "))
-
-  l <- lapply(seq_len(length(doc)), function(p){ # look at combinations of pages if no match
-
-    pages = sapply(c(doc[p], doc[p + 1]), function(x){
-      tolower(unlist(x))
-    })
-
-    pages <- lapply(seq_along(pages), function(i){
-      page <- pages[[i]]
-      page <- gsub("\\\n", " ", page)
-      page <- gsub(r"(\s{2,})", " ", page)
-      page <- trimws(page)
-      page
-    })
-
-    data.frame(
-      page_id = glue::glue("{p}-{p + 1}"),
-      text = trimws(paste(pages, collapse = " "))
-    )
-  }) # ---
-
-  doc <- do.call(rbind, l)
-  pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
-  doc$page_id[pnum]
-
-}
-
-#' header_to_bold
-#'
-#' Converts headers to bold
-#' @param string a string
-#' @return string
-
-header_to_bold = function(string){
-
-  while(grepl("(?<!\\{)#{1,}.{0,100}\\\n",string, perl = TRUE)){
-    target <- stringr::str_extract(string, "(?<!\\{)#{1,}.+?(\\n){1,}")
-    n_hash <- sum(strsplit(target, split = "")[[1]]=="#")
-    replacement <- gsub("(?<!\\{)#{1,}\\s?","**", target, perl = TRUE)
-    if(n_hash < 3){
-      replacement <- gsub("\\n{1,}","**\\\n\\\n", replacement)
-    } else{
-      replacement <- gsub("\\n{1,}",".** ", replacement)
+  if (to_envir) {
+    if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
+      warning("A manuscript has already been loaded, and will be replaced with the contents of '", fn, "'.")
     }
-    string <- gsub(target, replacement, string)
+    assign(".revise_manuscripts", manuscript, envir = envir)
   }
-
-  string
-
-}
-
-
-#' get_revision
-#'
-#' Extract and format revision
-#' @param manuscript the manuscript object from which to extract revisions
-#' @param id the id from a html tag
-#' @param quote is the output chunk quoted?
-#' @param evaluate logical. Should inline rchunks be executed?
-#' @param split_string should only the start and end of the string be searched for?
-#' @param search_length numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.
-#' @param include_pgnum logical. include PDF page number?
-#' @export
-
-get_revision = function(manuscript,
-                        id,
-                        quote = TRUE,
-                        evaluate = TRUE,
-                        split_string = FALSE,
-                        search_length = 300,
-                        include_pgnum = TRUE) {
-  if(is.null(manuscript[["sections"]])) return(NULL)
-  check_dup_sections(manuscript$sections)
-  string <- manuscript$sections[[id]]
-  if(is.null(string)){
-    similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
-    similar_id <- paste(similar_id, collapse = " | ")
-    message = paste0("Couldn't find a section in the manuscript tagged as '", id, "'.")
-    if(nchar(similar_id) > 0){
-      message <- paste0(message, " Did you mean: ", similar_id,"?")
-    }
-    stop(message, call. = FALSE)
-  }
-
-  if (evaluate) {
-    string <- evaluate_inline(string)
-  }
-
-  if (!is.null(manuscript$PDF) & include_pgnum) {
-
-    if((nchar(string) > search_length) | split_string){
-
-      start_string <- substring(string, 1, search_length)
-      end_string <- substring(string, nchar(string) - search_length, nchar(string))
-
-      pnum.start <-
-        get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
-      pnum.end <-
-        get_pdf_pagenumber(end_string, pdf_text = manuscript$PDF)
-
-      pnum.start <- gsub("\\-.*","",pnum.start)
-      pnum.end <- gsub(".*\\-","",pnum.end)
-
-      pnum <- paste(unique(c(pnum.start, pnum.end)),collapse = "-")
-
-    }else{
-      pnum = get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
-    }
-
-    if (length(pnum) == 0)
-      stop("Couldn't match the extracted text to the target PDF: ", id,". Have you knit the manuscript since making recent changes?")
-    string = paste0(string,
-                    "\n\n\\begin{flushright}Pg. ",
-                    pnum,
-                    "\\end{flushright}")
-  }
-
-  string <- header_to_bold(string)
-
-  for (i in seq_along(manuscript$refs$tables[, 1])) {
-    # replace \\@ref(tab:)
-    string <-
-      gsub(manuscript$refs$tables$text[i],
-           manuscript$refs$tables$ref[i],
-           string,
-           fixed = TRUE)
-  }
-
-  for (i in seq_along(manuscript$refs$figures[, 1])) {
-    # replace \\@ref(fig:)
-    string <-
-      gsub(manuscript$refs$figures$text[i],
-           manuscript$refs$figures$ref[i],
-           string,
-           fixed = TRUE)
-  }
-
-  if (quote) {
-    string <- gsub("\\n", "\\\n>", string)
-    string <- paste0(">", string)
-  }
-
-
-  string
-}
-
-utils::globalVariables(c("text", "page_id"))
-
-check_dup_sections <- function(sections){
-  if(any(duplicated(names(sections)))){
-    warning("The following sections have duplicate names. When referencing sections by name, the section with that name will be selected. Please use unique section names:\n", paste0("  '", names(sections)[duplicated(names(sections))], "'\n"), call. = FALSE)
-  }
+  return(invisible(manuscript))
 }

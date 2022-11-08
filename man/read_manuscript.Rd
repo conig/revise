@@ -4,7 +4,13 @@
 \alias{read_manuscript}
 \title{read_manuscript}
 \usage{
-read_manuscript(address, id = NULL, PDF = FALSE)
+read_manuscript(
+  address,
+  id = NULL,
+  PDF = FALSE,
+  to_envir = TRUE,
+  envir = parent.frame(1)
+)
 }
 \arguments{
 \item{address}{path to a rmarkdown file}
