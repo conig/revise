@@ -10,13 +10,22 @@
 #' @param include_pgnum logical. include PDF page number?
 #' @export
 
-get_revision = function(manuscript,
-                        id,
+get_revision = function(id,
+                        manuscript = NULL,
                         quote = TRUE,
                         evaluate = TRUE,
                         split_string = FALSE,
                         search_length = 300,
                         include_pgnum = TRUE) {
+  if(is.null(manuscript)){
+    browser()
+    if(".revise_manuscripts" %in% objects(envir = parent.frame(1), all.names = TRUE)){
+      manuscript <- .revise_manuscripts
+    } else {
+      warning("Argument 'manuscript' is NULL, and no manuscript exists in the environment.")
+      return(NULL)
+    }
+  }
   if(is.null(manuscript[["sections"]])) return(NULL)
   check_dup_sections(manuscript$sections)
   string <- manuscript$sections[[id]]
