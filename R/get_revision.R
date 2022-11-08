@@ -38,7 +38,7 @@ get_revision = function(id,
       message <- paste0(message, " Did you mean: ", similar_id,"?")
     }
     warning(message, call. = FALSE)
-    return(message)
+    return(paste0("**", message, "**"))
   }
 
   if (evaluate) {
