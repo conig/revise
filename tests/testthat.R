@@ -9,4 +9,4 @@
 library(testthat)
 library(revise)
 
-test_check("revise")
+if (identical(Sys.getenv("NOT_CRAN"), "true")) test_check("revise")

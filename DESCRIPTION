@@ -31,6 +31,8 @@ Authors@R:
     )
 Description: Tools for streamlining revise and resubmits.
 License: MIT + file LICENSE
+URL: https://github.com/conig/revise
+BugReports: https://github.com/conig/revise/issues
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -52,3 +54,4 @@ Suggests:
     docxtractr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+SystemRequirements: pandoc (>= 1.14) - http://pandoc.org
