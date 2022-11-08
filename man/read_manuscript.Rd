@@ -9,7 +9,7 @@ read_manuscript(address, id = NULL, PDF = FALSE)
 \arguments{
 \item{address}{path to a rmarkdown file}
 
-\item{id}{if provided spans will be searched for text which will be returned}
+\item{id}{if provided, text tagged with the given id will be returned}
 
 \item{PDF}{if TRUE, or path provided, a PDF will be loaded for page matching.}
 }

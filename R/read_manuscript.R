@@ -1,24 +1,3 @@
-#' extract_sections
-#'
-#' Extracts markdown sections
-#' @param path path to markdown file
-
-extract_md_sections <- function(path){
-  if(!grepl("md$",basename(path), ignore.case = TRUE)) stop("can only be used on rmd, or md files")
-  lines <- readLines(path)
-  lines <- paste(lines, collapse = "\n\n")
-  #comments <- stringr::str_extract_all(lines, "\\[(?!\\s*\\@).+?(?=\\{\\#)\\{\\#[^\\[]*\\}")
-  comments <- unlist(stringr::str_extract_all(lines, "\\[(?!\\s*\\@).+?\\]\\{#.+?\\}"))
-  sections <- lapply(comments, function(x){
-    tag <- stringr::str_extract(x,"\\{\\#.*\\}")
-    tag <- gsub("[\\{\\}\\#]","",tag)
-    tag <- trimws(tag)
-    section <- gsub("\\{\\#.*\\}", "", x)
-    section <- substring(section, 2,nchar(section)-1)
-    data.frame(tag = tag, section = section)
-  })
-  do.call(rbind, sections)
-}
 
 #' read_md
 #'
@@ -46,67 +25,21 @@ extract_refs <- function(path){
 
 }
 
-#' extract_html_sections
-#'
-#' A function to extract text within spans
-#' @param path character path to file
-
-extract_html_sections <- function(path){
-  lines <- read_md(path)
-  df <- data.frame(lines)
-  df$is_chunk <- FALSE
-  is_chunk <- FALSE
-  for(i in seq_along(df$is_chunk)){
-    if(grepl("\\`\\`\\`.*\\{",df$lines[i])) is_chunk <- TRUE
-    df$is_chunk[i] <- is_chunk
-    if(grepl("\\`\\`\\`$",df$lines[i])) is_chunk <- FALSE
-  }
-  document <- paste(df$lines[!df$is_chunk], collapse = "\n\n")
-  tmp <- tryCatch(xml2::read_html(document), error = function(e) tmp <- NULL)
-  if(is.null(tmp)) return(tmp)
-  tmp <- rvest::html_nodes(tmp, xpath = glue::glue('//*[@id]') )
-
-  section<- rvest::html_text(tmp)
-  section <- gsub("\\\\n","\\\n", section)
-  tag <- rvest::html_attr(tmp, "id")
-  data.frame(tag, section)
-}
-
-#' extract_sections
-#'
-#' Extracts markdown sections
-#' @param path character path to file
-
-extract_md_sections <- function(path){
-  if(!grepl("md$",basename(path), ignore.case = TRUE)) stop("can only be used on rmd, or md files")
-  lines <- readLines(path)
-  lines <- paste(lines, collapse = "\n\n")
-  #comments <- stringr::str_extract_all(lines, "\\[(?!\\s*\\@).+?(?=\\{\\#)\\{\\#[^\\[]*\\}")
-  comments <- unlist(stringr::str_extract_all(lines, "\\[(?!\\s*\\@).*?\\]\\{#.+?\\}"))
-  sections <- lapply(comments, function(x){
-    tag <- stringr::str_extract(x,"\\{\\#.*\\}")
-    tag <- gsub("[\\{\\}\\#]","",tag)
-    tag <- trimws(tag)
-    section <- gsub("\\{\\#.*\\}", "", x)
-    section <- substring(section, 2,nchar(section)-1)
-    data.frame(tag = tag, section = section)
-  })
-  do.call(rbind, sections)
-}
-
 #' read_manuscript
 #'
 #' Reads in rmarkdown manuscript and an associated PDF as possible
 #' @param address path to a rmarkdown file
-#' @param id if provided spans will be searched for text which will be returned
+#' @param id if provided, text tagged with the given id will be returned
 #' @param PDF if TRUE, or path provided, a PDF will be loaded for page matching.
 #' @export
 
 read_manuscript <- function(address, id = NULL, PDF = FALSE){
-  if(!is.null(id)) return(read_spans(address, id))
   rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
   sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
+  # Return section if id is provided for backwards compatibility
+  if(!is.null(id)) return(sections[[id]])
+
   check_dup_sections(sections)
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
@@ -164,26 +97,6 @@ print.manuscript = function(x, ...){
 
 
 
-}
-
-
-#' read_spans
-#'
-#' @param address string url or file location of knited html
-#' @param id the id from a html tag
-
-
-read_spans <- function(address, id){
-  # Test for missing or non-character id
-  if(missing(id)|!is.character(id)) stop("Please specify an id string")
-  # Read in data and parse
-  tmp = rvest::html_nodes(xml2::read_html(address),
-                          xpath = glue::glue('//*[@id="{id}"]'))
-  # Test if id is unique
-  if(length(tmp)>1) warning("ID is not unique")
-  # Extract
-  tmp <- stringr::str_trim(rvest::html_text(tmp))
-  return(tmp)
 }
 
 #' evaluate_inline

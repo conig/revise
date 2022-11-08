@@ -1,6 +1,6 @@
 #' abstract
 #'
-#' Create a structured abstract
+#' Create a structured abstract including cached results
 #' @param ... headed abstract sections
 #' @param cache_name character indicating the name the cached r chunk
 #' @param sep how should sections be pasted together?

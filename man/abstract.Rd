@@ -14,5 +14,5 @@ abstract(..., cache_name = NULL, sep = "\\n\\n")
 \item{sep}{how should sections be pasted together?}
 }
 \description{
-Create a structured abstract
+Create a structured abstract including cached results
 }

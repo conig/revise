@@ -1,3 +1,5 @@
+# Unexported function from papaja
+
 escape_latex <- function (x, newlines = FALSE, spaces = FALSE)
 {
     x = gsub("\\\\", "\\\\textbackslash", x)
