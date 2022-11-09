@@ -2,7 +2,6 @@
 #'
 #' Reads in rmarkdown manuscript and an associated PDF as possible
 #' @param address path to a rmarkdown file
-#' @param id if provided, text tagged with the given id will be returned
 #' @param PDF if TRUE, or path provided, a PDF will be loaded for page matching.
 #' @param to_envir Logical, indicating whether or not the manuscript should
 #' be assigned to an invisible environment variable (`.revise_manuscript`).
@@ -27,12 +26,10 @@
 #' @export
 #' @importFrom rmarkdown yaml_front_matter
 #' @importFrom tools file_ext
-read_manuscript <- function(address, id = NULL, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
+read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
   rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
   sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
-  # Return section if id is provided for backwards compatibility
-  if(!is.null(id)) return(sections[[id]])
 
   check_dup_sections(sections)
   if(!is.null(PDF)) {

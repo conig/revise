@@ -4,18 +4,10 @@
 \alias{read_manuscript}
 \title{read_manuscript}
 \usage{
-read_manuscript(
-  address,
-  id = NULL,
-  PDF = FALSE,
-  to_envir = TRUE,
-  envir = parent.frame(1)
-)
+read_manuscript(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1))
 }
 \arguments{
 \item{address}{path to a rmarkdown file}
-
-\item{id}{if provided, text tagged with the given id will be returned}
 
 \item{PDF}{if TRUE, or path provided, a PDF will be loaded for page matching.}
 
