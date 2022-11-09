@@ -206,3 +206,11 @@ check_dup_sections <- function(sections){
     warning("The following sections have duplicate names. When referencing sections by name, the section with that name will be selected. Please use unique section names:\n", paste0("  '", names(sections)[duplicated(names(sections))], "'\n"), call. = FALSE)
   }
 }
+
+.onLoad <- function(libname, pkgname){
+
+  if(is.null(getOption("revise_errors"))){
+    options(revise_errors = TRUE)
+  }
+
+}

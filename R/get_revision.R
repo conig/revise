@@ -10,6 +10,7 @@
 #' @param split_string should only the start and end of the string be searched for?
 #' @param search_length numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.
 #' @param include_pgnum logical. include PDF page number?
+#' @param revise_errors logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.
 #' @export
 
 get_revision = function(id,
@@ -18,7 +19,8 @@ get_revision = function(id,
                         evaluate = TRUE,
                         split_string = FALSE,
                         search_length = 300,
-                        include_pgnum = TRUE) {
+                        include_pgnum = TRUE,
+                        revise_errors = getOption("revise_errors")) {
   if(is.null(manuscript)){
     if(".revise_manuscripts" %in% objects(envir = parent.frame(1), all.names = TRUE)){
       manuscript <- .revise_manuscripts
@@ -30,15 +32,22 @@ get_revision = function(id,
   if(is.null(manuscript[["sections"]])) return(NULL)
   check_dup_sections(manuscript$sections)
   string <- manuscript$sections[[id]]
+
   if(is.null(string)){
     similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
     similar_id <- paste(similar_id, collapse = " | ")
-    message = paste0("Couldn't find a section in the manuscript tagged as '", id, "'.")
+    message <- paste0("Couldn't find a section in the manuscript tagged as '", id, "'.")
     if(nchar(similar_id) > 0){
       message <- paste0(message, " Did you mean: ", similar_id,"?")
     }
-    warning(message, call. = FALSE)
-    return(paste0("**", message, "**"))
+
+    if(!revise_errors){
+      warning(message)
+      return(paste0("**", message, "**"))
+    }else{
+      stop(message)
+    }
+
   }
 
   if (evaluate) {

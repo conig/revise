@@ -11,7 +11,8 @@ get_revision(
   evaluate = TRUE,
   split_string = FALSE,
   search_length = 300,
-  include_pgnum = TRUE
+  include_pgnum = TRUE,
+  revise_errors = getOption("revise_errors")
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ is found in the environment.}
 \item{search_length}{numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.}
 
 \item{include_pgnum}{logical. include PDF page number?}
+
+\item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
 }
 \description{
 Extract and format revision

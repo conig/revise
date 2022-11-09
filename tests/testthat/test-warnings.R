@@ -10,15 +10,23 @@ writeLines(lnz, con = original)
 lnz <- c("---", "format: \"github_document\"", "---", "",
             "```{r}",
          "library(revise)",
-            paste0("read_manuscript('", gsub("\\", "\\\\", original, fixed = T), "')"),
+         "options(revise_errors = FALSE)",
+         "options(revise_errors = TRUE)",
+            paste0("man <- read_manuscript('", gsub("\\", "\\\\", original, fixed = T), "')"),
             "```",
-            "`r revise::get_revision(\"doesntexist\")`",
+            "`r revise::get_revision(\"doesntexist\", man)`",
             "")
-action <- tempfile("action", fileext = ".Rmd")
-writeLines(lnz, con = action)
+no_error <- tempfile("noerror", fileext = ".Rmd")
+allow_error <- tempfile("error", fileext = ".Rmd")
+writeLines(lnz[-8], con = no_error)
+writeLines(lnz[-7], con = allow_error)
 
-test_that("warnings when section doesn't exist", {
-  expect_warning(out <- rmarkdown::render(action))
+test_that("errors when section doesn't exist", {
+  expect_error(out <- rmarkdown::render(allow_error))
+})
+
+test_that("errors when section doesn't exist can be switched off", {
+  expect_warning(out <- rmarkdown::render(no_error))
   tmp <- readLines(out)
   expect_true(any(grepl("Couldn’t find a section in the manuscript", tmp)))
 })
