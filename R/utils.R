@@ -1,3 +1,15 @@
+checksum_exists <- function(corpus, checksum){
+  UseMethod("checksum_exists", corpus)
+}
+
+checksum_exists.revise_corpus <- function(corpus, checksum){
+  all_csums <- sapply(corpus, `[[`, "checksum")
+  return(isTRUE(checksum %in% all_csums))
+}
+
+checksum_exists.revise_manuscript <- function(corpus, checksum){
+  return(isTRUE(checksum == corpus[["checksum"]]))
+}
 
 #' read_md
 #'
@@ -26,14 +38,8 @@ extract_refs <- function(path){
 }
 
 
-#' print.manuscript
-#'
-#' Print method for manuscripts
-#' @param x an object of class "manuscript"
-#' @param ... other arguments
 #' @export
-
-print.manuscript = function(x, ...){
+print.revise_manuscript = function(x, ...){
 
   n_sections <- glue::glue("\033[34m- {length(x$sec)} sections\033[39m")
   if(is.null(x$PDF)){
