@@ -65,9 +65,9 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
                      filename = basename(address))
   class(manuscript) <- c("revise_manuscript", class(manuscript))
   # Load to environment
-  browser()
   if (to_envir) {
     if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
+      .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
       # Check that this doc is not yet in .revise_manuscripts
       if(checksum_exists(.revise_manuscripts, doc_checksum)){
         return(invisible(manuscript))

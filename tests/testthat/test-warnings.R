@@ -22,11 +22,11 @@ writeLines(lnz[-8], con = no_error)
 writeLines(lnz[-7], con = allow_error)
 
 test_that("errors when section doesn't exist", {
-  expect_error(out <- rmarkdown::render(allow_error))
+  expect_error(out <- rmarkdown::render(allow_error, quiet = TRUE))
 })
 
 test_that("errors when section doesn't exist can be switched off", {
-  expect_warning(out <- rmarkdown::render(no_error))
+  expect_warning(out <- rmarkdown::render(no_error, quiet = TRUE))
   tmp <- readLines(out)
   expect_true(any(grepl("Couldn’t find a section in the manuscript", tmp)))
 })
@@ -43,8 +43,8 @@ action <- tempfile("action", fileext = ".Rmd")
 writeLines(lnz, con = action)
 
 test_that("warnings when manuscript has already been loaded", {
-  #expect_warning(out <- rmarkdown::render(action))
+  out <- rmarkdown::render(action, quiet = TRUE)
   tmp <- readLines(out)
-  expect_true(any(grepl("A manuscript has already been loaded", tmp)))
+  expect_false(any(grepl("A manuscript has already been loaded", tmp)))
 })
 }

@@ -23,7 +23,7 @@ get_revision = function(id,
                         revise_errors = getOption("revise_errors")) {
   if(is.null(manuscript)){
     if(".revise_manuscripts" %in% objects(envir = parent.frame(1), all.names = TRUE)){
-      manuscript <- .revise_manuscripts
+      manuscript <- get(".revise_manuscripts", envir = parent.frame(1))
     } else {
       warning("Argument 'manuscript' is NULL, and no manuscript exists in the environment.")
       return(NULL)

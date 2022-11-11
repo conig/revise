@@ -18,7 +18,7 @@ lnz <- c("---", "format: \"github_document\"", "---", "",
 action <- tempfile("action", fileext = ".Rmd")
 writeLines(lnz, con = action)
 
-out <- rmarkdown::render(action)
+out <- rmarkdown::render(action, quiet = TRUE)
 tmp <- readLines(out)
 
 test_that("get_revision uses .revise_manuscript", {
