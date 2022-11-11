@@ -11,16 +11,71 @@
 #' @param search_length numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.
 #' @param include_pgnum logical. include PDF page number?
 #' @param revise_errors logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.
+#' @param envir The environment in which to find the manuscript.
 #' @export
 
-get_revision = function(id,
+get_revision <- function(id,
+                                 manuscript = NULL,
+                                 quote = TRUE,
+                                 evaluate = TRUE,
+                                 split_string = FALSE,
+                                 search_length = 300,
+                                 include_pgnum = TRUE,
+                                 revise_errors = getOption("revise_errors"),
+                         envir = parent.frame(1L)) {
+  if(is.null(manuscript)){
+    if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
+      manuscript <- get(".revise_manuscripts", envir = envir)
+    } else {
+      warning("Argument 'manuscript' is NULL, and no manuscript exists in the environment.")
+      return(NULL)
+    }
+  }
+  cl <- match.call()
+  cl[["manuscript"]] <- manuscript
+  if(inherits(manuscript, "revise_corpus")){
+    cl[[1L]] <- str2lang("revise:::get_revision.revise_corpus")
+  } else {
+    cl[[1L]] <- str2lang("revise:::get_revision.default")
+  }
+  eval.parent(cl)
+}
+
+get_revision.revise_corpus <- function(id,
+                         manuscript = NULL,
+                         quote = TRUE,
+                         evaluate = TRUE,
+                         split_string = FALSE,
+                         search_length = 300,
+                         include_pgnum = TRUE,
+                         revise_errors = getOption("revise_errors"),
+                         envir) {
+  all_sect_names <- unlist(lapply(manuscript, function(x){ names(x[["sections"]]) }))
+  if(!isTRUE(length(all_sect_names) > 0)) return(NULL)
+  tryCatch(check_dup_sections(all_sect_names), warning = function(w){
+    if(!isTRUE(sapply(manuscript, function(x){ any(duplicated(names(x[["sections"]]))) }))){
+      w <- paste0(w, "You have loaded multiple manuscripts, and these manuscripts contain identical section names.")
+    }
+    warning(gsub("simpleWarning: ", "", w, fixed = TRUE), call. = FALSE)
+  })
+  # Here you could check for similar names; if so, turn that into a function
+  if(!id %in% all_sect_names) return(NULL)
+  # If it does exist, select the first instance
+  cl <- match.call()
+  cl[["manuscript"]] <- manuscript[[which(sapply(manuscript, function(x){ any(names(x[["sections"]]) == id)}))[1]]]
+  cl[[1L]] <- str2lang("revise:::get_revision.default")
+  eval.parent(cl)
+}
+
+get_revision.default <- function(id,
                         manuscript = NULL,
                         quote = TRUE,
                         evaluate = TRUE,
                         split_string = FALSE,
                         search_length = 300,
                         include_pgnum = TRUE,
-                        revise_errors = getOption("revise_errors")) {
+                        revise_errors = getOption("revise_errors"),
+                        envir) {
   if(is.null(manuscript)){
     if(".revise_manuscripts" %in% objects(envir = parent.frame(1), all.names = TRUE)){
       manuscript <- get(".revise_manuscripts", envir = parent.frame(1))
@@ -30,7 +85,7 @@ get_revision = function(id,
     }
   }
   if(is.null(manuscript[["sections"]])) return(NULL)
-  check_dup_sections(manuscript$sections)
+  check_dup_sections(names(manuscript$sections))
   string <- manuscript$sections[[id]]
 
   if(is.null(string)){
