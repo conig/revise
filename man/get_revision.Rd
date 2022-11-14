@@ -12,7 +12,8 @@ get_revision(
   split_string = FALSE,
   search_length = 300,
   include_pgnum = TRUE,
-  revise_errors = getOption("revise_errors")
+  revise_errors = getOption("revise_errors"),
+  envir = parent.frame(1L)
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ is found in the environment.}
 \item{include_pgnum}{logical. include PDF page number?}
 
 \item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
+
+\item{envir}{The environment in which to find the manuscript.}
 }
 \description{
 Extract and format revision

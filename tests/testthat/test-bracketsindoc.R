@@ -19,7 +19,7 @@ test_that("tempfile has expected sections", {
 })
 
 test_that("rendered tempfile has no brackets", {
-  tmp <- rmarkdown::render(tmpfl)
+  tmp <- rmarkdown::render(tmpfl, quiet = TRUE)
   tmp <- pdftools::pdf_text(tmp)
 
   expect_false(grepl("[", tmp, fixed = TRUE))
@@ -37,7 +37,7 @@ test_that("rendered tempfile has no brackets", {
 #   writeLines(lnz, con = tmpfl)
 #
 # test_that("rendered md has no brackets", {
-#     tmp <- rmarkdown::render(tmpfl)
+#     tmp <- rmarkdown::render(tmpfl, quiet = TRUE)
 #     tmp <- readLines(tmp)
 #
 #     expect_false(any(grepl("[", tmp, fixed = TRUE)))

@@ -1,3 +1,15 @@
+checksum_exists <- function(corpus, checksum){
+  UseMethod("checksum_exists", corpus)
+}
+
+checksum_exists.revise_corpus <- function(corpus, checksum){
+  all_csums <- sapply(corpus, `[[`, "checksum")
+  return(isTRUE(checksum %in% all_csums))
+}
+
+checksum_exists.revise_manuscript <- function(corpus, checksum){
+  return(isTRUE(checksum == corpus[["checksum"]]))
+}
 
 #' read_md
 #'
@@ -26,14 +38,8 @@ extract_refs <- function(path){
 }
 
 
-#' print.manuscript
-#'
-#' Print method for manuscripts
-#' @param x an object of class "manuscript"
-#' @param ... other arguments
 #' @export
-
-print.manuscript = function(x, ...){
+print.revise_manuscript = function(x, ...){
 
   n_sections <- glue::glue("\033[34m- {length(x$sec)} sections\033[39m")
   if(is.null(x$PDF)){
@@ -201,9 +207,16 @@ header_to_bold = function(string){
 
 utils::globalVariables(c("text", "page_id", ".revise_manuscripts"))
 
-check_dup_sections <- function(sections){
-  if(any(duplicated(names(sections)))){
-    warning("The following sections have duplicate names. When referencing sections by name, the section with that name will be selected. Please use unique section names:\n", paste0("  '", names(sections)[duplicated(names(sections))], "'\n"), call. = FALSE)
+check_dup_sections <- function(sect_nams, revise_errors = getOption("revise_errors")){
+  if(any(duplicated(sect_nams))){
+    m <- paste("The following sections have duplicate names. When referencing sections by name, the first section with that name will be selected. Please use unique section names:\n", paste0("  '", sect_nams[duplicated(sect_nams)], "'\n"))
+
+    if(!revise_errors){
+    warning(m, call. = FALSE)
+    }else{
+      stop(m, call. = FALSE)
+    }
+
   }
 }
 

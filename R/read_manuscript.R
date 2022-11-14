@@ -27,11 +27,12 @@
 #' @importFrom rmarkdown yaml_front_matter
 #' @importFrom tools file_ext
 read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
+  doc_checksum <- tools::md5sum(address)
   rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
   sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
 
-  check_dup_sections(sections)
+  check_dup_sections(names(sections), revise_errors = FALSE)
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
 
@@ -57,14 +58,33 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
     PDF <- NULL
   }
   refs <- extract_refs(address)
+  # Prepare output object
   manuscript <- list(sections = sections,PDF = PDF, refs = refs, rmd = rmd,
-                     mtime = file.info(address)$mtime)
-  class(manuscript) <- "manuscript"
+                     mtime = file.info(address)$mtime,
+                     checksum = doc_checksum,
+                     filename = basename(address))
+  class(manuscript) <- c("revise_manuscript", class(manuscript))
+  # Load to environment
   if (to_envir) {
     if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
-      warning("A manuscript has already been loaded, and will be replaced with the contents of '", basename(address), "'.")
+      .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
+      # Check that this doc is not yet in .revise_manuscripts
+      if(checksum_exists(.revise_manuscripts, doc_checksum)){
+        return(invisible(manuscript))
+      }
+      if(inherits(.revise_manuscripts, "revise_manuscript")){
+        manuscript <- list(.revise_manuscripts, manuscript)
+        names(manuscript) <- c(basename(.revise_manuscripts$filename),
+                               basename(address))
+        class(manuscript) <- c("revise_corpus", class(manuscript))
+      } else {
+        manuscript <- c(.revise_manuscripts, list(manuscript))
+        names(manuscript)[length(manuscript)] <-
+          basename(.revise_manuscripts$filename)
+      }
     }
     assign(".revise_manuscripts", manuscript, envir = envir)
   }
+  # Return
   return(invisible(manuscript))
 }
