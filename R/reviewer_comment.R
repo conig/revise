@@ -53,19 +53,6 @@ reviewer_comment <- function(){
     output_format <- tools::file_ext(output_format)
   }
 
-#   if (output_format == "pdf") {
-#     start_content <- glue::glue("```{=tex}
-# \\reviewer{c!!<comment_n>!!}{
-#
-# ",
-# .open = "!!<",
-# .close = ">!!")
-#
-#     end_content <- "
-#   }
-# ```"
-#   }
-
     start_content <- "```{asis}"
     end_content <- "
 ```"
@@ -92,25 +79,34 @@ rnr_header <- function(file){
 title <- tryCatch(yaml["title"][[1]], error = function(e) return("paper title"))
 author <- tryCatch(yaml["author"][[1]][[1]]$name, error = function(e) return("Author name"))
 bibliography <- tryCatch(yaml["bibliography"][[1]], error = function(e) return("bibliography.json"))
-csl <- tryCatch(yaml["csl"][[1]], error = function(e) return(""))
+
+csl <- yaml["csl"][[1]]
+
+if(!is.null(csl)){
+  csl <- paste0("csl               : ", '"',csl,'"')
+}
+
+if(!is.null(bibliography)){
+  bibliography <- paste0("bibliography      : ", '"',bibliography,'"')
+}
 
 if(is.null(title)) title <- "paper title"
 if(is.null(author)) author <- "Author name"
-if(is.null(bibliography)) bibliography <- "bibliography.json"
+if(is.null(bibliography)) bibliography <- ""
 if(is.null(csl)) csl <- ""
 if(length(bibliography) > 1) bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
 
 header <- glue::glue(r'(---
-title          : "!!<title>!!"
-authors        : "!!<author>!! on behalf of co-authors"
-journal        : "your journal"
-manuscript     : "MANUSCRIPT-ID"
-handling_editor: ""
+title             : "!!<title>!!"
+authors           : "!!<author>!! on behalf of co-authors"
+journal           : "your journal"
+manuscript        : "MANUSCRIPT-ID"
+handling_editor   : ""
 
 class             : "draft"
-bibliography      : !!<bibliography>!!
-csl               : "!!<csl>!!"
-output            : revise::letter.docx
+!!<bibliography>!!
+!!<csl>!!
+output            : revise::letter.pdf
 ---
 
 Dear Dr `r rmarkdown::metadata$handling_editor`,
@@ -118,9 +114,7 @@ Dear Dr `r rmarkdown::metadata$handling_editor`,
 Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. In the following itemised list we respond to each comment point-by-point.
 
 ```{r setup-chunk, include = FALSE}
-# manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
-# get_revision <- function(id, ...) revise::get_revision(manuscript, id, ...)
-# load("manuscript_workspace.rData")
+manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
 ```
 
 )', .open = "!!<", .close = ">!!")
