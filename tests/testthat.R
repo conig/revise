@@ -8,6 +8,5 @@
 
 library(testthat)
 library(revise)
-option(revise_errors = FALSE)
 
 if (identical(Sys.getenv("NOT_CRAN"), "true")) test_check("revise")
