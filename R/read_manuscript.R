@@ -32,7 +32,7 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
   sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
 
-  check_dup_sections(names(sections))
+  check_dup_sections(names(sections), revise_errors = FALSE)
   if(!is.null(PDF)) {
     if (PDF == TRUE) {
 

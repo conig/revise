@@ -38,6 +38,7 @@ get_revision <- function(id,
   } else {
     cl[[1L]] <- str2lang("revise:::get_revision.default")
   }
+
   eval.parent(cl)
 }
 
@@ -52,7 +53,7 @@ get_revision.revise_corpus <- function(id,
                          envir) {
   all_sect_names <- unlist(lapply(manuscript, function(x){ names(x[["sections"]]) }))
   if(!isTRUE(length(all_sect_names) > 0)) return(NULL)
-  tryCatch(check_dup_sections(all_sect_names), warning = function(w){
+  tryCatch(check_dup_sections(all_sect_names, revise_errors = revise_errors), warning = function(w){
     if(!isTRUE(sapply(manuscript, function(x){ any(duplicated(names(x[["sections"]]))) }))){
       w <- paste0(w, "You have loaded multiple manuscripts, and these manuscripts contain identical section names.")
     }
@@ -85,7 +86,7 @@ get_revision.default <- function(id,
     }
   }
   if(is.null(manuscript[["sections"]])) return(NULL)
-  check_dup_sections(names(manuscript$sections))
+  check_dup_sections(names(manuscript$sections), revise_errors = revise_errors)
   string <- manuscript$sections[[id]]
 
   if(is.null(string)){

@@ -207,9 +207,16 @@ header_to_bold = function(string){
 
 utils::globalVariables(c("text", "page_id", ".revise_manuscripts"))
 
-check_dup_sections <- function(sect_nams){
+check_dup_sections <- function(sect_nams, revise_errors = getOption("revise_errors")){
   if(any(duplicated(sect_nams))){
-    warning("The following sections have duplicate names. When referencing sections by name, the first section with that name will be selected. Please use unique section names:\n", paste0("  '", sect_nams[duplicated(sect_nams)], "'\n"), call. = FALSE)
+    m <- paste("The following sections have duplicate names. When referencing sections by name, the first section with that name will be selected. Please use unique section names:\n", paste0("  '", sect_nams[duplicated(sect_nams)], "'\n"))
+
+    if(!revise_errors){
+    warning(m, call. = FALSE)
+    }else{
+      stop(m, call. = FALSE)
+    }
+
   }
 }
 
