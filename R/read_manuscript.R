@@ -66,25 +66,44 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
   class(manuscript) <- c("revise_manuscript", class(manuscript))
   # Load to environment
   if (to_envir) {
-    if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
-      .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
-      # Check that this doc is not yet in .revise_manuscripts
-      if(checksum_exists(.revise_manuscripts, doc_checksum)){
-        return(invisible(manuscript))
-      }
-      if(inherits(.revise_manuscripts, "revise_manuscript")){
-        manuscript <- list(.revise_manuscripts, manuscript)
-        names(manuscript) <- c(basename(.revise_manuscripts$filename),
-                               basename(address))
-        class(manuscript) <- c("revise_corpus", class(manuscript))
-      } else {
-        manuscript <- c(.revise_manuscripts, list(manuscript))
-        names(manuscript)[length(manuscript)] <-
-          basename(.revise_manuscripts$filename)
-      }
-    }
-    assign(".revise_manuscripts", manuscript, envir = envir)
+    add_to_envir(manuscript = manuscript, envir = envir)
   }
   # Return
   return(invisible(manuscript))
 }
+
+add_to_envir <- function(manuscript, envir){
+  if(exists(".revise_manuscripts", envir = envir)){
+    .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
+    # Check that this doc is not yet in .revise_manuscripts
+    if(!isTRUE(checksum_exists(.revise_manuscripts, manuscript[["checksum"]]))){
+      newname <- basename(manuscript[["filename"]])
+      if(inherits(.revise_manuscripts, "revise_manuscript")){
+        manuscript <- list(.revise_manuscripts, manuscript)
+        names(manuscript) <- c(basename(.revise_manuscripts$filename),
+                               newname)
+        class(manuscript) <- c("revise_corpus", class(manuscript))
+      } else {
+        manuscript <- c(.revise_manuscripts, list(manuscript))
+        names(manuscript)[length(manuscript)] <- newname
+      }
+    }
+  }
+  assign(".revise_manuscripts", manuscript, envir = envir)
+}
+
+remove_from_envir <- function(manuscript, envir){
+  if(!inherits(manuscript, "character")) stop("Manuscript must be the name of a manuscript in the environment.")
+  if(!exists(".revise_manuscripts", envir = envir)) stop("No manuscripts in environment.")
+  .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
+  if(inherits(.revise_manuscripts, "revise_corpus")){
+    if(!manuscript %in% names(.revise_manuscripts)) stop("Named manuscript does not exist in environment.")
+    .revise_manuscripts[[manuscript]] <- NULL
+    if(length(.revise_manuscripts) == 1) .revise_manuscripts <- .revise_manuscripts[[1]]
+    assign(".revise_manuscripts", .revise_manuscripts, envir = envir)
+  } else {
+    if(!manuscript == .revise_manuscripts$filename) stop("Named manuscript does not exist in environment.")
+    rm(".revise_manuscripts", envir = envir)
+  }
+}
+
