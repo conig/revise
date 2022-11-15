@@ -21,5 +21,14 @@ otherwise.
 Removes a manuscript from a given environment by name.
 }
 \examples{
-remove_manuscript()
+library(revise)
+
+temp_file <- tempfile(fileext = ".Rmd")
+write("`r 1 + 1", file = temp_file)
+
+read_manuscript(temp_file)
+list_manuscripts()
+remove_manuscript(list_manuscripts()[1])
+list_manuscripts()
+
 }

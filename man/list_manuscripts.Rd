@@ -18,5 +18,11 @@ Returns a character vector with the names of manuscripts
 loaded in a given environment.
 }
 \examples{
+library(revise)
+
+temp_file <- tempfile(fileext = ".Rmd")
+write("`r 1 + 1", file = temp_file)
+
+read_manuscript(temp_file)
 list_manuscripts()
 }

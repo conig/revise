@@ -6,6 +6,12 @@
 #' @return A character vector, or `NULL` if no manuscripts
 #' exist in the environment.
 #' @examples
+#' library(revise)
+#'
+#' temp_file <- tempfile(fileext = ".Rmd")
+#' write("`r 1 + 1", file = temp_file)
+#'
+#' read_manuscript(temp_file)
 #' list_manuscripts()
 #' @rdname list_manuscripts
 #' @export
@@ -32,7 +38,16 @@ list_manuscripts <- function(envir = parent.frame(1)){
 #' @return Invisibly returns `TRUE` if successful, and `FALSE`
 #' otherwise.
 #' @examples
-#' remove_manuscript()
+#' library(revise)
+#'
+#' temp_file <- tempfile(fileext = ".Rmd")
+#' write("`r 1 + 1", file = temp_file)
+#'
+#' read_manuscript(temp_file)
+#' list_manuscripts()
+#' remove_manuscript(list_manuscripts()[1])
+#' list_manuscripts()
+#'
 #' @rdname remove_manuscript
 #' @export
 remove_manuscript <- function(manuscript = NULL, envir = parent.frame(1)){
