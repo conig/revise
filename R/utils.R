@@ -226,4 +226,8 @@ check_dup_sections <- function(sect_nams, revise_errors = getOption("revise_erro
     options(revise_errors = TRUE)
   }
 
+  if(is.null(getOption("reviewer_chunkname"))){
+    options(reviewer_chunkname = c("asis", "reviewer"))
+  }
+
 }
