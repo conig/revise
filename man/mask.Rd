@@ -2,7 +2,7 @@
 % Please edit documentation in R/mask.R
 \name{mask}
 \alias{mask}
-\title{FUNCTION_TITLE}
+\title{Mask text for blind review}
 \usage{
 mask(
   x,
@@ -11,20 +11,20 @@ mask(
 )
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{x}{Atomic character vector to be masked.}
 
-\item{mask_message}{PARAM_DESCRIPTION, Default: 'masked for blind review'}
+\item{mask_message}{Atomic character vector to mask \code{x} with when
+\code{mask: yes}, Default: 'masked for blind review'}
 
-\item{hide}{PARAM_DESCRIPTION, Default: rmarkdown::metadata$mask}
+\item{hide}{Logical, Default: rmarkdown::metadata$mask}
 }
 \value{
-OUTPUT_DESCRIPTION
+Character vector.
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+The YAML front matter tag \code{mask} determines whether
+the text is displayed or replaced by \code{mask_message}.
+The YAML tag can take the values \code{yes} or \code{no}.
 }
 \examples{
 mask("this is masked", hide = TRUE)
