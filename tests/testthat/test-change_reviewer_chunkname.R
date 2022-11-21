@@ -12,8 +12,9 @@ test_that("Users can change reviewer chunknames", {
     "Author response",
     ""), con = rmdPath)
 
-  options(reviewer_chunkname = "examplechunk")
-  tryCatch(rmarkdown::render(rmdPath, output_file = outPath), error = function(e) return(FALSE))
+  options(reviewer_chunkname = "examplechunk",
+          warn = 2)
 
-  testthat::expect_true(file.exists(outPath))
+  testthat::expect_no_error(rmarkdown::render(rmdPath, output_file = outPath))
+
 })
