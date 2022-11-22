@@ -53,7 +53,7 @@ reviewer_comment <- function(){
     output_format <- tools::file_ext(output_format)
   }
 
-    start_content <- "```{asis}"
+    start_content <- paste0("```{",getOption("reviewer_chunkname")[[1]],"}")
     end_content <- "
 ```"
 
