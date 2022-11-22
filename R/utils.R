@@ -66,7 +66,7 @@ print.revise_manuscript = function(x, ...){
 #' revise:::evaluate_inline("1+1 = `r 1+1`")
 
 evaluate_inline <- function(string){
-  glue::glue(string, .open = "`r", .close = "`")
+  glue::glue(string, .open = "`r ", .close = "`")
 }
 
 #' process_pdf

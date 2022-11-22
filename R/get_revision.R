@@ -24,7 +24,7 @@ get_revision <- function(id,
                                  revise_errors = getOption("revise_errors"),
                          envir = parent.frame(1L)) {
   if(is.null(manuscript)){
-    if(".revise_manuscripts" %in% objects(envir = envir, all.names = TRUE)){
+    if(exists(".revise_manuscripts", where = envir)){
       manuscript <- get(".revise_manuscripts", envir = envir)
     } else {
       warning("Argument 'manuscript' is NULL, and no manuscript exists in the environment.")
@@ -38,7 +38,6 @@ get_revision <- function(id,
   } else {
     cl[[1L]] <- str2lang("revise:::get_revision.default")
   }
-
   eval.parent(cl)
 }
 
