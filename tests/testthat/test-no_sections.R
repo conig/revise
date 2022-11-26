@@ -8,7 +8,7 @@ writeLines(lnz, con = tmp)
 
 
 test_that("read_manuscript works when there are no sections", {
-  out <- revise::read_manuscript(tmp)
+  out <- revise::read_manuscript(tmp, to_envir = FALSE)
   expect_equal(out$sections, NULL)
 })
 
@@ -16,7 +16,7 @@ lnz[10] <- paste0("[", lnz[10], "]{#test}")
 writeLines(lnz, con = tmp)
 
 test_that("read_manuscript works when there are no span sections", {
-  out <- revise::read_manuscript(tmp)
+  out <- revise::read_manuscript(tmp, to_envir = FALSE)
   expect_equal(names(out$sections), "test")
 })
 
@@ -25,6 +25,6 @@ lnz[8] <- paste0("<span id = \"test\">", lnz[8], "</span>")
 writeLines(lnz, con = tmp)
 
 test_that("read_manuscript works when there are no bracket sections", {
-  out <- revise::read_manuscript(tmp)
+  out <- revise::read_manuscript(tmp, to_envir = FALSE)
   expect_equal(names(out$sections), "test")
 })

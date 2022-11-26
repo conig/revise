@@ -4,7 +4,7 @@ tmpfl <- tempfile("test", fileext = ".Rmd")
 writeLines(lnz, con = tmpfl)
 
 test_that("warning on duplicate ids", {
-  expect_warning(out <- read_manuscript(tmpfl))
+  expect_warning(out <- read_manuscript(tmpfl, to_envir = FALSE))
   expect_warning(get_revision("revise", out, revise_errors = FALSE))
 })
 

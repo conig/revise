@@ -1,5 +1,5 @@
 # Only run on our local machines, add your sys user if you want
-if(Sys.info()["user"] %in% c("vanlissa")){
+if(FALSE){
 lnz <- c("---", "output            : pdf_document", "---", "", "# Span method",
          "", "<span id = \"spanmethod\">", "", "First line", "", "Second line",
          "", "</span>", "", "", "# MD method", "", "[", "", "First line",

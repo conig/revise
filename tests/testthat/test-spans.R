@@ -28,7 +28,7 @@ test_that("new parser works with nested spans", {
            "Second line", "", "</span>")
 
   out <- revise:::extract_sections(string = paste0(lnz, collapse = "\n"), is_span = TRUE)
-  expect_equal(names(out), c("spanmethod", "anotherone"))
+  expect_equal(names(out), c("anotherone", "spanmethod"))
   expect_equal(unname(unlist(out)), c("a second span...", '\n\nFirst line\n<span id = "anotherone">a second span...</span>\nSecond line\n\n'))
 })
 
