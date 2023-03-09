@@ -1,6 +1,6 @@
 process_chunk_pdf <- function(options) {
 
-  code <- paste(options$code, collapse = "")
+  code <- paste(options$code, collapse = "\n")
 
   if(options$escape) code <- escape_latex(code)
 
@@ -12,8 +12,7 @@ process_chunk_pdf <- function(options) {
 }
 
 process_chunk_txt <- function(options) {
-
-  code <- paste(options$code, collapse = "")
+  code <- paste(options$code, collapse = " ")
 
     comment_label <- options$label
 
@@ -30,7 +29,10 @@ process_chunk_txt <- function(options) {
 
 process_chunk_docx <- function(options) {
 
-  code <- paste(options$code, collapse = "")
+  code <- options$code
+  code[nchar(code) > 0] <- paste0("**",code[nchar(code) > 0],"**")
+
+  code <- paste(code, collapse = "\n")
 
     comment_label <- options$label
 
@@ -41,6 +43,6 @@ process_chunk_docx <- function(options) {
         ), collapse = ""))
     }
 
-    glue::glue("____\n<span class='underline'>**COMMENT {comment_label}**</span>\n\n \n**RC:\n{code}**\n\n")
+    glue::glue("____\n<span class='underline'>**COMMENT {comment_label}**</span>\n\n \n**RC:**\n{code}</br>\n\n")
 
 }
