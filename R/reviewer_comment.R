@@ -2,19 +2,18 @@
 #'
 #' A comment to style chunks for reviewer comments
 
-reviewer_comment <- function(){
-
+reviewer_comment <- function() {
   context <- rstudioapi::getActiveDocumentContext()
 
-    #assign("context", context, envir = globalenv())
+  # assign("context", context, envir = globalenv())
 
-    if(length(context$selection) == 0){
-      return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
-    }
+  if (length(context$selection) == 0) {
+    return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
+  }
 
-  contents = context$contents
+  contents <- context$contents
 
-  if(!any(grepl("^---$", contents))){
+  if (!any(grepl("^---$", contents))) {
     append_to_front <- rnr_header(detect_primary_file())
     append_to_rear <- '\\clearpage
 
@@ -26,11 +25,10 @@ reviewer_comment <- function(){
 
 \\endgroup
 '
-  output_format = "pdf"
-
-  }else{
-    append_to_front = NULL
-    append_to_rear = NULL
+    output_format <- "pdf"
+  } else {
+    append_to_front <- NULL
+    append_to_rear <- NULL
     output_format <- NULL
   }
 
@@ -40,10 +38,10 @@ reviewer_comment <- function(){
   end <- selection$end[[1]]
   document_end <- length(context$contents)
 
-  comment_n <- stringr::str_extract_all(contents, r"(\\reviewer\{c[0-9]*\})", simplify = TRUE)
-  if(length(comment_n) == 0){
+  comment_n <- stringr::str_extract_all(contents, r"(\\reviewerid\{c[0-9]*\})", simplify = TRUE)
+  if (length(comment_n) == 0) {
     comment_n <- 1
-  }else{
+  } else {
     comment_n <- max(as.numeric(stringr::str_extract_all(comment_n, "\\d*", simplify = TRUE)), na.rm = TRUE)
     comment_n <- comment_n + 1
   }
@@ -53,50 +51,57 @@ reviewer_comment <- function(){
     output_format <- tools::file_ext(output_format)
   }
 
-    start_content <- paste0("```{",getOption("reviewer_chunkname")[[1]],"}")
-    end_content <- "
+  start_content <- paste0("```{", getOption("reviewer_chunkname")[[1]], "}")
+  end_content <- "
 ```"
 
-  before <- contents[1:start-1]
+  before <- contents[1:start - 1]
 
   middle <- contents[start:end]
-  if(document_end != end){
-    after <- contents[(end+1) : length(contents)]
-  }else{
+  if (document_end != end) {
+    after <- contents[(end + 1):length(contents)]
+  } else {
     after <- ""
   }
 
-  new = c(append_to_front,before, start_content, middle, end_content, after, append_to_rear)
+  new <- c(append_to_front, before, start_content, middle, end_content, after, append_to_rear)
 
-  rstudioapi::setDocumentContents(paste(new,collapse = "\n"), id = context$id)
-
+  rstudioapi::setDocumentContents(paste(new, collapse = "\n"), id = context$id)
 }
 
 
-rnr_header <- function(file){
-  yaml <- tryCatch(rmarkdown::yaml_front_matter(file), error = function(e) return(NA))
+rnr_header <- function(file) {
+  yaml <- tryCatch(rmarkdown::yaml_front_matter(file), error = function(e) {
+    return(NA)
+  })
 
-title <- tryCatch(yaml["title"][[1]], error = function(e) return("paper title"))
-author <- tryCatch(yaml["author"][[1]][[1]]$name, error = function(e) return("Author name"))
-bibliography <- tryCatch(yaml["bibliography"][[1]], error = function(e) return("bibliography.json"))
+  title <- tryCatch(yaml["title"][[1]], error = function(e) {
+    return("paper title")
+  })
+  author <- tryCatch(yaml["author"][[1]][[1]]$name, error = function(e) {
+    return("Author name")
+  })
+  bibliography <- tryCatch(yaml["bibliography"][[1]], error = function(e) {
+    return("bibliography.json")
+  })
 
-csl <- yaml["csl"][[1]]
+  csl <- yaml["csl"][[1]]
 
-if(!is.null(csl)){
-  csl <- paste0("csl               : ", '"',csl,'"')
-}
+  if (!is.null(csl)) {
+    csl <- paste0("csl               : ", '"', csl, '"')
+  }
 
-if(!is.null(bibliography)){
-  bibliography <- paste0("bibliography      : ", '"',bibliography,'"')
-}
+  if (!is.null(bibliography)) {
+    bibliography <- paste0("bibliography      : ", '"', bibliography, '"')
+  }
 
-if(is.null(title)) title <- "paper title"
-if(is.null(author)) author <- "Author name"
-if(is.null(bibliography)) bibliography <- ""
-if(is.null(csl)) csl <- ""
-if(length(bibliography) > 1) bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
+  if (is.null(title)) title <- "paper title"
+  if (is.null(author)) author <- "Author name"
+  if (is.null(bibliography)) bibliography <- ""
+  if (is.null(csl)) csl <- ""
+  if (length(bibliography) > 1) bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
 
-header <- glue::glue(r'(---
+  header <- glue::glue(r'(---
 title             : "!!<title>!!"
 authors           : "!!<author>!! on behalf of co-authors"
 journal           : "your journal"
@@ -119,25 +124,25 @@ manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
 
 )', .open = "!!<", .close = ">!!")
 
-header <- gsub("csl\\s*:\\s*\"NA\"", "" , header)
-header <- gsub("bibliography\\s*:\\s*NA", "" , header)
-header
-
+  header <- gsub("csl\\s*:\\s*\"NA\"", "", header)
+  header <- gsub("bibliography\\s*:\\s*NA", "", header)
+  header
 }
 
-detect_primary_file <- function(){
-
+detect_primary_file <- function() {
   files <- list.files(pattern = ".rmd$", ignore.case = TRUE)
   contents <- suppressWarnings(lapply(files, readLines))
 
-  out <- data.frame(files = files,
-             has_papaja = sapply(contents, function(x)
-               any(grepl("papaja::apa", x, fixed = TRUE))),
-             filesize = sapply(files, file.size))
-  if(nrow(out) == 0) return(NA)
+  out <- data.frame(
+    files = files,
+    has_papaja = sapply(contents, function(x) {
+      any(grepl("papaja::apa", x, fixed = TRUE))
+    }),
+    filesize = sapply(files, file.size)
+  )
+  if (nrow(out) == 0) {
+    return(NA)
+  }
 
-   out[order(-out$has_papaja,-out$filesize),"files"][[1]]
-
+  out[order(-out$has_papaja, -out$filesize), "files"][[1]]
 }
-
-
