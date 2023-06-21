@@ -5,7 +5,7 @@ process_chunk_pdf <- function(options) {
   if(options$escape) code <- escape_latex(code)
 
     # if the format is PDF
-    start <- paste0("\\reviewer{", options$label, "}{")
+    start <- paste0("\\reviewerid{", options$label, "}{")
 
     paste(start, "\n" , code , "}", sep = "\n")
 
