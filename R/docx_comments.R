@@ -48,11 +48,17 @@ get_docx_comments <- function(x) {
   })
 
   # Extract and concatenate text within each paragraph
-  text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
-    sapply(paragraphs, function(para) {
+text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
+  out <- sapply(paragraphs, function(para) {
+    # Filter out standalone <ins> elements
+    if (xml_name(para) == "p") {
       paste(xml_text(xml_find_all(para, ".//w:t")), collapse = "")
-    })
+    } else {
+      NULL  # Ignore standalone <ins> elements
+    }
   })
+  unlist(out[!sapply(out, is.null)])
+})
 
   # Collapse concatenated text per paragraph with newline character
   collapsed_text_per_paragraph <- lapply(text_per_paragraph, function(paragraph_texts) {
@@ -104,3 +110,4 @@ get_docx_comments <- function(x) {
   data <- merge(out, data, by = "comment_id", all.x = TRUE)
   data[order(as.integer(data$comment_id)), ]
 }
+
