@@ -7,6 +7,6 @@
 #' Revise automates this process. Sections in the manuscript can be tagged,
 #' and inserted into the action letter.
 #'
-#' @docType package
 #' @name revise
-NULL
+#' @keywords internal
+"_PACKAGE"
