@@ -52,7 +52,10 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
   out <- sapply(paragraphs, function(para) {
     # Filter out standalone <ins> elements
     if (xml_name(para) == "p") {
-      paste(xml_text(xml_find_all(para, ".//w:t")), collapse = "")
+       comment_start <- xml_find_first(para, ".//w:commentRangeStart")
+      comment_end <- xml_find_first(para, ".//w:commentRangeEnd")
+      nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart and following-sibling::w:commentRangeEnd]")
+      paste(xml_text(xml_find_all(nodes, ".//w:t")), collapse = "")
     } else {
       NULL  # Ignore standalone <ins> elements
     }
