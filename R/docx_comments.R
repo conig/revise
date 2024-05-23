@@ -2,7 +2,7 @@
 #' 
 #' Read a docx file and extract comments
 #' @param address path to docx
-#' @importFrom xml2 xml_find_all xml_text xml_attr xml_parent
+#' @importFrom xml2 xml_find_all xml_text xml_attr xml_parent xml_name
 
 read_docx <- function(address) {
   docx <- officer::read_docx(address)
