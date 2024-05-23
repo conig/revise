@@ -29,6 +29,8 @@ get_docx_comments <- function(x) {
     ), "id"
   )
 
+
+
   # Retrieve text runs within comment ranges
   comment_text_runs <- lapply(comment_ids, function(id) {
     xml_find_all(
@@ -50,11 +52,21 @@ get_docx_comments <- function(x) {
   # Extract and concatenate text within each paragraph
 text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
   out <- sapply(paragraphs, function(para) {
-    # Filter out standalone <ins> elements
     if (xml_name(para) == "p") {
-       comment_start <- xml_find_first(para, ".//w:commentRangeStart")
+      comment_start <- xml_find_first(para, ".//w:commentRangeStart")
       comment_end <- xml_find_first(para, ".//w:commentRangeEnd")
-      nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart and following-sibling::w:commentRangeEnd]")
+
+      if (is.na(comment_start)) {
+        # Keep all content from the start of the node to the end if comment_start is NA
+        nodes <- xml_find_all(para, ".//*")
+      } else if (is.na(comment_end)) {
+        # Keep all content from comment_start to the end of the node if comment_end is NA
+        nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart]")
+      } else {
+        # Keep content between comment_start and comment_end
+        nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart and following-sibling::w:commentRangeEnd]")
+      }
+      
       paste(xml_text(xml_find_all(nodes, ".//w:t")), collapse = "")
     } else {
       NULL  # Ignore standalone <ins> elements
