@@ -56,7 +56,7 @@ get_docx_comments <- function(x) {
 
   # Collapse concatenated text per paragraph with newline character
   collapsed_text_per_paragraph <- lapply(text_per_paragraph, function(paragraph_texts) {
-    paste(paragraph_texts, collapse = "\n")
+    paste(paragraph_texts, collapse = "\n\n")
   })
 
   # Create data frame for comment IDs
