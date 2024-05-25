@@ -2,7 +2,7 @@
 #' 
 #' Read a docx file and extract comments
 #' @param address path to docx
-#' @importFrom xml2 xml_find_all xml_text xml_attr xml_parent xml_name xml_find_first
+#' @importFrom xml2 xml_find_all xml_text xml_attr xml_parent xml_name xml_find_first xml_remove
 
 read_docx <- function(address) {
   docx <- officer::read_docx(address)
@@ -29,8 +29,6 @@ get_docx_comments <- function(x) {
     ), "id"
   )
 
-
-
   # Retrieve text runs within comment ranges
   comment_text_runs <- lapply(comment_ids, function(id) {
     xml_find_all(
@@ -55,6 +53,12 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
     if (xml_name(para) == "p") {
       comment_start <- xml_find_first(para, ".//w:commentRangeStart")
       comment_end <- xml_find_first(para, ".//w:commentRangeEnd")
+
+      # Remove del_nodes
+      if(contains_del(para)){
+        del_nodes <- xml_find_all(para, ".//w:del")
+        xml2::xml_remove(del_nodes)
+      }
 
       if (is.na(comment_start)) {
         # Keep all content from the start of the node to the end if comment_start is NA
@@ -126,3 +130,6 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
   data[order(as.integer(data$comment_id)), ]
 }
 
+contains_del <- function(x) {
+  grepl("\\<w\\:delText", as.character(x))
+}
