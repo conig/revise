@@ -70,8 +70,13 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
         # Keep content between comment_start and comment_end
         nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart and following-sibling::w:commentRangeEnd]")
       }
+      content <- paste(xml_text(xml_find_all(nodes, ".//w:t")), collapse = "")
       
-      paste(xml_text(xml_find_all(nodes, ".//w:t")), collapse = "")
+      if(contains_bullets(para)){
+        paste("*", content)
+      }else{
+        content
+      }
     } else {
       NULL  # Ignore standalone <ins> elements
     }
@@ -132,4 +137,8 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
 
 contains_del <- function(x) {
   grepl("\\<w\\:delText", as.character(x))
+}
+
+contains_bullets <- function(x) {
+  grepl(r"(ListParagraph\"/>)", as.character(x))
 }
