@@ -142,3 +142,29 @@ contains_del <- function(x) {
 contains_bullets <- function(x) {
   grepl(r"(ListParagraph\"/>)", as.character(x))
 }
+
+#' bullets_2_numbers
+#' 
+#' Convert bullets to numbered lists
+#' @param x character vector
+#' @return character vector
+#' @export
+#' @examples
+#' convert_bullets_2_numbers(c("* First bullet\n\n* Second bullet\n\n* Third bullet\n\n"))
+
+bullets_2_numbers <- function(x) {
+  pattern <- "(?<=^|\\n)\\*"
+# Count number of bullets following newlines
+  n_bullets <- gregexpr(pattern, x, perl = TRUE)[[1]] |>
+    length()
+  
+  replacements <- paste0(seq_len(n_bullets), ".")
+
+  # replace bullets with numbers
+  for (i in seq_len(n_bullets)) {
+    x <- sub(pattern, replacements[i], x, perl = TRUE)
+  }
+
+  x
+
+}
