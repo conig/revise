@@ -150,7 +150,7 @@ contains_bullets <- function(x) {
 #' @return character vector
 #' @export
 #' @examples
-#' convert_bullets_2_numbers(c("* First bullet\n\n* Second bullet\n\n* Third bullet\n\n"))
+#' bullets_2_numbers(c("* First bullet\n\n* Second bullet\n\n* Third bullet\n\n"))
 
 bullets_2_numbers <- function(x) {
   pattern <- "(?<=^|\\n)\\*"

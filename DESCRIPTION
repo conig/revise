@@ -1,6 +1,6 @@
 Package: revise
 Title: Tools for Formulating Revise and Resubmit Rmarkdown Documents
-Version: 0.0.2.4
+Version: 0.0.3.0
 Authors@R: 
     c(
     person(given = "James",
@@ -49,7 +49,8 @@ Imports:
     rstudioapi,
     stringr,
     pdftools,
-    officer
+    officer,
+    xml2
 Suggests: 
     googledrive,
     docxtractr,
