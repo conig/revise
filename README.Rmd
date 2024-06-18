@@ -28,10 +28,37 @@ You can install the development version of {revise} from [GitHub](https://github
 # install.packages("remotes")
 remotes::install_github("conig/revise")
 ```
-## Examples
+# Starting a revision document
 
-### ReviewerComment addin
+## ReviewerComment addin
 
 We have included an addin so you can mark text as a reviewer comment. If a YAML header is not detected in document the addin will add it. Fields will automatically be filled in if there is a .rmd file in the working directory. Additionally, selected text will be marked as a reviewer comment by including it within an "asis" chunk. Text below this chunk will be tagged as an author response. A hotkey can be set for this addin (e.g. Ctrl+Shift+R).
 
 ![animation of ReviewerComment addin](man/figures/README/ReviewerComment.gif)
+
+# Loading a manuscript
+
+You can use rmd or docx files with revise. To load either, simply call revise::read_manuscript("your_file.rmd")
+
+For example. Here is an example docx where content has been tagged with comment boxes. E.g, Revise::hard
+```{r}
+docx_path <- system.file("examples/word_test.docx", package = "revise")
+
+man <- read_manuscript(docx_path)
+man
+```
+
+We can see all tagged sections by running
+
+```{r}
+names(man$sections)
+```
+
+Then we can retrieve using a section name
+
+```{r}
+revision <- get_revision("hard", man)
+revision
+```
+
+This content can then be put directly into a response document using single backticks.

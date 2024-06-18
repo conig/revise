@@ -2,6 +2,7 @@
 % Please edit documentation in R/revise.R
 \docType{package}
 \name{revise}
+\alias{revise-package}
 \alias{revise}
 \title{revise: Tools for Formulating Revise and Resubmit Rmarkdown Documents}
 \description{
@@ -13,3 +14,24 @@ responses to reviewers.
 Revise automates this process. Sections in the manuscript can be tagged,
 and inserted into the action letter.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/conig/revise}
+  \item Report bugs at \url{https://github.com/conig/revise/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: James Conigrave \email{james@conigrave.com} (\href{https://orcid.org/0000-0002-8816-6229}{ORCID})
+
+Authors:
+\itemize{
+  \item Philip Parker \email{philip.parker@acu.edu.au} (\href{https://orcid.org/0000-0002-4604-8566}{ORCID})
+  \item Taren Sanders \email{taren.sanders@acu.edu.au} (\href{https://orcid.org/0000-0002-4504-6008}{ORCID})
+  \item Michael Noetel \email{michael.noetel@acu.edu.au} (\href{https://orcid.org/0000-0002-6563-8203}{ORCID})
+  \item Caspar J. Van Lissa \email{c.j.vanlissa@tilburguniversity.edu} (\href{https://orcid.org/0000-0002-0808-5024}{ORCID})
+}
+
+}
+\keyword{internal}

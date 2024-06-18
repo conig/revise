@@ -28,9 +28,17 @@
 #' @importFrom tools file_ext
 read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
   doc_checksum <- tools::md5sum(address)
-  rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
-  sections <- c(extract_sections(rmd),
+  if(!is_docx(address)){
+    rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
+    sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
+    refs <- extract_refs(address)
+  }else{
+   sections <- read_docx(address)
+   rmd <- NULL
+   refs <- NULL
+  }
+  
 
   check_dup_sections(names(sections), revise_errors = FALSE)
   if(!is.null(PDF)) {
@@ -57,9 +65,12 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
   } else{
     PDF <- NULL
   }
-  refs <- extract_refs(address)
+  
   # Prepare output object
-  manuscript <- list(sections = sections,PDF = PDF, refs = refs, rmd = rmd,
+  manuscript <- list(sections = sections,
+                     PDF = PDF,
+                     refs = refs,
+                     rmd = rmd,
                      mtime = file.info(address)$mtime,
                      checksum = doc_checksum,
                      filename = basename(address))
@@ -106,4 +117,3 @@ remove_from_envir <- function(manuscript, envir){
     rm(".revise_manuscripts", envir = envir)
   }
 }
-

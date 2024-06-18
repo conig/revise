@@ -1,12 +1,13 @@
 checksum_exists <- function(corpus, checksum){
   UseMethod("checksum_exists", corpus)
 }
-
+#' @export
 checksum_exists.revise_corpus <- function(corpus, checksum){
   all_csums <- sapply(corpus, `[[`, "checksum")
   return(isTRUE(checksum %in% all_csums))
 }
 
+#' @export
 checksum_exists.revise_manuscript <- function(corpus, checksum){
   return(isTRUE(checksum == corpus[["checksum"]]))
 }
@@ -230,4 +231,14 @@ check_dup_sections <- function(sect_nams, revise_errors = getOption("revise_erro
     options(reviewer_chunkname = c("asis", "reviewer"))
   }
 
+}
+
+#' path
+#' 
+#' Determines whether a path is to a .doc or .docx
+#' @param path to file
+
+is_docx <- function(path) {
+  ext <- tolower(tools::file_ext(path))
+  ext %in% c("doc", "docx")
 }
