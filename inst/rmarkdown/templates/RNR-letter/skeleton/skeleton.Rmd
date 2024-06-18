@@ -1,0 +1,35 @@
+---
+title             : "Paper title"
+authors           : "Author name on behalf of co-authors"
+journal           : "your journal"
+handling_editor   : ""
+
+class             : "draft"
+
+output            : revise::letter.pdf
+---
+
+Dear Dr `r rmarkdown::metadata$handling_editor`,
+
+Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. In the following itemised list we respond to each comment point-by-point.
+
+```{r setup-chunk, include = FALSE}
+# manuscript <- revise::read_manuscript("README.Rmd", PDF = TRUE)
+```
+
+```{asis}
+Reviewer comment
+
+```
+
+Response
+
+\clearpage
+
+# References
+
+\begingroup
+
+<div id="refs"></div>
+
+\endgroup
