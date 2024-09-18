@@ -12,8 +12,10 @@ The goal of revise is to support authors in responding to revise and
 resubmit requests. These functions are designed to work with
 [crsh/papaja](https://github.com/crsh/papaja).
 
-The core functionality allows you to extract text from a Rmd or docx, and insert it into the RNR letter.
-This allows you to avoid having to update the RnR letter, every time you, or a co-author makes a change to the manuscript.
+The core functionality allows you to extract text from a Rmd or docx,
+and insert it into the RNR letter. This allows you to avoid having to
+update the RnR letter, every time you, or a co-author makes a change to
+the manuscript.
 
 ## Installation
 
@@ -25,41 +27,56 @@ You can install the development version of {revise} from
 remotes::install_github("conig/revise")
 ```
 
-# Revision letter template
+# Starting a revision document
 
-Revise comes with a template revision letter `RNR-letter.pdf`.
-This Rmarkdown template builds off the template provided by papaja.
-However it differes in how reviewer chunks are handled. Instead of \RC{}, it uses `asis` markdown chunks.
+## Revision letter template
 
-For example: 
+Revise comes with a template revision letter `RNR-letter.pdf`. This
+Rmarkdown template builds off the template provided by papaja. However
+it differes in how reviewer chunks are handled. Instead of , it uses
+`asis` markdown chunks.
 
-```
-```{asis}
-This is a review comment
-
-
-```
-```
-
-And this is our response.
-
-```
+For example:
 
 
-This allows for us to do some R processing on chunks before rendering them in the letter, allowing us to support PDF, docx, and txt outputs.
 
-To change the RNR-letter to docx or txt. just change the extension in the output field.
+    ```{asis}
+    This is a reviewer comment
+
+    ```
+
+    And this is our response
+
+This allows for us to do some R processing on chunks before rendering
+them in the letter, allowing us to support PDF, docx, and txt outputs.
+
+To change the RNR-letter to docx or txt. just change the extension in
+the output field.
 
 E.g.,
 
-```yaml
+``` yaml
 ---
 output: RNR-letter.docx
 ---
 ```
 
-# 
+## ReviewerComment addin
 
+We have included an addin so you can mark text as a reviewer comment. If
+a YAML header is not detected in document the addin will add it. Fields
+will automatically be filled in if there is a .rmd file in the working
+directory. Additionally, selected text will be marked as a reviewer
+comment by including it within an “asis” chunk. Text below this chunk
+will be tagged as an author response. A hotkey can be set for this addin
+(e.g. Ctrl+Shift+R).
+
+<figure>
+<img src="man/figures/README/ReviewerComment.gif"
+alt="animation of ReviewerComment addin" />
+<figcaption aria-hidden="true">animation of ReviewerComment
+addin</figcaption>
+</figure>
 
 # Loading a manuscript
 
@@ -70,6 +87,7 @@ For example. Here is an example docx where content has been tagged with
 comment boxes. E.g, Revise::hard
 
 ``` r
+library(revise)
 docx_path <- system.file("examples/word_test.docx", package = "revise")
 
 man <- read_manuscript(docx_path)
