@@ -36,9 +36,11 @@ To change the RNR-letter to docx or txt. just change the extension in the output
 
 E.g.,
 
+```yaml
 ---
 output: RNR-letter.docx
 ---
+```
 
 # 
 
