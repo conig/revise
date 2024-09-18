@@ -33,7 +33,7 @@ However it differes in how reviewer chunks are handled. Instead of \RC{}, it use
 
 For example: 
 
-```{asis}
+```
 
 ```{asis}
 This is a review comment
