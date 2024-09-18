@@ -29,7 +29,22 @@ remotes::install_github("conig/revise")
 
 Revise comes with a template revision letter `RNR-letter.pdf`.
 This Rmarkdown template builds off the template provided by papaja.
-However it differes in how reviewer chunks are handled. Instead of \RC{}, it uses: ```{asis}\n```.
+However it differes in how reviewer chunks are handled. Instead of \RC{}, it uses `asis` markdown chunks.
+
+For example: 
+
+```{asis}
+
+```{asis}
+This is a review comment
+
+```
+
+And this is our response.
+
+```
+
+
 This allows for us to do some R processing on chunks before rendering them in the letter, allowing us to support PDF, docx, and txt outputs.
 
 To change the RNR-letter to docx or txt. just change the extension in the output field.
