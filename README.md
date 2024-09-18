@@ -12,6 +12,9 @@ The goal of revise is to support authors in responding to revise and
 resubmit requests. These functions are designed to work with
 [crsh/papaja](https://github.com/crsh/papaja).
 
+The core functionality allows you to extract text from a Rmd or docx, and insert it into the RNR letter.
+This allows you to avoid having to update the RnR letter, every time you, or a co-author makes a change to the manuscript.
+
 ## Installation
 
 You can install the development version of {revise} from
@@ -22,24 +25,23 @@ You can install the development version of {revise} from
 remotes::install_github("conig/revise")
 ```
 
-# Starting a revision document
+# Revision letter template
 
-## ReviewerComment addin
+Revise comes with a template revision letter `RNR-letter.pdf`.
+This Rmarkdown template builds off the template provided by papaja.
+However it differes in how reviewer chunks are handled. Instead of \RC{}, it uses: ```{asis}\n```.
+This allows for us to do some R processing on chunks before rendering them in the letter, allowing us to support PDF, docx, and txt outputs.
 
-We have included an addin so you can mark text as a reviewer comment. If
-a YAML header is not detected in document the addin will add it. Fields
-will automatically be filled in if there is a .rmd file in the working
-directory. Additionally, selected text will be marked as a reviewer
-comment by including it within an “asis” chunk. Text below this chunk
-will be tagged as an author response. A hotkey can be set for this addin
-(e.g. Ctrl+Shift+R).
+To change the RNR-letter to docx or txt. just change the extension in the output field.
 
-<figure>
-<img src="man/figures/README/ReviewerComment.gif"
-alt="animation of ReviewerComment addin" />
-<figcaption aria-hidden="true">animation of ReviewerComment
-addin</figcaption>
-</figure>
+E.g.,
+
+---
+output: RNR-letter.docx
+---
+
+# 
+
 
 # Loading a manuscript
 
