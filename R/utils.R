@@ -40,40 +40,32 @@ extract_refs <- function(path){
 
 
 #' @export
+#' @importFrom cli cli_h2
 print.revise_manuscript = function(x, ...){
-
-  n_sections <- glue::glue("\033[34m- {length(x$sec)} sections\033[39m")
+  cli::cli_h2("<Manuscript>")
+  cli_msg("*" = "{length(x$sec)} section{c('s', '')[(length(x$sec) == 1)+1L]}")
   if(is.null(x$PDF)){
-    PDF_info <- "\033[31mNo PDF attached\033[39m"
+    cli_msg("x" = "No PDF attached")
   }else{
-    PDF_info <- glue::glue("\033[32m- {nrow(x$PDF)} pages\033[39m")
+    cli_msg("*" = "{nrow(x$PDF)} pages")
   }
-
-  cat("<Manuscript>")
-  cat("\n")
-  cat(n_sections)
-  cat("\n")
-  cat(PDF_info)
-
-
-
 }
 
-#' evaluate_inline
-#'
-#' Evaluates embedded rchunks within a string of text
-#' @param string a section of text with includes inline elements
-#' @examples
-#' revise:::evaluate_inline("1+1 = `r 1+1`")
+# evaluate_inline
+#
+# Evaluates embedded rchunks within a string of text
+# @param string a section of text with includes inline elements
+# @examples
+# revise:::evaluate_inline("1+1 = `r 1+1`")
 
 evaluate_inline <- function(string){
   glue::glue(string, .open = "`r ", .close = "`")
 }
 
-#' process_pdf
-#'
-#' process pdf file
-#' @param path path to pdf
+# process_pdf
+#
+# process pdf file
+# @param path path to pdf
 
 process_pdf <- function(path){
   ext <- tolower(tools::file_ext(path))
@@ -122,10 +114,10 @@ find_pages <- function(manuscript, string){
   get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
 }
 
-#' clean_string
-#'
-#' Cleaning steps for identifying strings
-#' @param string string to clean
+# clean_string
+#
+# Cleaning steps for identifying strings
+# @param string string to clean
 
 clean_string <- function(string){
   string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
@@ -138,12 +130,12 @@ clean_string <- function(string){
   string
 }
 
-#' get_page_number
-#'
-#' Finds page number from pdf based on text matching
-#' @param string text to match
-#' @param pdf_text text to search
-#' @param max.distance argument passed to agrep
+# get_page_number
+#
+# Finds page number from pdf based on text matching
+# @param string text to match
+# @param pdf_text text to search
+# @param max.distance argument passed to agrep
 
 get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 
@@ -181,11 +173,11 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 
 }
 
-#' header_to_bold
-#'
-#' Converts headers to bold
-#' @param string a string
-#' @return string
+# header_to_bold
+#
+# Converts headers to bold
+# @param string a string
+# @return string
 
 header_to_bold = function(string){
 
@@ -233,10 +225,10 @@ check_dup_sections <- function(sect_nams, revise_errors = getOption("revise_erro
 
 }
 
-#' path
-#' 
-#' Determines whether a path is to a .doc or .docx
-#' @param path to file
+# path
+#
+# Determines whether a path is to a .doc or .docx
+# @param path to file
 
 is_docx <- function(path) {
   ext <- tolower(tools::file_ext(path))
