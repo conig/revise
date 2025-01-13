@@ -102,12 +102,12 @@ process_pdf <- function(path){
   doc
 }
 
-#' find_pages
-#'
-#' Searches through a manuscript for a page reference
-#' @param manuscript the manuscript object to search
-#' @param string the string to find
-#' @export
+# find_pages
+#
+# Searches through a manuscript for a page reference
+# @param manuscript the manuscript object to search
+# @param string the string to find
+# @export
 
 find_pages <- function(manuscript, string){
   if(is.null(manuscript$PDF)) stop("No PDF attached to the manuscript object: not possible to identify page numbers.")
