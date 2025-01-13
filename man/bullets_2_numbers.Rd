@@ -6,15 +6,6 @@
 \usage{
 bullets_2_numbers(x)
 }
-\arguments{
-\item{x}{character vector}
-}
-\value{
-character vector
-}
 \description{
 Convert bullets to numbered lists
-}
-\examples{
-bullets_2_numbers(c("* First bullet\n\n* Second bullet\n\n* Third bullet\n\n"))
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/list_manuscripts.R
 \name{remove_manuscript}
 \alias{remove_manuscript}
-\title{Remove manuscript from environment}
+\title{Remove Manuscript from Environment}
 \usage{
 remove_manuscript(manuscript = NULL, envir = parent.frame(1))
 }
@@ -21,14 +21,13 @@ otherwise.
 Removes a manuscript from a given environment by name.
 }
 \examples{
-library(revise)
-
 temp_file <- tempfile(fileext = ".Rmd")
 write("`r 1 + 1", file = temp_file)
-
 read_manuscript(temp_file)
-list_manuscripts()
-remove_manuscript(list_manuscripts()[1])
+result <- remove_manuscript(list_manuscripts()[1])
+# See that remove_manuscript() silently returns TRUE
+print(result)
+# See that there are no more manuscripts in envir
 list_manuscripts()
 
 }
