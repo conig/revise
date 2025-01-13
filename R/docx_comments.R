@@ -1,5 +1,5 @@
 #' read_docx
-#' 
+#'
 #' Read a docx file and extract comments
 #' @param address path to docx
 #' @importFrom xml2 xml_find_all xml_text xml_attr xml_parent xml_name xml_find_first xml_remove
@@ -7,13 +7,13 @@
 read_docx <- function(address) {
   docx <- officer::read_docx(address)
   comments <- get_docx_comments(docx)
-  out <- 
+  out <-
     data.frame(section = unlist(comments$text),
                 section_text = comments$commented_text)
   out <- out[grepl("Revise\\:\\:",out$section),]
   out$section <- gsub("Revise\\:\\:","",out$section)
   out$section <- trimws(out$section)
-   
+
   lst <- as.list(trimws(out$section_text))
   names(lst) <- out$section
   lst
@@ -71,7 +71,7 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
         nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart and following-sibling::w:commentRangeEnd]")
       }
       content <- paste(xml_text(xml_find_all(nodes, ".//w:t")), collapse = "")
-      
+
       if(contains_bullets(para)){
         paste("*", content)
       }else{
@@ -144,20 +144,20 @@ contains_bullets <- function(x) {
 }
 
 #' bullets_2_numbers
-#' 
+#'
 #' Convert bullets to numbered lists
-#' @param x character vector
-#' @return character vector
-#' @export
-#' @examples
-#' bullets_2_numbers(c("* First bullet\n\n* Second bullet\n\n* Third bullet\n\n"))
+# @param x character vector
+# @return character vector
+# @export
+# @examples
+# bullets_2_numbers(c("* First bullet\n\n* Second bullet\n\n* Third bullet\n\n"))
 
 bullets_2_numbers <- function(x) {
   pattern <- "(?<=^|\\n)\\*"
 # Count number of bullets following newlines
   n_bullets <- gregexpr(pattern, x, perl = TRUE)[[1]] |>
     length()
-  
+
   replacements <- paste0(seq_len(n_bullets), ".")
 
   # replace bullets with numbers
