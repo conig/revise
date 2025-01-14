@@ -143,9 +143,9 @@ contains_bullets <- function(x) {
   grepl(r"(ListParagraph\"/>)", as.character(x))
 }
 
-#' bullets_2_numbers
-#'
-#' Convert bullets to numbered lists
+# bullets_2_numbers
+#
+# Convert bullets to numbered lists
 # @param x character vector
 # @return character vector
 # @export

@@ -104,8 +104,8 @@ letter_post_txt <- function(front_matter, input , output_file, clean, quiet = FA
 # @param ... arguments passed to letter.pdf
 # @export
 
-letter <- function(...){
-  .Deprecated("letter.pdf", package = "revise", msg = "revise::letter is deprecated.\n\nPlease specify the type of document required...\n- revise::letter.pdf\n- revise::letter.txt\n- revise::letter.docx")
-  letter.pdf(...)
-
-}
+# letter <- function(...){
+#   .Deprecated("letter.pdf", package = "revise", msg = "revise::letter is deprecated.\n\nPlease specify the type of document required...\n- revise::letter.pdf\n- revise::letter.txt\n- revise::letter.docx")
+#   letter.pdf(...)
+#
+# }

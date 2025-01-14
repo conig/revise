@@ -55,8 +55,8 @@ docx_path <- system.file("examples/word_test.docx", package = "revise")
 man <- read_manuscript(docx_path)
 man
 #> <Manuscript>
-#> [34m- 6 sections[39m
-#> [31mNo PDF attached[39m
+#> [34m- 6 sections[39m
+#> [31mNo PDF attached[39m
 ```
 
 We can see all tagged sections by running

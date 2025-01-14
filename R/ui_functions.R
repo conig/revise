@@ -3,3 +3,8 @@
 with_cli_try <- utils::getFromNamespace("with_cli_try", "worcs")
 cli_msg <- utils::getFromNamespace("cli_msg", "worcs")
 is_quiet <- utils::getFromNamespace("is_quiet", "worcs")
+
+#' @importFrom worcs check_rmarkdown
+check_revise <- function(){
+  worcs::check_rmarkdown()
+}
