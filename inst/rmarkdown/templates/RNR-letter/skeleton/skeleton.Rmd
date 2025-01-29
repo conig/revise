@@ -27,17 +27,13 @@ Response
 \clearpage
 
 
-```{r, results="asis", include = FALSE}
-cat(r"(
-
+<!-- Remove comment to include references
 # References
 
 \begingroup
 
 <div id="refs"></div>
 
-\endgroup   
-)")
-
-```
+\endgroup
+-->
 
