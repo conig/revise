@@ -111,7 +111,7 @@ handling_editor   : ""
 class             : "draft"
 !!<bibliography>!!
 !!<csl>!!
-output            : revise::letter.pdf
+output            : revise::revise_letter_pdf
 ---
 
 Dear Dr `r rmarkdown::metadata$handling_editor`,

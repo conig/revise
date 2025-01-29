@@ -1,4 +1,4 @@
-#' @title Mask text for blind review
+#' @title Mask Text for Blind Review
 #' @description The YAML front matter tag `mask` determines whether
 #' the text is displayed or replaced by `mask_message`.
 #' The YAML tag can take the values `yes` or `no`.

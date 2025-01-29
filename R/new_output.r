@@ -10,12 +10,16 @@ set_engine <- function(process_chunk){
 
 }
 
-#' letter.pdf
+#' Dynamic PDF Revision Letter
 #'
-#' Revise and resubmit letter
-#' @param ... arguments passed to papaja:::revision_letter_pdf
+#' Template for creating journal revision letters
+#' with dynamic excerpts from a manuscript.
+#' @param ... Arguments passed on to [papaja::revision_letter_pdf()].
+#' @details This function wraps [papaja::revision_letter_pdf()].
+#' @seealso [papaja::revision_letter_pdf()], [bookdown::pdf_document2()], [rmarkdown::pdf_document()]
+#' @inherit papaja::apa6_pdf return
 #' @export
-letter.pdf <- function(...) {
+revise_letter_pdf <- function(...) {
   extra_tex <-
     rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
 
@@ -30,13 +34,16 @@ letter.pdf <- function(...) {
                                includes = extra_tex)
 }
 
-#' letter.docx
+#' Dynamic docx Revision Letter
 #'
-#' Revise and resubmit letter as a txt doc
-#' @param ... additional arguments passed to rmarkdown::word_document
+#' Template for creating journal revision letters
+#' with dynamic excerpts from a manuscript.
+#' @param ... Arguments passed on to [bookdown::word_document2()].
+#' @details This function wraps [bookdown::word_document2()].
+#' @seealso [bookdown::word_document2()]
+#' @inherit bookdown::word_document2 return
 #' @export
-
-letter.docx <- function(...) {
+revise_letter_docx <- function(...) {
   # knitr::knit_engines$set(reviewer = process_chunk_docx,
   #                         asis = process_chunk_docx)
 
@@ -47,19 +54,20 @@ letter.docx <- function(...) {
 
 }
 
-#' letter.txt
+#' Dynamic txt Revision Letter
 #'
-#' Revise and resubmit letter as a txt doc
-#' @param ... additional arguments passed to rmarkdown::output_format
+#' Template for creating journal revision letters
+#' with dynamic excerpts from a manuscript.
+#' @param ... Arguments passed on to [rmarkdown::output_format()].
+#' @details This function wraps [rmarkdown::output_format()].
+#' @seealso [rmarkdown::output_format()]
+#' @inherit rmarkdown::output_format return
 #' @export
-
-letter.txt <- function(...) {
+revise_letter_txt <- function(...) {
   extra_tex <-
     rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
 
     set_engine("process_chunk_txt")
-  # knitr::knit_engines$set(reviewer = process_chunk_txt,
-  #                         asis = process_chunk_txt)
 
     rmarkdown::output_format(
       rmarkdown::knitr_options(opts_chunk = list(echo = FALSE,
@@ -90,14 +98,14 @@ letter_post_txt <- function(front_matter, input , output_file, clean, quiet = FA
 
 }
 
-#' letter
-#'
-#' This function is deprecated
-#' @param ... arguments passed to letter.pdf
-#' @export
+# letter
+#
+# This function is deprecated
+# @param ... arguments passed to letter.pdf
+# @export
 
-letter <- function(...){
-  .Deprecated("letter.pdf", package = "revise", msg = "revise::letter is deprecated.\n\nPlease specify the type of document required...\n- revise::letter.pdf\n- revise::letter.txt\n- revise::letter.docx")
-  letter.pdf(...)
-
-}
+# letter <- function(...){
+#   .Deprecated("letter.pdf", package = "revise", msg = "revise::letter is deprecated.\n\nPlease specify the type of document required...\n- revise::letter.pdf\n- revise::letter.txt\n- revise::letter.docx")
+#   letter.pdf(...)
+#
+# }

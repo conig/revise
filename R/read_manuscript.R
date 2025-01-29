@@ -1,10 +1,10 @@
-#' read_manuscript
+#' Read 'Rmarkdown' Manuscript
 #'
-#' Reads in rmarkdown manuscript and an associated PDF as possible
-#' @param address path to a rmarkdown file
-#' @param PDF if TRUE, or path provided, a PDF will be loaded for page matching.
+#' Reads an 'Rmarkdown' manuscript and, if possible, an associated PDF.
+#' @param address Character, path to the 'Rmarkdown' file.
+#' @param PDF Logical or character. Default `FALSE` does nothing. If set to `TRUE`, attempts to determine PDF file address from `YAML` front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.
 #' @param to_envir Logical, indicating whether or not the manuscript should
-#' be assigned to an invisible environment variable (`.revise_manuscript`).
+#' be invisibly assigned to an environment variable names `.revise_manuscript`.
 #' Defaults to `TRUE`.
 #' @param envir The environment to which the manuscript should be assigned.
 #' @return Invisibly returns a list of class `manuscript`, containing
@@ -38,7 +38,7 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
    rmd <- NULL
    refs <- NULL
   }
-  
+
 
   check_dup_sections(names(sections), revise_errors = FALSE)
   if(!is.null(PDF)) {
@@ -65,7 +65,7 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = paren
   } else{
     PDF <- NULL
   }
-  
+
   # Prepare output object
   manuscript <- list(sections = sections,
                      PDF = PDF,

@@ -2,12 +2,12 @@
 % Please edit documentation in R/list_manuscripts.R
 \name{list_manuscripts}
 \alias{list_manuscripts}
-\title{List manuscripts in environment}
+\title{List Manuscripts in Environment}
 \usage{
 list_manuscripts(envir = parent.frame(1))
 }
 \arguments{
-\item{envir}{The environment to which the manuscript should be assigned.}
+\item{envir}{The environment in which to check for manuscripts.}
 }
 \value{
 A character vector, or \code{NULL} if no manuscripts
@@ -18,8 +18,6 @@ Returns a character vector with the names of manuscripts
 loaded in a given environment.
 }
 \examples{
-library(revise)
-
 temp_file <- tempfile(fileext = ".Rmd")
 write("`r 1 + 1", file = temp_file)
 

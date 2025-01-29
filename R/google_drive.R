@@ -8,8 +8,9 @@
 
 drive_comments <- function(url, email = NULL, cache_credentials = NULL){
 
-  requireNamespace("docxtractr", quietly = TRUE)
-  requireNamespace("googledrive", quietly = TRUE)
+if(!isTRUE(requireNamespace("docxtractr", quietly = TRUE) & requireNamespace("googledrive", quietly = TRUE))){
+    return(NULL)
+  }
 
   if(!is.null(email)){
   options(gargle_oauth_email = email)

@@ -2,17 +2,17 @@
 % Please edit documentation in R/read_manuscript.R
 \name{read_manuscript}
 \alias{read_manuscript}
-\title{read_manuscript}
+\title{Read 'Rmarkdown' Manuscript}
 \usage{
 read_manuscript(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1))
 }
 \arguments{
-\item{address}{path to a rmarkdown file}
+\item{address}{Character, path to the 'Rmarkdown' file.}
 
-\item{PDF}{if TRUE, or path provided, a PDF will be loaded for page matching.}
+\item{PDF}{Logical or character. Default \code{FALSE} does nothing. If set to \code{TRUE}, attempts to determine PDF file address from \code{YAML} front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.}
 
 \item{to_envir}{Logical, indicating whether or not the manuscript should
-be assigned to an invisible environment variable (\code{.revise_manuscript}).
+be invisibly assigned to an environment variable names \code{.revise_manuscript}.
 Defaults to \code{TRUE}.}
 
 \item{envir}{The environment to which the manuscript should be assigned.}
@@ -29,7 +29,7 @@ the following elements:
 }
 }
 \description{
-Reads in rmarkdown manuscript and an associated PDF as possible
+Reads an 'Rmarkdown' manuscript and, if possible, an associated PDF.
 }
 \examples{
 tempfile <- tempfile("tmp", fileext = ".txt")

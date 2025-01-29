@@ -6,7 +6,7 @@ handling_editor   : ""
 
 class             : "draft"
 
-output            : revise::letter.pdf
+output            : revise::revise_letter_pdf
 ---
 
 Dear Dr `r rmarkdown::metadata$handling_editor`,

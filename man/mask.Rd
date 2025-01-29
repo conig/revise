@@ -2,7 +2,7 @@
 % Please edit documentation in R/mask.R
 \name{mask}
 \alias{mask}
-\title{Mask text for blind review}
+\title{Mask Text for Blind Review}
 \usage{
 mask(
   x,

@@ -6,7 +6,7 @@ test_that("Users can change reviewer chunknames", {
   outPath <- tempfile(fileext = ".docx")
 
   writeLines(c("---",
-    "output:  revise::letter.docx",
+    "output:  revise::revise_letter_docx",
     "---",
     "```{examplechunk}",
     "Test text appears",
