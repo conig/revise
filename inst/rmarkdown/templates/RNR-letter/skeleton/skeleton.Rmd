@@ -26,10 +26,18 @@ Response
 
 \clearpage
 
+
+```{r, results="asis", include = FALSE}
+cat(r"(
+
 # References
 
 \begingroup
 
 <div id="refs"></div>
 
-\endgroup
+\endgroup   
+)")
+
+```
+
