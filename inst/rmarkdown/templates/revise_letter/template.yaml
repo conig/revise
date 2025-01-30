@@ -1,4 +1,5 @@
 name: revise_letter_pdf
 description: >
-   Revise and resubmit letter template (_pdf, _docx, or _txt)
+  Revise and resubmit letter templatee (_pdf, _docx, or _txt).
+  PDF template powered by papaja::revise_letter_pdf.
 create_dir: FALSE
