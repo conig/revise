@@ -168,3 +168,37 @@ bullets_2_numbers <- function(x) {
   x
 
 }
+
+# to_bold
+# 
+# Add asterisks before or after a target string
+# @param string character vector
+# @param start start of string to match
+# @param end end of string to match
+# @examples revise:::to_bold("This is a string", "is", "string")
+# export
+
+to_bold <- function(string, start, end) {
+  # Try to find a start marker that is not part of a larger word.
+  pattern <- paste0("(?<![A-Za-z])", start)
+  start_pos <- regexpr(pattern, string, perl = TRUE)
+  if (start_pos == -1) {
+    # Fallback to a plain search if the boundary‐constrained search fails.
+    start_pos <- regexpr(start, string, fixed = TRUE)
+    if (start_pos == -1) return(string)
+  }
+  
+  # Work from the found start position.
+  sub_string <- substring(string, start_pos)
+  end_pos <- regexpr(end, sub_string, fixed = TRUE)
+  if (end_pos == -1) return(string)
+  
+  bold_end <- start_pos + end_pos - 1 + attr(end_pos, "match.length")
+  
+  prefix <- substring(string, 1, start_pos - 1)
+  bold_text <- substring(string, start_pos, bold_end)
+  suffix <- substring(string, bold_end + 1, nchar(string))
+  
+  sprintf("%s**%s**%s", prefix, bold_text, suffix)
+
+}
