@@ -4,7 +4,12 @@
 \alias{read_manuscript}
 \title{Read 'Rmarkdown' Manuscript}
 \usage{
-read_manuscript(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1))
+read_manuscript(
+  address,
+  PDF = FALSE,
+  to_envir = getOption("revise_use_envir", TRUE),
+  envir = parent.frame(1)
+)
 }
 \arguments{
 \item{address}{Character, path to the 'Rmarkdown' file.}
@@ -13,7 +18,7 @@ read_manuscript(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1))
 
 \item{to_envir}{Logical, indicating whether or not the manuscript should
 be invisibly assigned to an environment variable names \code{.revise_manuscript}.
-Defaults to \code{TRUE}.}
+Defaults to \code{TRUE}. Can be disabled by setting \code{options(revise_use_envir = FALSE)}.}
 
 \item{envir}{The environment to which the manuscript should be assigned.}
 }
