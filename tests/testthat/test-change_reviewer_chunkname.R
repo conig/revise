@@ -17,8 +17,11 @@ test_that("Users can change reviewer chunknames", {
   options(reviewer_chunkname = "examplechunk",
           warn = 2)
 
-  testthat::expect_no_error(rmarkdown::render(rmdPath, output_file = outPath,
-                                              quiet = TRUE))
+  # Min version pandoc 3.6
+  if(rmarkdown::pandoc_available("3.6")) {
+    testthat::expect_no_error(rmarkdown::render(rmdPath, output_file = outPath,
+                                                quiet = TRUE))
+  }
 
   options(warn = 1)
 })
