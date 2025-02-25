@@ -21,7 +21,7 @@ Authors@R:
     person(given = "Michael",
            family = "Noetel",
            role = c("aut"),
-           email = "michael.noetel@acu.edu.au",
+           email = "m.noetel@uq.edu.au",
            comment = c(ORCID = "0000-0002-6563-8203")),
     person(given = c("Caspar", "J."),
            family = "Van Lissa", 
