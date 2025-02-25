@@ -5,7 +5,7 @@
 #' @param PDF Logical or character. Default `FALSE` does nothing. If set to `TRUE`, attempts to determine PDF file address from `YAML` front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.
 #' @param to_envir Logical, indicating whether or not the manuscript should
 #' be invisibly assigned to an environment variable names `.revise_manuscript`.
-#' Defaults to `TRUE`.
+#' Defaults to `TRUE`. Can be disabled by setting `options(revise_use_envir = FALSE)`.
 #' @param envir The environment to which the manuscript should be assigned.
 #' @return Invisibly returns a list of class `manuscript`, containing
 #' the following elements:
@@ -26,7 +26,7 @@
 #' @export
 #' @importFrom rmarkdown yaml_front_matter
 #' @importFrom tools file_ext
-read_manuscript <- function(address, PDF = FALSE, to_envir = TRUE, envir = parent.frame(1)){
+read_manuscript <- function(address, PDF = FALSE, to_envir = getOption("revise_use_envir", TRUE), envir = parent.frame(1)){
   doc_checksum <- tools::md5sum(address)
   if(!is_docx(address)){
     rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
