@@ -29,7 +29,7 @@ Authors@R:
            email = "c.j.vanlissa@tilburguniversity.edu",
            comment = c(ORCID = "0000-0002-0808-5024"))
     )
-Description: Helps authors draft revision letters that dynamically incorporate text from the manuscript. Integrated with the 'papaja' package for APA-style manuscript preparation. An 'RStudio' addin allows you to use the package interactively.
+Description: Extracts tagged text from markdown manuscripts for inclusion in dynamically generated revision letters. Provides an R markdown template based on papaja::revision_letter_pdf with comment cross-referencing, a system for managing multiple sections of extracted text, and a way to automatically determine the page number of quoted sections from PDF manuscripts.
 License: MIT + file LICENSE
 URL: https://github.com/conig/revise
 BugReports: https://github.com/conig/revise/issues
