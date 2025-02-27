@@ -7,7 +7,7 @@
 remove_manuscript(manuscript = NULL, envir = parent.frame(1))
 }
 \arguments{
-\item{manuscript}{A character vector of manuscript names
+\item{manuscript}{A character vector of revise_manuscript names
 that exist in \code{envir}.}
 
 \item{envir}{The environment from which to remove
@@ -18,7 +18,7 @@ Invisibly returns \code{TRUE} if successful, and \code{FALSE}
 otherwise.
 }
 \description{
-Removes a manuscript from a given environment by name.
+Removes a revise_manuscript from a given environment by name.
 }
 \examples{
 temp_file <- tempfile(fileext = ".Rmd")
