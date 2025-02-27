@@ -29,7 +29,7 @@ Authors:
 \itemize{
   \item Philip Parker \email{philip.parker@acu.edu.au} (\href{https://orcid.org/0000-0002-4604-8566}{ORCID})
   \item Taren Sanders \email{taren.sanders@acu.edu.au} (\href{https://orcid.org/0000-0002-4504-6008}{ORCID})
-  \item Michael Noetel \email{michael.noetel@acu.edu.au} (\href{https://orcid.org/0000-0002-6563-8203}{ORCID})
+  \item Michael Noetel \email{m.noetel@uq.edu.au} (\href{https://orcid.org/0000-0002-6563-8203}{ORCID})
   \item Caspar J. Van Lissa \email{c.j.vanlissa@tilburguniversity.edu} (\href{https://orcid.org/0000-0002-0808-5024}{ORCID})
 }
 

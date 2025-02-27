@@ -1,4 +1,3 @@
-# revise 0.0.2.1
+# revise 0.1.0
+* First CRAN release
 
-* Added a `NEWS.md` file to track changes to the package.
-* By default escape latex. Can turn off by using escape = FALSE in asis chunk options.
