@@ -1,8 +1,8 @@
 #' Read 'Rmarkdown' Manuscript
 #'
 #' Reads an 'Rmarkdown' manuscript and, if possible, an associated PDF.
-#' @param address Character, path to the 'Rmarkdown' file.
-#' @param PDF Logical or character. Default `FALSE` does nothing. If set to `TRUE`, attempts to determine PDF file address from `YAML` front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.
+#' @param path Character, path to the 'Rmarkdown' file.
+#' @param PDF Logical or character. Default `FALSE` does nothing. If set to `TRUE`, attempts to determine PDF file path from `YAML` front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.
 #' @param to_envir Logical, indicating whether or not the manuscript should
 #' be invisibly assigned to an environment variable names `.revise_manuscript`.
 #' Defaults to `TRUE`. Can be disabled by setting `options(revise_use_envir = FALSE)`.
@@ -26,15 +26,15 @@
 #' @export
 #' @importFrom rmarkdown yaml_front_matter
 #' @importFrom tools file_ext
-read_manuscript <- function(address, PDF = FALSE, to_envir = getOption("revise_use_envir", TRUE), envir = parent.frame(1)){
-  doc_checksum <- tools::md5sum(address)
-  if(!is_docx(address)){
-    rmd <- paste0(readLines(address, encoding = "UTF8"), collapse = "\n")
+read_manuscript <- function(path, PDF = FALSE, to_envir = getOption("revise_use_envir", TRUE), envir = parent.frame(1)){
+  doc_checksum <- tools::md5sum(path)
+  if(!is_docx(path)){
+    rmd <- paste0(readLines(path, encoding = "UTF8"), collapse = "\n")
     sections <- c(extract_sections(rmd),
                 extract_sections(rmd, is_span = TRUE))
-    refs <- extract_refs(address)
+    refs <- extract_refs(path)
   }else{
-   sections <- read_docx(address)
+   sections <- read_docx(path)
    rmd <- NULL
    refs <- NULL
   }
@@ -46,7 +46,7 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = getOption("revise_u
 
       floats_in_text <-
         tryCatch({
-          rmarkdown::yaml_front_matter(address)$floatsintext
+          rmarkdown::yaml_front_matter(path)$floatsintext
         }, error = function(e) return(FALSE))
 
       if(is.null(floats_in_text)) floats_in_text <- FALSE
@@ -55,7 +55,7 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = getOption("revise_u
         warning("floatsintext is set to TRUE in target rmarkdown. This may disrupt page number matching where target strings cross pages.")
       }
 
-      PDF <- gsub(tools::file_ext(address), "pdf", address)
+      PDF <- gsub(tools::file_ext(path), "pdf", path)
     }
     if (inherits(PDF, "character")) {
       PDF <- process_pdf(PDF)
@@ -71,9 +71,9 @@ read_manuscript <- function(address, PDF = FALSE, to_envir = getOption("revise_u
                      PDF = PDF,
                      refs = refs,
                      rmd = rmd,
-                     mtime = file.info(address)$mtime,
+                     mtime = file.info(path)$mtime,
                      checksum = doc_checksum,
-                     filename = basename(address))
+                     filename = basename(path))
   class(manuscript) <- c("revise_manuscript", class(manuscript))
   # Load to environment
   if (to_envir) {
