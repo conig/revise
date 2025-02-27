@@ -28,8 +28,8 @@ list_manuscripts <- function(envir = parent.frame(1)){
 
 #' Remove Manuscript from Environment
 #'
-#' Removes a manuscript from a given environment by name.
-#' @param manuscript A character vector of manuscript names
+#' Removes a revise_manuscript from a given environment by name.
+#' @param manuscript A character vector of revise_manuscript names
 #' that exist in `envir`.
 #' @param envir The environment from which to remove
 #' the manuscript.
