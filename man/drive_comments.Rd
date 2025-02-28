@@ -2,7 +2,7 @@
 % Please edit documentation in R/google_drive.R
 \name{drive_comments}
 \alias{drive_comments}
-\title{google}
+\title{drive_comments}
 \usage{
 drive_comments(url, email = NULL, cache_credentials = NULL)
 }
@@ -14,5 +14,5 @@ drive_comments(url, email = NULL, cache_credentials = NULL)
 \item{cache_credentials}{bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)}
 }
 \description{
-google
+Extract comments from a google docs document
 }

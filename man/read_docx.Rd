@@ -4,10 +4,10 @@
 \alias{read_docx}
 \title{read_docx}
 \usage{
-read_docx(address)
+read_docx(path)
 }
 \arguments{
-\item{address}{path to docx}
+\item{path}{path to docx}
 }
 \description{
 Read a docx file and extract comments

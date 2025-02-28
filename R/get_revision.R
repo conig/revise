@@ -1,15 +1,15 @@
-#' get_revision
+#' Extract Tagged Text from a Manuscript
 #'
-#' Extract and format revision
-#' @param id the id from a html tag
-#' @param manuscript Optional; a manuscript object in which to search
+#' Retrieves and formats a specified section from a revise_manuscript object based on its ID.
+#' @param id the id from a html or markdown tag
+#' @param manuscript Optional; a revise_manuscript object in which to search
 #' for `id`. Defaults to `NULL`, in which case the manuscript object
 #' is found in the environment.
 #' @param quote is the output chunk quoted?
 #' @param evaluate logical. Should inline rchunks be executed?
 #' @param split_string should only the start and end of the string be searched for?
 #' @param search_length numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.
-#' @param include_pgnum logical. include PDF page number?
+#' @param include_pgnum logical. include PDF page number? Requires a PDF to be provided to the manuscript object.
 #' @param revise_errors logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.
 #' @param envir The environment in which to find the manuscript.
 #' @export

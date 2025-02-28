@@ -1,11 +1,11 @@
 #' read_docx
 #'
 #' Read a docx file and extract comments
-#' @param address path to docx
+#' @param path path to docx
 #' @importFrom xml2 xml_find_all xml_text xml_attr xml_parent xml_name xml_find_first xml_remove
 
-read_docx <- function(address) {
-  docx <- officer::read_docx(address)
+read_docx <- function(path) {
+  docx <- officer::read_docx(path)
   comments <- get_docx_comments(docx)
   out <-
     data.frame(section = unlist(comments$text),

@@ -1,5 +1,6 @@
-#' google
+#' drive_comments
 #'
+#' Extract comments from a google docs document
 #' @param url URL to drive document
 #' @param email drive email account. Can be set with options(gargle_oath_email)
 #' @param cache_credentials bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)

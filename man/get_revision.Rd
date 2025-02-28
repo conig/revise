@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_revision.R
 \name{get_revision}
 \alias{get_revision}
-\title{get_revision}
+\title{Extract Tagged Text from a Manuscript}
 \usage{
 get_revision(
   id,
@@ -17,9 +17,9 @@ get_revision(
 )
 }
 \arguments{
-\item{id}{the id from a html tag}
+\item{id}{the id from a html or markdown tag}
 
-\item{manuscript}{Optional; a manuscript object in which to search
+\item{manuscript}{Optional; a revise_manuscript object in which to search
 for \code{id}. Defaults to \code{NULL}, in which case the manuscript object
 is found in the environment.}
 
@@ -31,12 +31,12 @@ is found in the environment.}
 
 \item{search_length}{numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.}
 
-\item{include_pgnum}{logical. include PDF page number?}
+\item{include_pgnum}{logical. include PDF page number? Requires a PDF to be provided to the manuscript object.}
 
 \item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
 
 \item{envir}{The environment in which to find the manuscript.}
 }
 \description{
-Extract and format revision
+Retrieves and formats a specified section from a revise_manuscript object based on its ID.
 }

@@ -5,16 +5,16 @@
 \title{Read 'Rmarkdown' Manuscript}
 \usage{
 read_manuscript(
-  address,
+  path,
   PDF = FALSE,
   to_envir = getOption("revise_use_envir", TRUE),
   envir = parent.frame(1)
 )
 }
 \arguments{
-\item{address}{Character, path to the 'Rmarkdown' file.}
+\item{path}{Character, path to the 'Rmarkdown' file.}
 
-\item{PDF}{Logical or character. Default \code{FALSE} does nothing. If set to \code{TRUE}, attempts to determine PDF file address from \code{YAML} front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.}
+\item{PDF}{Logical or character. Default \code{FALSE} does nothing. If set to \code{TRUE}, attempts to determine PDF file path from \code{YAML} front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.}
 
 \item{to_envir}{Logical, indicating whether or not the manuscript should
 be invisibly assigned to an environment variable names \code{.revise_manuscript}.
