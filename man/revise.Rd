@@ -23,7 +23,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: James Conigrave \email{james@conigrave.com} (\href{https://orcid.org/0000-0002-8816-6229}{ORCID})
+\strong{Maintainer}: James Conigrave \email{james.conigrave@gmail.com} (\href{https://orcid.org/0000-0002-8816-6229}{ORCID})
 
 Authors:
 \itemize{
