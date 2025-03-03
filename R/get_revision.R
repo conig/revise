@@ -12,7 +12,7 @@
 #' @param include_pgnum logical. include PDF page number? Requires a PDF to be provided to the manuscript object.
 #' @param revise_errors logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.
 #' @param envir The environment in which to find the manuscript.
-#' @return A character vector of length 1 containing the text extracted from the manuscript that was tagged with 'id', including any modifications as specified by the arguments.
+#' @return A character vector of length 1 containing the text extracted from the manuscript that was tagged with `id`, including any modifications as specified by the arguments.
 #' @export
 
 get_revision <- function(id,

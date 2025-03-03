@@ -38,7 +38,7 @@ is found in the environment.}
 \item{envir}{The environment in which to find the manuscript.}
 }
 \value{
-A character vector of length 1 containing the text extracted from the manuscript that was tagged with 'id' including any modifications as specified by the arguments.
+A character vector of length 1 containing the text extracted from the manuscript that was tagged with \code{id}, including any modifications as specified by the arguments.
 }
 \description{
 Retrieves and formats a specified section from a revise_manuscript object based on its ID.

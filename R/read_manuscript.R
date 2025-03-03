@@ -14,7 +14,10 @@
 #' * $PDF: Optionally, the PDF document
 #' * $refs: References to figures and tables
 #' * $rmd: The raw rmarkdown
-#' * $mtime: When the rmarkdown file was created
+#' * $mtime: When the rmarkdown file was last modified
+#' * $checksum: A checksum of the rmarkdown file
+#' * $filename: The filename of the rmarkdown file
+#' @details If `to_envir` is `TRUE`, the manuscript is invisibly assigned to the specified environment for later use by other revise functions. For example, this allows `get_revision` to work without specifying a manuscript. This behaviour can be disabled by setting `options(revise_use_envir = FALSE)`.
 #' @examples
 #' tempfile <- tempfile("tmp", fileext = ".txt")
 #' writeLines("[Maecenas mollis consectetur purus.]{#test}", con = tempfile)
