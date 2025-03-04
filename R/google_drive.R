@@ -4,8 +4,8 @@
 #' @param url URL to drive document
 #' @param email drive email account. Can be set with options(gargle_oath_email)
 #' @param cache_credentials bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)
+#' @return A list with a length equal to the number of comments. Each element corresponds to one comment: the element's name is the comment text, and its value is the text that was bounded by the comment.
 #' @export
-
 
 drive_comments <- function(url, email = NULL, cache_credentials = NULL){
 

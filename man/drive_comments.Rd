@@ -13,6 +13,9 @@ drive_comments(url, email = NULL, cache_credentials = NULL)
 
 \item{cache_credentials}{bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)}
 }
+\value{
+A list with a length equal to the number of comments. Each element corresponds to one comment: the element's name is the comment text, and its value is the text that was bounded by the comment.
+}
 \description{
 Extract comments from a google docs document
 }

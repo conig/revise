@@ -30,11 +30,16 @@ the following elements:
 \item $PDF: Optionally, the PDF document
 \item $refs: References to figures and tables
 \item $rmd: The raw rmarkdown
-\item $mtime: When the rmarkdown file was created
+\item $mtime: When the rmarkdown file was last modified
+\item $checksum: A checksum of the rmarkdown file
+\item $filename: The filename of the rmarkdown file
 }
 }
 \description{
 Reads an 'Rmarkdown' manuscript and, if possible, an associated PDF.
+}
+\details{
+If \code{to_envir} is \code{TRUE}, the manuscript is invisibly assigned to the specified environment for later use by other revise functions. For example, this allows \code{get_revision} to work without specifying a manuscript. This behaviour can be disabled by setting \code{options(revise_use_envir = FALSE)}.
 }
 \examples{
 tempfile <- tempfile("tmp", fileext = ".txt")

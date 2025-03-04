@@ -17,13 +17,13 @@ get_revision(
 )
 }
 \arguments{
-\item{id}{the id from a html or markdown tag}
+\item{id}{the id as a character string from a html or markdown tag}
 
 \item{manuscript}{Optional; a revise_manuscript object in which to search
 for \code{id}. Defaults to \code{NULL}, in which case the manuscript object
 is found in the environment.}
 
-\item{quote}{is the output chunk quoted?}
+\item{quote}{should the output string be quoted by inserting '>' before the string?}
 
 \item{evaluate}{logical. Should inline rchunks be executed?}
 
@@ -36,6 +36,9 @@ is found in the environment.}
 \item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
 
 \item{envir}{The environment in which to find the manuscript.}
+}
+\value{
+A character vector of length 1 containing the text extracted from the manuscript that was tagged with \code{id}, including any modifications as specified by the arguments.
 }
 \description{
 Retrieves and formats a specified section from a revise_manuscript object based on its ID.
