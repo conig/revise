@@ -22,10 +22,24 @@ test_that(".revise_manuscripts contains both files", {
 })
 
 test_that(".revise_manuscripts retrieves sections from both manuscripts", {
-  res1 <- get_revision("SpanTest", envir = test_env)
+  res1 <- get_revision(
+    "SpanTest",
+    envir = test_env,
+    trust_manuscript = TRUE
+  )
   expect_true(grepl("Maecenas mollis", res1, fixed = TRUE))
-  expect_true(grepl("Suspendisse vulputate", get_revision("SpanTest2", envir = test_env), fixed = TRUE))
-  expect_true(is.null(get_revision("SpanTest3", envir = test_env)))
+  expect_true(grepl(
+    "Suspendisse vulputate",
+    get_revision(
+      "SpanTest2",
+      envir = test_env,
+      trust_manuscript = TRUE
+    ),
+    fixed = TRUE
+  ))
+  expect_true(is.null(get_revision(
+    "SpanTest3",
+    envir = test_env,
+    trust_manuscript = TRUE
+  )))
 })
-
-

@@ -12,6 +12,9 @@
 #' @param include_pgnum logical. include PDF page number? Requires a PDF to be provided to the manuscript object.
 #' @param revise_errors logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.
 #' @param envir The environment in which to find the manuscript.
+#' @param trust_manuscript logical. If `TRUE`, allow inline `r` code in
+#' the manuscript to be evaluated when `evaluate = TRUE`. Defaults to
+#' `getOption("revise_trust_manuscript") which when unset is assumed to be FALSE`.
 #' @return A character vector of length 1 containing the text extracted from the manuscript that was tagged with `id`, including any modifications as specified by the arguments.
 #' @export
 
@@ -24,7 +27,8 @@ get_revision <- function(
   search_length = 300,
   include_pgnum = TRUE,
   revise_errors = getOption("revise_errors"),
-  envir = parent.frame(1L)
+  envir = parent.frame(1L),
+  trust_manuscript = getOption("revise_trust_manuscript", FALSE)
 ) {
   if (is.null(manuscript)) {
     if (exists(".revise_manuscripts", where = envir)) {
@@ -55,7 +59,8 @@ get_revision.revise_corpus <- function(
   search_length = 300,
   include_pgnum = TRUE,
   revise_errors = getOption("revise_errors"),
-  envir
+  envir,
+  trust_manuscript = getOption("revise_trust_manuscript", FALSE)
 ) {
   all_sect_names <- unlist(lapply(manuscript, function(x) {
     names(x[["sections"]])
@@ -101,7 +106,8 @@ get_revision.default <- function(
   search_length = 300,
   include_pgnum = TRUE,
   revise_errors = getOption("revise_errors"),
-  envir = parent.frame(1L)
+  envir = parent.frame(1L),
+  trust_manuscript = getOption("revise_trust_manuscript", FALSE)
 ) {
   if (is.null(manuscript)) {
     if (
@@ -143,7 +149,11 @@ get_revision.default <- function(
   }
 
   if (evaluate) {
-    string <- evaluate_inline(string, envir = envir)
+    string <- evaluate_inline(
+      string,
+      envir = envir,
+      trust_manuscript = trust_manuscript
+    )
   }
 
   if (!is.null(manuscript$PDF) & include_pgnum) {

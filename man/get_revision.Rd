@@ -13,7 +13,8 @@ get_revision(
   search_length = 300,
   include_pgnum = TRUE,
   revise_errors = getOption("revise_errors"),
-  envir = parent.frame(1L)
+  envir = parent.frame(1L),
+  trust_manuscript = getOption("revise_trust_manuscript", FALSE)
 )
 }
 \arguments{
@@ -36,6 +37,10 @@ is found in the environment.}
 \item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
 
 \item{envir}{The environment in which to find the manuscript.}
+
+\item{trust_manuscript}{logical. If \code{TRUE}, allow inline \code{r} code in
+the manuscript to be evaluated when \code{evaluate = TRUE}. Defaults to
+\code{getOption("revise_trust_manuscript")}.}
 }
 \value{
 A character vector of length 1 containing the text extracted from the manuscript that was tagged with \code{id}, including any modifications as specified by the arguments.

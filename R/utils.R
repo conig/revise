@@ -57,14 +57,50 @@ print.revise_manuscript = function(x, ...) {
 
 #' evaluate_inline
 #'
-#' Evaluates embedded rchunks within a string of text
-#' @param string a section of text with includes inline elements
+#' Evaluates embedded inline r code within a string of text
+#' @param string a section of text containing inline `r` elements
 #' @param envir the environment in which to evaluate the code
+#' @param trust_manuscript logical. Should inline `r` code be trusted and
+#'   evaluated? Defaults to `FALSE`. When called via [get_revision()], the default
+#'   comes from `getOption("revise_trust_manuscript")`.
+#' @return A character string with inline `r` code evaluated.
+#' @details
+#' Inline `r` code is detected using backticks and evaluated via
+#' [glue::glue()] with `.open = "`r "` and `.close = "`"`.
+#' If inline `r` chunks are present and `trust_manuscript` is not `TRUE`,
+#' this function errors with the inline code that would have been evaluated.
+#' Set `options(revise_trust_manuscript = TRUE)` and call [get_revision()], or pass
+#' `trust_manuscript = TRUE` directly, or disable evaluation in
+#' [get_revision()] by setting `evaluate = FALSE`.
 #'
 #' @examples
 #' revise:::evaluate_inline("1+1 = `r 1+1`")
 
-evaluate_inline <- function(string, envir = parent.frame()) {
+evaluate_inline <- function(
+  string,
+  envir = parent.frame(),
+  trust_manuscript = FALSE
+) {
+  inline_matches <- unlist(stringr::str_extract_all(string, "`r\\s+[^`]*`"))
+  if (length(inline_matches) > 0 && !isTRUE(trust_manuscript)) {
+    inline_code <- trimws(gsub("^`r\\s+|`$", "", inline_matches))
+    inline_code <- unique(inline_code[nzchar(inline_code)])
+    inline_list <- if (length(inline_code) > 0) {
+      paste0("'", inline_code, "'", collapse = ", ")
+    } else {
+      paste0("'", inline_matches, "'", collapse = ", ")
+    }
+    stop(
+      "revise has detected inline r code to evaluate. ",
+      "The string(s) to evaluate are: ",
+      inline_list,
+      ". Please ensure you trust the manuscript to proceed, ",
+      "set option(revise_trust_manuscript=TRUE) or ",
+      "pass trust_manuscript=TRUE, otherwise, ",
+      "in get_revision set evaluate=FALSE. Do not trust manuscripts unless you wrote them, or have reviewed all in-line code for safety.",
+      call. = FALSE
+    )
+  }
   glue::glue(string, .open = "`r ", .close = "`", .envir = envir)
 }
 
