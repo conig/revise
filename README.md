@@ -67,10 +67,10 @@ There are two methods to tag sections in manuscript for extraction. We
 support using id attributes in html spans:
 
 ``` md
-<span id="hard">
-This is a multi-line secion of text.
+<span id="multi-line">
+This is a multi-line section of text.
 
-We have tagged it with the section name "multi-line-example".
+We have tagged it with the section name "multi-line".
 </span>
 ```
 
