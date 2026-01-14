@@ -110,7 +110,7 @@ evaluate_inline <- function(
       ),
       sep = "\n\n"
     )
-    stop(message, call. = FALSE)
+    stop(message, call. = TRUE)
   }
   glue::glue(string, .open = "`r ", .close = "`", .envir = envir)
 }
