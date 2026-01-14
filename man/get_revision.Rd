@@ -40,7 +40,7 @@ is found in the environment.}
 
 \item{trust_manuscript}{logical. If \code{TRUE}, allow inline \code{r} code in
 the manuscript to be evaluated when \code{evaluate = TRUE}. Defaults to
-\code{getOption("revise_trust_manuscript")}.}
+\verb{getOption("revise_trust_manuscript") which when unset is assumed to be FALSE}.}
 }
 \value{
 A character vector of length 1 containing the text extracted from the manuscript that was tagged with \code{id}, including any modifications as specified by the arguments.

@@ -85,21 +85,32 @@ evaluate_inline <- function(
   if (length(inline_matches) > 0 && !isTRUE(trust_manuscript)) {
     inline_code <- trimws(gsub("^`r\\s+|`$", "", inline_matches))
     inline_code <- unique(inline_code[nzchar(inline_code)])
-    inline_list <- if (length(inline_code) > 0) {
-      paste0("'", inline_code, "'", collapse = ", ")
-    } else {
-      paste0("'", inline_matches, "'", collapse = ", ")
+    inline_items <- if (length(inline_code) > 0) inline_code else inline_matches
+    inline_items <- unique(inline_items[nzchar(inline_items)])
+    if (length(inline_items) == 0) {
+      inline_items <- unique(inline_matches)
     }
-    stop(
-      "revise has detected inline r code to evaluate. ",
-      "The string(s) to evaluate are: ",
+    inline_list <- paste0("  - `", inline_items, "`", collapse = "\n")
+    inline_section <- paste(
+      "The string(s) to evaluate are:",
       inline_list,
-      ". Please ensure you trust the manuscript to proceed, ",
-      "set option(revise_trust_manuscript=TRUE) or ",
-      "pass trust_manuscript=TRUE, otherwise, ",
-      "in get_revision set evaluate=FALSE. Do not trust manuscripts unless you wrote them, or have reviewed all in-line code for safety.",
-      call. = FALSE
+      sep = "\n"
     )
+    message <- paste(
+      "revise has detected inline r code to evaluate.",
+      inline_section,
+      paste(
+        "Please ensure you trust the manuscript before executing its code.",
+        "To proceed do one of the following:",
+        "  1) set argument trust_manuscript=TRUE",
+        "  2) set option(revise_trust_manuscript=TRUE)",
+        "  3) in get_revision set evaluate=FALSE so inline code is not executed",
+        "Do not trust manuscripts unless you wrote them, or have reviewed all in-line code for safety.",
+        sep = "\n"
+      ),
+      sep = "\n\n"
+    )
+    stop(message, call. = FALSE)
   }
   glue::glue(string, .open = "`r ", .close = "`", .envir = envir)
 }
