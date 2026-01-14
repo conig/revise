@@ -8,6 +8,8 @@ evaluate_inline(string, envir = parent.frame())
 }
 \arguments{
 \item{string}{a section of text with includes inline elements}
+
+\item{envir}{the environment in which to evaluate the code}
 }
 \description{
 Evaluates embedded rchunks within a string of text

@@ -33,6 +33,7 @@ remotes::install_github("conig/revise")
 You can use rmd or docx files with revise. To load either, simply call revise::read_manuscript("your_file.rmd")
 
 For example. Here is an example docx where content has been tagged with comment boxes. E.g, Revise::hard
+
 ```{r}
 docx_path <- system.file("examples/word_test.docx", package = "revise")
 
@@ -60,10 +61,10 @@ This content can then be put directly into a response document using single back
 There are two methods to tag sections in manuscript for extraction. We support using id attributes in html spans:
 
 ```{md}
-<span id="hard">
+<span id="multi-line">
 This is a multi-line section of text.
 
-We have tagged it with the section name "hard".
+We have tagged it with the section name "multi-line".
 </span>
 ```
 We also support a markdown variant for quick inline tagging:

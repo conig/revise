@@ -59,6 +59,7 @@ print.revise_manuscript = function(x, ...) {
 #'
 #' Evaluates embedded rchunks within a string of text
 #' @param string a section of text with includes inline elements
+#' @param envir the environment in which to evaluate the code
 #'
 #' @examples
 #' revise:::evaluate_inline("1+1 = `r 1+1`")
