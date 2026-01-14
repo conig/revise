@@ -63,7 +63,7 @@ There are two methods to tag sections in manuscript for extraction. We support u
 <span id="hard">
 This is a multi-line section of text.
 
-We have tagged it with the section name "multi-line-example".
+We have tagged it with the section name "hard".
 </span>
 ```
 We also support a markdown variant for quick inline tagging:
