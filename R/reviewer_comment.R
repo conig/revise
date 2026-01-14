@@ -8,7 +8,10 @@ reviewer_comment <- function() {
   # assign("context", context, envir = globalenv())
 
   if (length(context$selection) == 0) {
-    return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
+    return(rstudioapi::showDialog(
+      title = ":'(",
+      message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."
+    ))
   }
 
   contents <- context$contents
@@ -32,17 +35,23 @@ reviewer_comment <- function() {
     output_format <- NULL
   }
 
-
   selection <- context$select[[1]]$range
   start <- selection$start[[1]]
   end <- selection$end[[1]]
   document_end <- length(context$contents)
 
-  comment_n <- stringr::str_extract_all(contents, r"(\\reviewerid\{c[0-9]*\})", simplify = TRUE)
+  comment_n <- stringr::str_extract_all(
+    contents,
+    r"(\\reviewerid\{c[0-9]*\})",
+    simplify = TRUE
+  )
   if (length(comment_n) == 0) {
     comment_n <- 1
   } else {
-    comment_n <- max(as.numeric(stringr::str_extract_all(comment_n, "\\d*", simplify = TRUE)), na.rm = TRUE)
+    comment_n <- max(
+      as.numeric(stringr::str_extract_all(comment_n, "\\d*", simplify = TRUE)),
+      na.rm = TRUE
+    )
     comment_n <- comment_n + 1
   }
 
@@ -64,7 +73,15 @@ reviewer_comment <- function() {
     after <- ""
   }
 
-  new <- c(append_to_front, before, start_content, middle, end_content, after, append_to_rear)
+  new <- c(
+    append_to_front,
+    before,
+    start_content,
+    middle,
+    end_content,
+    after,
+    append_to_rear
+  )
 
   rstudioapi::setDocumentContents(paste(new, collapse = "\n"), id = context$id)
 }
@@ -95,13 +112,24 @@ rnr_header <- function(file) {
     bibliography <- paste0("bibliography      : ", '"', bibliography, '"')
   }
 
-  if (is.null(title)) title <- "paper title"
-  if (is.null(author)) author <- "Author name"
-  if (is.null(bibliography)) bibliography <- ""
-  if (is.null(csl)) csl <- ""
-  if (length(bibliography) > 1) bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
+  if (is.null(title)) {
+    title <- "paper title"
+  }
+  if (is.null(author)) {
+    author <- "Author name"
+  }
+  if (is.null(bibliography)) {
+    bibliography <- ""
+  }
+  if (is.null(csl)) {
+    csl <- ""
+  }
+  if (length(bibliography) > 1) {
+    bibliography <- glue::glue("[{paste(bibliography, collapse = ', ')}]")
+  }
 
-  header <- glue::glue(r'(---
+  header <- glue::glue(
+    r'(---
 title             : "!!<title>!!"
 authors           : "!!<author>!! on behalf of co-authors"
 journal           : "your journal"
@@ -116,13 +144,16 @@ output            : revise::revise_letter_pdf
 
 Dear Dr `r rmarkdown::metadata$handling_editor`,
 
-Thank you for considering our manuscript for publication at _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. In the following itemised list we respond to each comment point-by-point.
+Thank you for considering our manuscript for publication in _`r rmarkdown::metadata$journal`_. We appreciate the feedback that you, and the reviewers have provided. In the following itemised list we respond to each comment point-by-point.
 
 ```{r setup-chunk, include = FALSE}
 manuscript <- revise::read_manuscript("!!<file>!!", PDF = TRUE)
 ```
 
-)', .open = "!!<", .close = ">!!")
+)',
+    .open = "!!<",
+    .close = ">!!"
+  )
 
   header <- gsub("csl\\s*:\\s*\"NA\"", "", header)
   header <- gsub("bibliography\\s*:\\s*NA", "", header)
