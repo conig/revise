@@ -34,7 +34,8 @@ read_manuscript <- function(path, PDF = FALSE, to_envir = getOption("revise_use_
   if(!is_docx(path)){
     rmd <- paste0(readLines(path, encoding = "UTF8"), collapse = "\n")
     sections <- c(extract_sections(rmd),
-                extract_sections(rmd, is_span = TRUE))
+                extract_sections(rmd, is_span = TRUE),
+                extract_fenced_sections(rmd))
     refs <- extract_refs(path)
   }else{
    sections <- read_docx(path)

@@ -80,5 +80,15 @@ We also support a markdown variant for quick inline tagging:
 [This is a single line of text we have tagged using markdown.]{#single-line-example}
 ```
 
-In both cases pandoc ignores these tags when rendering the document, but
+For multi-line sections using markdown span tags, use fenced divs:
+
+``` md
+::: {#multiline}
+## Heading 1
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pulvinar felis scelerisque auctor mattis. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+:::
+```
+
+In all cases pandoc ignores these tags when rendering the document, but
 they can be used by revise to extract content.
