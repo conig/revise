@@ -129,13 +129,26 @@ get_revision.default <- function(
   string <- manuscript$sections[[id]]
 
   if (is.null(string)) {
-    similar_id <- agrep(id, names(manuscript$sections), value = TRUE)
+    section_names <- names(manuscript$sections)
+    similar_id <- agrep(id, section_names, value = TRUE)
     similar_id <- paste(similar_id, collapse = " | ")
+    quoted_id <- paste0("\"", id, "\"")
+    has_double_quoted_match <- quoted_id %in% section_names
     message <- paste0(
-      "Couldn't find a section in the manuscript tagged as '",
+      "Couldn't find a section in the manuscript tagged as \"",
       id,
-      "'."
+      "\"."
     )
+    if (has_double_quoted_match) {
+      message <- paste0(
+        message,
+        " It looks like the manuscript tag includes surrounding double quotes (",
+        quoted_id,
+        "). For pandoc div IDs, use unquoted tags like {#tag instead of {#\"tag}",
+        id,
+        "}."
+      )
+    }
     if (nchar(similar_id) > 0) {
       message <- paste0(message, " Did you mean: ", similar_id, "?")
     }

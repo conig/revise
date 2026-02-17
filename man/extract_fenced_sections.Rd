@@ -12,5 +12,5 @@ extract_fenced_sections(string, ignore_ids = c("refs"))
 \item{ignore_ids}{character vector of ids to skip (default: "refs")}
 }
 \description{
-Extract sections from fenced divs using markdown tags.
+Extract sections from fenced divs using markdown tags
 }
