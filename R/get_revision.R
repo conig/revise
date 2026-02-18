@@ -169,6 +169,8 @@ get_revision.default <- function(
     )
   }
 
+  string <- sanitize_pandoc_tag_artifacts(string)
+
   if (!is.null(manuscript$PDF) & include_pgnum) {
     if ((nchar(string) > search_length) | split_string) {
       start_string <- substring(string, 1, search_length)
@@ -238,4 +240,22 @@ get_revision.default <- function(
   }
 
   string
+}
+
+sanitize_pandoc_tag_artifacts <- function(string) {
+  if (!is.character(string) || length(string) != 1L || is.na(string)) {
+    return(string)
+  }
+
+  out <- string
+
+  # Remove leaked markdown id fragments like ]{#tag} from malformed tags.
+  out <- gsub("\\]\\{#[-A-Za-z0-9_:.]+\\}", "", out, perl = TRUE)
+  out <- gsub("\\{#[-A-Za-z0-9_:.]+\\}", "", out, perl = TRUE)
+
+  # Remove standalone fenced-div markers if they leak through extraction.
+  out <- gsub("(?m)^:{3,}\\s*\\{[^\\n]*\\}\\s*$", "", out, perl = TRUE)
+  out <- gsub("(?m)^:{3,}\\s*$", "", out, perl = TRUE)
+
+  gsub("\\n{3,}", "\n\n", out, perl = TRUE)
 }
