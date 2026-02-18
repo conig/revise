@@ -54,10 +54,26 @@ revise_letter_pdf <- function(comment_reset_by_section = TRUE, ...) {
 #' @export
 revise_letter_docx <- function(...) {
   set_engine("process_chunk_docx")
+  init_docx_comment_state()
 
-  bookdown::word_document2(...,
+  output_format <- bookdown::word_document2(...,
     reference_docx = system.file("response_letter_template.docx", package = "revise")
   )
+
+  if (is.null(output_format$knitr$knit_hooks)) {
+    output_format$knitr$knit_hooks <- list()
+  }
+
+  existing_document_hook <- output_format$knitr$knit_hooks$document
+  output_format$knitr$knit_hooks$document <- function(x) {
+    if (!is.null(existing_document_hook)) {
+      x <- existing_document_hook(x)
+    }
+
+    process_docx_document(x)
+  }
+
+  output_format
 }
 
 #' Dynamic txt Revision Letter
