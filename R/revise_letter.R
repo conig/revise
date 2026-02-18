@@ -12,14 +12,27 @@ set_engine <- function(process_chunk) {
 #'
 #' Template for creating journal revision letters
 #' with dynamic excerpts from a manuscript.
+#' @param comment_reset_by_section Should reviewer comment numbering reset at each
+#'   section header (e.g., each reviewer)? Defaults to `TRUE` for current
+#'   behavior. Set to `FALSE` to keep numbering continuous across reviewers.
 #' @param ... Arguments passed on to [papaja::revision_letter_pdf()].
 #' @details This function wraps [papaja::revision_letter_pdf()].
 #' @seealso [papaja::revision_letter_pdf()], [bookdown::pdf_document2()], [rmarkdown::pdf_document()]
 #' @inherit papaja::apa6_pdf return
 #' @export
-revise_letter_pdf <- function(...) {
+revise_letter_pdf <- function(comment_reset_by_section = TRUE, ...) {
+  if (!is.logical(comment_reset_by_section) || length(comment_reset_by_section) != 1L || is.na(comment_reset_by_section)) {
+    stop("`comment_reset_by_section` must be TRUE or FALSE.")
+  }
+
+  header_file <- if (comment_reset_by_section) {
+    "header.tex"
+  } else {
+    "header_no_section_reset.tex"
+  }
+
   extra_tex <-
-    rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
+    rmarkdown::includes(in_header = system.file(header_file, package = "revise"))
 
   knitr::opts_chunk$set(escape = TRUE)
 

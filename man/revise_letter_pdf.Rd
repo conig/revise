@@ -4,9 +4,13 @@
 \alias{revise_letter_pdf}
 \title{Dynamic PDF Revision Letter}
 \usage{
-revise_letter_pdf(...)
+revise_letter_pdf(comment_reset_by_section = TRUE, ...)
 }
 \arguments{
+\item{comment_reset_by_section}{Should reviewer comment numbering reset at each
+section header (e.g., each reviewer)? Defaults to \code{TRUE} for current
+behavior. Set to \code{FALSE} to keep numbering continuous across reviewers.}
+
 \item{...}{Arguments passed on to \code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}.}
 }
 \value{
