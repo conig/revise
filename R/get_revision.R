@@ -97,6 +97,126 @@ get_revision.revise_corpus <- function(
   eval.parent(cl)
 }
 
+#' Build a cleaned anchor string for long-section page matching
+#'
+#' Converts extracted manuscript text into a cleaned, word-aligned prefix or
+#' suffix anchor. This avoids matching fragments that begin or end inside
+#' markup, citations, or punctuation that disappear in the rendered PDF.
+#' @param string Extracted manuscript section.
+#' @param search_length Approximate target anchor length in characters.
+#' @param side Which side of the section to use: `"start"` or `"end"`.
+#' @return Cleaned anchor string, or `character(0)` when no anchor can be built.
+build_page_anchor <- function(string, search_length, side = c("start", "end")) {
+  side <- match.arg(side)
+  cleaned <- clean_string(string)
+
+  if (!nzchar(cleaned)) {
+    return(character(0))
+  }
+
+  words <- strsplit(cleaned, "\\s+")[[1]]
+  if (length(words) == 0) {
+    return(character(0))
+  }
+
+  if (side == "end") {
+    words <- rev(words)
+  }
+
+  anchor <- character()
+  current_length <- 0
+  for (word in words) {
+    anchor <- c(anchor, word)
+    current_length <- nchar(paste(anchor, collapse = " "))
+    if (current_length >= search_length) {
+      break
+    }
+  }
+
+  if (side == "end") {
+    anchor <- rev(anchor)
+  }
+
+  paste(anchor, collapse = " ")
+}
+
+#' Split a page label into its bounds
+#'
+#' Converts page labels such as `"5"` or `"5--6"` into their component page
+#' bounds so callers can compare or merge page estimates.
+#' @param page_id Character page label.
+#' @return Character vector of page bounds, or `character(0)` for missing input.
+extract_page_bounds <- function(page_id) {
+  if (page_match_is_missing(page_id)) {
+    return(character(0))
+  }
+
+  strsplit(page_id[1], "--", fixed = TRUE)[[1]]
+}
+
+#' Combine start and end page estimates into one label
+#'
+#' Merges page matches derived from the start and end anchors of a long section.
+#' If both anchors resolve, the result spans from the earliest start page to the
+#' latest end page using `--` as the range separator.
+#' @param start_match Page label inferred from the start anchor.
+#' @param end_match Page label inferred from the end anchor.
+#' @return Single page label, page range label, or `character(0)` when unusable.
+combine_page_matches <- function(start_match, end_match) {
+  if (page_match_is_missing(start_match) && page_match_is_missing(end_match)) {
+    return(character(0))
+  }
+  if (page_match_is_missing(start_match)) {
+    return(end_match[1])
+  }
+  if (page_match_is_missing(end_match)) {
+    return(start_match[1])
+  }
+
+  start_bounds <- extract_page_bounds(start_match)
+  end_bounds <- extract_page_bounds(end_match)
+  start_page <- start_bounds[1]
+  end_page <- end_bounds[length(end_bounds)]
+
+  if (!nzchar(start_page) || !nzchar(end_page)) {
+    return(character(0))
+  }
+
+  if (
+    !is.na(suppressWarnings(as.integer(start_page))) &&
+    !is.na(suppressWarnings(as.integer(end_page))) &&
+    as.integer(start_page) > as.integer(end_page)
+  ) {
+    return(character(0))
+  }
+
+  if (identical(start_page, end_page)) start_page else paste0(start_page, "--", end_page)
+}
+
+#' Normalize page match output to a single label
+#'
+#' Collapses page-match outputs into one canonical label so downstream rendering
+#' never receives blank strings or comma-separated vectors of page IDs.
+#' @param page_id Character vector of page labels.
+#' @return Single normalized page label, or `character(0)` if no usable label exists.
+normalize_page_match <- function(page_id) {
+  if (page_match_is_missing(page_id)) {
+    return(character(0))
+  }
+
+  page_id <- trimws(page_id)
+  page_id <- page_id[nzchar(page_id)]
+
+  if (length(page_id) == 0) {
+    return(character(0))
+  }
+  if (length(page_id) == 1) {
+    return(page_id)
+  }
+
+  combine_page_matches(page_id[1], page_id[length(page_id)])
+}
+
 get_revision.default <- function(
   id,
   manuscript = NULL,
@@ -172,28 +292,44 @@ get_revision.default <- function(
   string <- sanitize_pandoc_tag_artifacts(string)
 
   if (!is.null(manuscript$PDF) & include_pgnum) {
+    pnum <- character(0)
+
     if ((nchar(string) > search_length) | split_string) {
-      start_string <- substring(string, 1, search_length)
-      end_string <- substring(
-        string,
-        nchar(string) - search_length,
-        nchar(string)
+      start_string <- build_page_anchor(string, search_length, side = "start")
+      end_string <- build_page_anchor(string, search_length, side = "end")
+      pnum.full <- character(0)
+
+      pnum.start <- if (!page_match_is_missing(start_string)) {
+        get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
+      } else {
+        character(0)
+      }
+      pnum.end <- if (!page_match_is_missing(end_string)) {
+        get_pdf_pagenumber(end_string, pdf_text = manuscript$PDF)
+      } else {
+        character(0)
+      }
+
+      pnum <- combine_page_matches(pnum.start, pnum.end)
+
+      pnum.full <- normalize_page_match(
+        get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
       )
 
-      pnum.start <-
-        get_pdf_pagenumber(start_string, pdf_text = manuscript$PDF)
-      pnum.end <-
-        get_pdf_pagenumber(end_string, pdf_text = manuscript$PDF)
-
-      pnum.start <- gsub("\\-.*", "", pnum.start)
-      pnum.end <- gsub(".*\\-", "", pnum.end)
-
-      pnum <- paste(unique(c(pnum.start, pnum.end)), collapse = "-")
+      if (
+        page_match_is_missing(pnum) ||
+        (!page_match_is_missing(pnum.full) &&
+         length(extract_page_bounds(pnum.full)) > length(extract_page_bounds(pnum)))
+      ) {
+        pnum <- pnum.full
+      }
     } else {
-      pnum = get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
+      pnum <- get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
     }
 
-    if (length(pnum) == 0) {
+    pnum <- normalize_page_match(pnum)
+
+    if (page_match_is_missing(pnum)) {
       warning(
         "Couldn't match the extracted text to the target PDF: ",
         id,

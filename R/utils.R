@@ -184,10 +184,206 @@ clean_string <- function(string) {
   string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
   string <- gsub("[0-9]", "", string) # remove numbers
   string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
-  string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
-  string <- gsub("\\s{2,}", " ", string) # remove additional spaces
   string <- gsub("\\n", " ", string)
-  string
+  string <- gsub("[[:punct:]]", "", tolower(string)) # remove punctuation
+  trimws(gsub("\\s{2,}", " ", string)) # remove additional spaces
+}
+
+#' Detect empty page-match results
+#'
+#' Treats zero-length, blank, and whitespace-only page IDs as missing so the
+#' page matching pipeline can distinguish failed matches from legitimate page
+#' labels.
+#' @param page_id Character vector returned by page matching helpers.
+#' @return Logical scalar indicating whether the match should be treated as missing.
+page_match_is_missing <- function(page_id) {
+  length(page_id) == 0 || !any(nzchar(trimws(page_id)))
+}
+
+#' Build searchable page candidates from PDF text
+#'
+#' Creates a candidate table containing both single-page text and adjacent
+#' two-page windows. This allows later matching to detect text that falls
+#' wholly on one page or straddles a page break.
+#' @param pdf_text Data frame of processed PDF text with `page_id` and `text`.
+#' @return Data frame with candidate `page_id` labels and cleaned candidate text.
+build_pdf_page_candidates <- function(pdf_text) {
+  if (length(pdf_text$text) == 0) {
+    return(data.frame(
+      page_id = character(),
+      text = character(),
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  page_ids <- as.character(pdf_text$page_id)
+  doc <- clean_string(pdf_text$text)
+  singles <- data.frame(
+    page_id = page_ids,
+    text = doc,
+    stringsAsFactors = FALSE
+  )
+  singles <- singles[nzchar(singles$text), , drop = FALSE]
+
+  if (length(doc) < 2) {
+    return(singles)
+  }
+
+  windows <- data.frame(
+    page_id = paste0(page_ids[-length(page_ids)], "--", page_ids[-1]),
+    text = paste(doc[-length(doc)], doc[-1]),
+    stringsAsFactors = FALSE
+  )
+  windows <- windows[nzchar(windows$text), , drop = FALSE]
+
+  rbind(singles, windows)
+}
+
+#' Find an exact page match
+#'
+#' Searches the candidate text for an exact fixed-string occurrence of the
+#' cleaned target string. Exact matches are preferred over fuzzy scoring.
+#' @param string Cleaned target string.
+#' @param candidates Data frame produced by [build_pdf_page_candidates()].
+#' @return Matching page ID, or `character(0)` when no exact match is found.
+find_exact_page_match <- function(string, candidates) {
+  matches <- which(vapply(
+    candidates$text,
+    function(text) grepl(string, text, fixed = TRUE),
+    logical(1)
+  ))
+
+  if (length(matches) == 0) {
+    return(character(0))
+  }
+
+  candidates$page_id[matches[1]]
+}
+
+#' Build contiguous word n-grams
+#'
+#' Generates contiguous phrases from a token vector so approximate page
+#' matching can score how much of a target passage survives cleaning and PDF
+#' extraction.
+#' @param tokens Character vector of cleaned word tokens.
+#' @param n Size of each n-gram.
+#' @return Character vector of unique contiguous n-grams.
+build_word_ngrams <- function(tokens, n) {
+  if (length(tokens) == 0) {
+    return(character(0))
+  }
+  if (length(tokens) <= n) {
+    return(paste(tokens, collapse = " "))
+  }
+
+  starts <- seq_len(length(tokens) - n + 1)
+  unique(vapply(starts, function(i) {
+    paste(tokens[i:(i + n - 1)], collapse = " ")
+  }, character(1)))
+}
+
+#' Score phrase coverage within a candidate page
+#'
+#' Estimates how much of the cleaned target passage is present in a candidate by
+#' checking the proportion of target n-grams that appear verbatim in that
+#' candidate.
+#' @param string Cleaned target string.
+#' @param candidate_text Cleaned candidate page or page-window text.
+#' @return Numeric coverage score between 0 and 1.
+score_pdf_candidate_coverage <- function(string, candidate_text) {
+  if (!nzchar(string) || !nzchar(candidate_text)) {
+    return(0)
+  }
+
+  string_tokens <- strsplit(string, "\\s+")[[1]]
+  if (length(string_tokens) == 0) {
+    return(0)
+  }
+
+  ngram_n <- max(3, min(8, length(string_tokens)))
+  ngrams <- build_word_ngrams(string_tokens, ngram_n)
+  if (length(ngrams) == 0) {
+    return(0)
+  }
+
+  mean(vapply(ngrams, function(ngram) {
+    grepl(ngram, candidate_text, fixed = TRUE)
+  }, logical(1)))
+}
+
+#' Score approximate edit-distance fit for a candidate page
+#'
+#' Slides a window over the candidate text and computes the best normalized edit
+#' distance against the cleaned target. This is used as a fallback when phrase
+#' coverage is not decisive.
+#' @param string Cleaned target string.
+#' @param candidate_text Cleaned candidate page or page-window text.
+#' @return Numeric distance score where smaller values are better.
+score_pdf_candidate <- function(string, candidate_text) {
+  if (!nzchar(string) || !nzchar(candidate_text)) {
+    return(Inf)
+  }
+
+  string_tokens <- strsplit(string, "\\s+")[[1]]
+  candidate_tokens <- strsplit(candidate_text, "\\s+")[[1]]
+
+  if (length(string_tokens) == 0 || length(candidate_tokens) == 0) {
+    return(Inf)
+  }
+
+  target_n <- length(string_tokens)
+  if (length(candidate_tokens) <= target_n) {
+    windows <- candidate_text
+  } else {
+    starts <- seq_len(length(candidate_tokens) - target_n + 1)
+    windows <- vapply(starts, function(i) {
+      paste(candidate_tokens[i:(i + target_n - 1)], collapse = " ")
+    }, character(1))
+  }
+
+  distances <- vapply(windows, function(window) {
+    utils::adist(string, window, ignore.case = TRUE)[1] /
+      max(nchar(string), nchar(window), 1L)
+  }, numeric(1))
+
+  min(distances)
+}
+
+#' Find the best approximate page match
+#'
+#' First ranks candidates by phrase coverage, then falls back to normalized
+#' edit-distance scoring when coverage is weak. Returns no match when the best
+#' candidate still exceeds the allowed distance threshold.
+#' @param string Cleaned target string.
+#' @param candidates Data frame produced by [build_pdf_page_candidates()].
+#' @param max.distance Maximum allowed normalized edit distance.
+#' @return Matching page ID, or `character(0)` when no acceptable match is found.
+find_approximate_page_match <- function(string, candidates, max.distance) {
+  coverage_scores <- vapply(
+    candidates$text,
+    function(text) score_pdf_candidate_coverage(string, text),
+    numeric(1)
+  )
+  best_coverage <- which.max(coverage_scores)
+
+  if (length(best_coverage) > 0 && is.finite(coverage_scores[best_coverage]) &&
+      coverage_scores[best_coverage] >= 0.3) {
+    return(candidates$page_id[best_coverage])
+  }
+
+  distance_scores <- vapply(
+    candidates$text,
+    function(text) score_pdf_candidate(string, text),
+    numeric(1)
+  )
+  best <- which.min(distance_scores)
+
+  if (!length(best) || !is.finite(distance_scores[best]) ||
+      distance_scores[best] > max.distance) {
+    return(character(0))
+  }
+
+  candidates$page_id[best]
 }
 
 # get_page_number
@@ -195,48 +391,26 @@ clean_string <- function(string) {
 # Finds page number from pdf based on text matching
 # @param string text to match
 # @param pdf_text text to search
-# @param max.distance argument passed to agrep
+# @param max.distance maximum normalized distance for approximate matches
 
 get_pdf_pagenumber = function(string, pdf_text, max.distance = .15) {
   string <- clean_string(string)
 
-  doc <- clean_string(pdf_text$text)
-
-  pnum <- agrep(string, doc, ignore.case = TRUE, max.distance = max.distance)
-
-  if (length(pnum) > 0) {
-    return(paste(pnum, collapse = ", "))
+  if (!nzchar(string)) {
+    return(character(0))
   }
 
-  l <- lapply(seq_len(length(doc)), function(p) {
-    # look at combinations of pages if no match
+  candidates <- build_pdf_page_candidates(pdf_text)
+  if (nrow(candidates) == 0) {
+    return(character(0))
+  }
 
-    pages = sapply(c(doc[p], doc[p + 1]), function(x) {
-      tolower(unlist(x))
-    })
+  pnum <- find_exact_page_match(string, candidates)
+  if (!page_match_is_missing(pnum)) {
+    return(pnum)
+  }
 
-    pages <- lapply(seq_along(pages), function(i) {
-      page <- pages[[i]]
-      page <- gsub("\\\n", " ", page)
-      page <- gsub(r"(\s{2,})", " ", page)
-      page <- trimws(page)
-      page
-    })
-
-    data.frame(
-      page_id = glue::glue("{p}-{p + 1}"),
-      text = trimws(paste(pages, collapse = " "))
-    )
-  }) # ---
-
-  doc <- do.call(rbind, l)
-  pnum <- agrep(
-    string,
-    doc$text,
-    ignore.case = TRUE,
-    max.distance = max.distance
-  )
-  doc$page_id[pnum]
+  find_approximate_page_match(string, candidates, max.distance = max.distance)
 }
 
 # header_to_bold
