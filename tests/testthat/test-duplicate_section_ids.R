@@ -5,7 +5,12 @@ writeLines(lnz, con = tmpfl)
 
 test_that("warning on duplicate ids", {
   expect_warning(out <- read_manuscript(tmpfl, to_envir = FALSE))
-  expect_warning(get_revision("revise", out, revise_errors = FALSE))
+  expect_warning(get_revision(
+    "revise",
+    out,
+    revise_errors = FALSE,
+    trust_manuscript = TRUE
+  ))
 })
 
 lnz <- c('How does <span id = "revise">revise get on with mutliple identical ',
@@ -16,5 +21,10 @@ writeLines(lnz, con = tmpfl)
 
 test_that("error on duplicate ids in span and square tags", {
   expect_warning(out <- read_manuscript(tmpfl))
-  expect_warning(get_revision("revise", out, revise_errors = FALSE))
+  expect_warning(get_revision(
+    "revise",
+    out,
+    revise_errors = FALSE,
+    trust_manuscript = TRUE
+  ))
 })

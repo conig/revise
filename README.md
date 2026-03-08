@@ -24,25 +24,6 @@ remotes::install_github("conig/revise")
 
 # Starting a revision document
 
-## ReviewerComment addin
-
-We have included an addin so you can mark text as a reviewer comment. If
-a YAML header is not detected in document the addin will add it. Fields
-will automatically be filled in if there is a .rmd file in the working
-directory. Additionally, selected text will be marked as a reviewer
-comment by including it within an “asis” chunk. Text below this chunk
-will be tagged as an author response. A hotkey can be set for this addin
-(e.g. Ctrl+Shift+R).
-
-<figure>
-<img src="man/figures/README/ReviewerComment.gif"
-alt="animation of ReviewerComment addin" />
-<figcaption aria-hidden="true">animation of ReviewerComment
-addin</figcaption>
-</figure>
-
-# Loading a manuscript
-
 You can use rmd or docx files with revise. To load either, simply call
 revise::read_manuscript(“your_file.rmd”)
 
@@ -54,16 +35,19 @@ docx_path <- system.file("examples/word_test.docx", package = "revise")
 
 man <- read_manuscript(docx_path)
 man
-#> <Manuscript>
-#> [34m- 6 sections[39m
-#> [31mNo PDF attached[39m
+#> 
+#> ── <Manuscript> ──
+#> 
+#> • 6 sections
+#> ✖ No PDF attached
 ```
 
 We can see all tagged sections by running
 
 ``` r
 names(man$sections)
-#> [1] "track_changes" "section"       "multi_lines"   "bullets"       "hard"          "numbered"
+#> [1] "track_changes" "section"       "multi_lines"   "bullets"      
+#> [5] "hard"          "numbered"
 ```
 
 Then we can retrieve using a section name
@@ -76,3 +60,35 @@ revision
 
 This content can then be put directly into a response document using
 single backticks.
+
+# Tagging sections in a manuscript for extraction
+
+There are two methods to tag sections in manuscript for extraction. We
+support using id attributes in html spans:
+
+``` md
+<span id="multi-line">
+This is a multi-line section of text.
+
+We have tagged it with the section name "multi-line".
+</span>
+```
+
+We also support a markdown variant for quick inline tagging:
+
+``` md
+[This is a single line of text we have tagged using markdown.]{#single-line-example}
+```
+
+For multi-line sections using markdown span tags, use fenced divs:
+
+``` md
+::: {#multiline}
+## Heading 1
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pulvinar felis scelerisque auctor mattis. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+:::
+```
+
+In all cases pandoc ignores these tags when rendering the document, but
+they can be used by revise to extract content.

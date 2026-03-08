@@ -12,14 +12,27 @@ set_engine <- function(process_chunk) {
 #'
 #' Template for creating journal revision letters
 #' with dynamic excerpts from a manuscript.
+#' @param comment_reset_by_section Should reviewer comment numbering reset at each
+#'   section header (e.g., each reviewer)? Defaults to `TRUE` for current
+#'   behavior. Set to `FALSE` to keep numbering continuous across reviewers.
 #' @param ... Arguments passed on to [papaja::revision_letter_pdf()].
 #' @details This function wraps [papaja::revision_letter_pdf()].
 #' @seealso [papaja::revision_letter_pdf()], [bookdown::pdf_document2()], [rmarkdown::pdf_document()]
 #' @inherit papaja::apa6_pdf return
 #' @export
-revise_letter_pdf <- function(...) {
+revise_letter_pdf <- function(comment_reset_by_section = TRUE, ...) {
+  if (!is.logical(comment_reset_by_section) || length(comment_reset_by_section) != 1L || is.na(comment_reset_by_section)) {
+    stop("`comment_reset_by_section` must be TRUE or FALSE.")
+  }
+
+  header_file <- if (comment_reset_by_section) {
+    "header.tex"
+  } else {
+    "header_no_section_reset.tex"
+  }
+
   extra_tex <-
-    rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
+    rmarkdown::includes(in_header = system.file(header_file, package = "revise"))
 
   knitr::opts_chunk$set(escape = TRUE)
 
@@ -41,10 +54,26 @@ revise_letter_pdf <- function(...) {
 #' @export
 revise_letter_docx <- function(...) {
   set_engine("process_chunk_docx")
+  init_docx_comment_state()
 
-  bookdown::word_document2(...,
+  output_format <- bookdown::word_document2(...,
     reference_docx = system.file("response_letter_template.docx", package = "revise")
   )
+
+  if (is.null(output_format$knitr$knit_hooks)) {
+    output_format$knitr$knit_hooks <- list()
+  }
+
+  existing_document_hook <- output_format$knitr$knit_hooks$document
+  output_format$knitr$knit_hooks$document <- function(x) {
+    if (!is.null(existing_document_hook)) {
+      x <- existing_document_hook(x)
+    }
+
+    process_docx_document(x)
+  }
+
+  output_format
 }
 
 #' Dynamic txt Revision Letter

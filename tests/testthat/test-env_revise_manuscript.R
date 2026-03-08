@@ -11,7 +11,7 @@ lnz <- c("---","title: \"test doc\"", "format: \"github_document\"", "---", "",
          "library(revise)",
             paste0("read_manuscript('", gsub("\\", "\\\\", original, fixed = T), "')"),
             "```",
-            "`r revise::get_revision(\"SpanTest\")`",
+            "`r revise::get_revision(\"SpanTest\", trust_manuscript = TRUE)`",
             "```",
             "")
 action <- tempfile("action", fileext = ".Rmd")
