@@ -253,6 +253,10 @@ sanitize_pandoc_tag_artifacts <- function(string) {
   out <- gsub("\\]\\{#[-A-Za-z0-9_:.]+\\}", "", out, perl = TRUE)
   out <- gsub("\\{#[-A-Za-z0-9_:.]+\\}", "", out, perl = TRUE)
 
+  # Remove span wrappers when overlap with markdown id tags leaves fragments.
+  out <- gsub("<span\\b[^>]*>", "", out, perl = TRUE)
+  out <- gsub("</span>", "", out, fixed = TRUE)
+
   # Remove standalone fenced-div markers if they leak through extraction.
   out <- gsub("(?m)^:{3,}\\s*\\{[^\\n]*\\}\\s*$", "", out, perl = TRUE)
   out <- gsub("(?m)^:{3,}\\s*$", "", out, perl = TRUE)
