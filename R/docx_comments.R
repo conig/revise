@@ -37,52 +37,56 @@ get_docx_comments <- function(x) {
         "/w:document/w:body//*[self::w:r[w:t and ",
         "preceding::w:commentRangeStart[@w:id='", id, "']",
         " and ",
-        "following::w:commentRangeEnd[@w:id='", id, "']]]"
+        "following::w:commentRangeEnd[@w:id='", id, "'] and ",
+        "not(ancestor::w:del)]]"
       )
     )
   })
 
-  # Retrieve parent paragraphs of text runs
+  # Retrieve the containing paragraphs for each run. Runs can sit inside
+  # tracked-change containers such as <w:ins>, so we need the nearest
+  # paragraph ancestor rather than the immediate parent node. Deleted runs
+  # are filtered out in the XPath above.
   comment_paragraphs <- lapply(comment_text_runs, function(runs) {
-    unique(xml_parent(runs))
+    if (length(runs) == 0) {
+      return(list())
+    }
+
+    paragraph_keys <- vapply(seq_along(runs), function(i) {
+      para <- xml_find_first(runs[[i]], "ancestor::w:p[1]")
+      para_id <- xml_attr(para, "paraId")
+      if (is.na(para_id) || !nzchar(para_id)) {
+        xml_path(para)
+      } else {
+        para_id
+      }
+    }, character(1))
+
+    split(seq_along(runs), factor(paragraph_keys, levels = unique(paragraph_keys)))
   })
 
-  # Extract and concatenate text within each paragraph
-text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
-  out <- sapply(paragraphs, function(para) {
-    if (xml_name(para) == "p") {
-      comment_start <- xml_find_first(para, ".//w:commentRangeStart")
-      comment_end <- xml_find_first(para, ".//w:commentRangeEnd")
+  # Extract and concatenate text within each paragraph from the already
+  # matched runs. This preserves comments that start inside <w:ins> and
+  # continue later in the same paragraph.
+  text_per_paragraph <- Map(function(paragraph_indexes, runs) {
+    vapply(paragraph_indexes, function(indexes) {
+      paragraph_runs <- runs[unlist(indexes)]
+      para <- xml_find_first(paragraph_runs[[1]], "ancestor::w:p[1]")
 
-      # Remove del_nodes
-      if(contains_del(para)){
-        del_nodes <- xml_find_all(para, ".//w:del")
-        xml2::xml_remove(del_nodes)
-      }
+      content <- paste(
+        vapply(paragraph_runs, function(run) {
+          paste(xml_text(xml_find_all(run, ".//w:t")), collapse = "")
+        }, character(1)),
+        collapse = ""
+      )
 
-      if (is.na(comment_start)) {
-        # Keep all content from the start of the node to the end if comment_start is NA
-        nodes <- xml_find_all(para, ".//*")
-      } else if (is.na(comment_end)) {
-        # Keep all content from comment_start to the end of the node if comment_end is NA
-        nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart]")
-      } else {
-        # Keep content between comment_start and comment_end
-        nodes <- xml_find_all(comment_start, ".//following-sibling::*[preceding-sibling::w:commentRangeStart and following-sibling::w:commentRangeEnd]")
-      }
-      content <- paste(xml_text(xml_find_all(nodes, ".//w:t")), collapse = "")
-
-      if(contains_bullets(para)){
+      if (contains_bullets(para)) {
         paste("*", content)
-      }else{
+      } else {
         content
       }
-    } else {
-      NULL  # Ignore standalone <ins> elements
-    }
-  })
-  unlist(out[!sapply(out, is.null)])
-})
+    }, character(1))
+  }, comment_paragraphs, comment_text_runs)
 
   # Collapse concatenated text per paragraph with newline character
   collapsed_text_per_paragraph <- lapply(text_per_paragraph, function(paragraph_texts) {
@@ -98,9 +102,7 @@ text_per_paragraph <- lapply(comment_paragraphs, function(paragraphs) {
    data$para_id <- lapply(
     comment_paragraphs,
     function(paragraphs) {
-      sapply(paragraphs, function(para) {
-        xml_attr(para, "paraId")
-      })
+      names(paragraphs)
     }
   )
 
