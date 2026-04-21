@@ -61,6 +61,27 @@ revision
 This content can then be put directly into a response document using
 single backticks.
 
+To tag text in a Word manuscript, add a comment whose text starts with
+`Revise::section-name` to the passage you want to reuse. To render a
+response letter as a Word document, set the output format to
+`revise::revise_letter_docx` and insert excerpts with inline R:
+
+```` md
+---
+output: revise::revise_letter_docx
+---
+
+```{r setup, include = FALSE}
+man <- revise::read_manuscript("manuscript.docx")
+```
+
+```{asis}
+Reviewer comment
+```
+
+Our response references the tagged excerpt: `r revise::get_revision("hard", man)`
+````
+
 # Tagging sections in a manuscript for extraction
 
 There are two methods to tag sections in manuscript for extraction. We
