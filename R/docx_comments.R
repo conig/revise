@@ -56,7 +56,7 @@ get_docx_comments <- function(x) {
       para <- xml_find_first(runs[[i]], "ancestor::w:p[1]")
       para_id <- xml_attr(para, "paraId")
       if (is.na(para_id) || !nzchar(para_id)) {
-        xml_path(para)
+        xml2::xml_path(para)
       } else {
         para_id
       }
