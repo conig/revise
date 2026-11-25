@@ -28,19 +28,19 @@ with_reviewer_engine <- function(format, engine, reset = NULL) {
 #'
 #' R Markdown output format for creating PDF journal revision letters with
 #' dynamic excerpts from a tagged manuscript.
-#' @param comment_reset_by_section Logical scalar. Should reviewer comment
-#'   numbering reset at each section header (for example, for each reviewer)?
-#'   Defaults to `TRUE`. Set to `FALSE` for continuous numbering.
 #' @param ... Additional arguments passed on to [papaja::revision_letter_pdf()].
 #'   `revise_letter_pdf()` supplies the `includes` argument so that revise's
 #'   LaTeX header is used; callers should not pass `includes` through `...`.
+#' @param comment_reset_by_section Logical scalar. Should reviewer comment
+#'   numbering reset at each section header (for example, for each reviewer)?
+#'   Defaults to `TRUE`. Pass `comment_reset_by_section = FALSE` by name for continuous numbering.
 #' @return An R Markdown output format object for [rmarkdown::render()].
 #' @details This function wraps [papaja::revision_letter_pdf()], installs the
 #'   revise knitr engine for PDF revision chunks, and adds the package LaTeX
 #'   header required for reviewer-comment cross-references.
 #' @seealso [papaja::revision_letter_pdf()], [bookdown::pdf_document2()], [rmarkdown::pdf_document()]
 #' @export
-revise_letter_pdf <- function(comment_reset_by_section = TRUE, ...) {
+revise_letter_pdf <- function(..., comment_reset_by_section = TRUE) {
   if (!is.logical(comment_reset_by_section) || length(comment_reset_by_section) != 1L || is.na(comment_reset_by_section)) {
     stop("`comment_reset_by_section` must be TRUE or FALSE.")
   }
@@ -118,8 +118,7 @@ revise_letter_txt <- function(...) {
 
 letter_post_txt <- function(front_matter, input, output_file, clean, quiet = FALSE) {
   lines <- readLines(output_file, encoding = "UTF-8")
-  unlink(output_file)
-  output_file <- gsub("\\.plain", ".txt", output_file)
+  target <- sub("\\.plain$", ".txt", output_file)
 
   letter_head <- readLines(system.file("header.txt", package = "revise"))
 
@@ -130,8 +129,9 @@ letter_post_txt <- function(front_matter, input, output_file, clean, quiet = FAL
 
   lines <- c(letter_head, lines)
 
-  write(lines, output_file)
-  output_file
+  write(lines, target)
+  if (target != output_file) unlink(output_file)
+  target
 }
 
 # letter

@@ -5,8 +5,6 @@
 reviewer_comment <- function() {
   context <- rstudioapi::getActiveDocumentContext()
 
-  # assign("context", context, envir = globalenv())
-
   if (length(context$selection) == 0) {
     return(rstudioapi::showDialog(title = ":'(", message = "The ReviewerComment addin will not work in the visual markdown editor. Please switch to the source editor."))
   }
@@ -25,37 +23,22 @@ reviewer_comment <- function() {
 
 \\endgroup
 '
-    output_format <- "pdf"
   } else {
     append_to_front <- NULL
     append_to_rear <- NULL
-    output_format <- NULL
   }
 
 
-  selection <- context$select[[1]]$range
+  selection <- context$selection[[1]]$range
   start <- selection$start[[1]]
   end <- selection$end[[1]]
   document_end <- length(context$contents)
-
-  comment_n <- stringr::str_extract_all(contents, r"(\\reviewerid\{c[0-9]*\})", simplify = TRUE)
-  if (length(comment_n) == 0) {
-    comment_n <- 1
-  } else {
-    comment_n <- max(as.numeric(stringr::str_extract_all(comment_n, "\\d*", simplify = TRUE)), na.rm = TRUE)
-    comment_n <- comment_n + 1
-  }
-
-  if (is.null(output_format)) {
-    output_format <- rmarkdown::yaml_front_matter(context$path)$output
-    output_format <- tools::file_ext(output_format)
-  }
 
   start_content <- paste0("```{", getOption("reviewer_chunkname")[[1]], "}")
   end_content <- "
 ```"
 
-  before <- contents[1:start - 1]
+  before <- contents[seq_len(start - 1L)]
 
   middle <- contents[start:end]
   if (document_end != end) {

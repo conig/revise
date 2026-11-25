@@ -4,16 +4,16 @@
 \alias{revise_letter_pdf}
 \title{Dynamic PDF revision letter output}
 \usage{
-revise_letter_pdf(comment_reset_by_section = TRUE, ...)
+revise_letter_pdf(..., comment_reset_by_section = TRUE)
 }
 \arguments{
-\item{comment_reset_by_section}{Logical scalar. Should reviewer comment
-numbering reset at each section header (for example, for each reviewer)?
-Defaults to \code{TRUE}. Set to \code{FALSE} for continuous numbering.}
-
 \item{...}{Additional arguments passed on to \code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}.
 \code{revise_letter_pdf()} supplies the \code{includes} argument so that revise's
 LaTeX header is used; callers should not pass \code{includes} through \code{...}.}
+
+\item{comment_reset_by_section}{Logical scalar. Should reviewer comment
+numbering reset at each section header (for example, for each reviewer)?
+Defaults to \code{TRUE}. Pass \code{comment_reset_by_section = FALSE} by name for continuous numbering.}
 }
 \value{
 An R Markdown output format object for \code{\link[rmarkdown:render]{rmarkdown::render()}}.
@@ -28,5 +28,5 @@ revise knitr engine for PDF revision chunks, and adds the package LaTeX
 header required for reviewer-comment cross-references.
 }
 \seealso{
-\code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}, \code{\link[bookdown:pdf_document2]{bookdown::pdf_document2()}}, \code{\link[rmarkdown:pdf_document]{rmarkdown::pdf_document()}}
+\code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}, \code{\link[bookdown:html_document2]{bookdown::pdf_document2()}}, \code{\link[rmarkdown:pdf_document]{rmarkdown::pdf_document()}}
 }
