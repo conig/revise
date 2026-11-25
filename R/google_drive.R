@@ -1,10 +1,14 @@
-#' drive_comments
+#' Read Comments from Google Docs
 #'
-#' Extract comments from a google docs document
-#' @param url URL to drive document
-#' @param email drive email account. Can be set with options(gargle_oauth_email)
-#' @param cache_credentials bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)
-#' @return A list with a length equal to the number of comments. Each element corresponds to one comment: the element's name is the comment text, and its value is the text that was bounded by the comment.
+#' Download a Google Docs document as Word (.docx) and extract its comments.
+#' Unlike [read_manuscript()], this function does not filter for `Revise::` tags.
+#' @param url URL of the Google Docs document.
+#' @param email Google account email, passed to [googledrive::drive_auth()].
+#'   When omitted, use the authentication default.
+#' @param cache_credentials Whether to use cached credentials, passed as
+#'   `cache` to [googledrive::drive_auth()] when supplied.
+#' @return A list named by comment text, with the selected manuscript text as
+#'   each value. Returns `NULL` if the optional googledrive package is not installed.
 #' @export
 
 drive_comments <- function(url, email = NULL, cache_credentials = NULL) {

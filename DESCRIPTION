@@ -1,5 +1,5 @@
 Package: revise
-Title: Dynamic Revision Letters for 'Rmarkdown' Manuscripts
+Title: Dynamic Revision Letters for Markdown and Word Manuscripts
 Version: 0.1.1
 Authors@R:
     c(
@@ -29,7 +29,11 @@ Authors@R:
            email = "c.j.vanlissa@tilburguniversity.edu",
            comment = c(ORCID = "0000-0002-0808-5024"))
     )
-Description: Extracts tagged text from markdown manuscripts for inclusion in dynamically generated revision letters. Provides an R markdown template based on papaja::revision_letter_pdf() with comment cross-referencing, a system for managing multiple sections of extracted text, and a way to automatically determine the page number of quoted sections from PDF manuscripts.
+Description: Extracts tagged passages from Markdown and Word manuscripts for
+    use in revision letters. Creates PDF, Word, or plain-text letters with
+    reviewer comments and manuscript excerpts. The PDF format is based on
+    papaja::revision_letter_pdf() and can include page references matched
+    against the rendered manuscript.
 License: MIT + file LICENCE
 URL: https://github.com/conig/revise
 BugReports: https://github.com/conig/revise/issues
@@ -53,4 +57,4 @@ Suggests:
     googledrive,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-SystemRequirements: pandoc (>= 1.14) - http://pandoc.org
+SystemRequirements: Pandoc (>= 2.8); LaTeX for PDF output

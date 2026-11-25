@@ -2,20 +2,24 @@
 % Please edit documentation in R/google_drive.R
 \name{drive_comments}
 \alias{drive_comments}
-\title{drive_comments}
+\title{Read Comments from Google Docs}
 \usage{
 drive_comments(url, email = NULL, cache_credentials = NULL)
 }
 \arguments{
-\item{url}{URL to drive document}
+\item{url}{URL of the Google Docs document.}
 
-\item{email}{drive email account. Can be set with options(gargle_oauth_email)}
+\item{email}{Google account email, passed to \code{\link[googledrive:drive_auth]{googledrive::drive_auth()}}.
+When omitted, use the authentication default.}
 
-\item{cache_credentials}{bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)}
+\item{cache_credentials}{Whether to use cached credentials, passed as
+\code{cache} to \code{\link[googledrive:drive_auth]{googledrive::drive_auth()}} when supplied.}
 }
 \value{
-A list with a length equal to the number of comments. Each element corresponds to one comment: the element's name is the comment text, and its value is the text that was bounded by the comment.
+A list named by comment text, with the selected manuscript text as
+each value. Returns \code{NULL} if the optional googledrive package is not installed.
 }
 \description{
-Extract comments from a google docs document
+Download a Google Docs document as Word (.docx) and extract its comments.
+Unlike \code{\link[=read_manuscript]{read_manuscript()}}, this function does not filter for \verb{Revise::} tags.
 }

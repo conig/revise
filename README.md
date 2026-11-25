@@ -8,9 +8,9 @@
 [![R-CMD-check](https://github.com/conig/revise/workflows/R-CMD-check/badge.svg)](https://github.com/conig/revise/actions)
 <!-- badges: end -->
 
-The goal of revise is to support authors in responding to revise and
-resubmit requests. These functions are designed to work with
-[crsh/papaja](https://github.com/crsh/papaja).
+revise inserts tagged passages from a manuscript into a revision letter.
+It reads Markdown, R Markdown, and Word manuscripts and produces PDF,
+Word, or plain-text letters.
 
 ## Installation
 
@@ -27,7 +27,10 @@ remotes::install_github("conig/revise")
 Use `revise::revise_letter_pdf`, `revise::revise_letter_docx`, or
 `revise::revise_letter_txt` as the R Markdown output format. In RStudio,
 the **ReviewerComment** addin wraps selected text in an `asis` reviewer
-chunk and adds a YAML header if one is missing.
+chunk and adds a YAML header if one is missing. Rendering requires
+Pandoc, and PDF letters also require LaTeX. For plain-text letters, set
+`title`, `authors`, `journal`, and `manuscript` (the manuscript ID) in
+the YAML header.
 
 <figure>
 <img src="man/figures/README/ReviewerComment.gif"
@@ -67,14 +70,14 @@ output: revise::revise_letter_docx
 ---
 
 ```{r setup, include = FALSE}
-man <- revise::read_manuscript("manuscript.docx")
+man <- revise::read_manuscript("manuscript.docx", to_envir = FALSE)
 ```
 
 ```{asis reviewer-method}
 Reviewer comment
 ```
 
-We revised the passage as follows:
+In response to \Comment{reviewer-method}, we revised the passage as follows:
 
 `r revise::get_revision("section-name", man)`
 ````
@@ -92,4 +95,31 @@ cat(paste(names(man$sections), collapse = ", "), "\n", sep = "")
 #> track_changes, section, multi_lines, bullets, hard, numbered
 revise::get_revision("hard", man)
 #> [1] ">Hard example\n>\n>This section has all features:\n>\n>* Bullet1\n>\n>* Bullet2\n>\n>* Bullet3\n>\n>Some more text is here."
+```
+
+## Add manuscript page references
+
+For a PDF revision letter, attach the PDF rendered from the current
+manuscript:
+
+``` r
+man <- revise::read_manuscript("manuscript.Rmd", PDF = "manuscript.pdf",
+                               to_envir = FALSE)
+```
+
+Use `PDF = TRUE` if the PDF sits alongside the manuscript and shares its
+base name. `get_revision()` adds the matching page or page range. If it
+cannot locate the excerpt, it warns and prints `Pg. ?`. Page references
+are LaTeX; set `include_pgnum = FALSE` in `get_revision()` when reusing
+that manuscript in a Word or plain-text letter.
+
+## Number reviewer comments across sections
+
+PDF reviewer comment numbers reset at section headings by default. To
+keep numbering continuous, use this YAML:
+
+``` yaml
+output:
+  revise::revise_letter_pdf:
+    comment_reset_by_section: false
 ```
