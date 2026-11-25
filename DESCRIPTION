@@ -1,7 +1,7 @@
 Package: revise
-Title: Dynamic Revision Letters for 'Rmarkdown' Manuscripts
-Version: 0.1.0
-Authors@R: 
+Title: Dynamic Revision Letters for Markdown and Word Manuscripts
+Version: 0.1.1
+Authors@R:
     c(
     person(given = "James",
            family = "Conigrave",
@@ -24,23 +24,26 @@ Authors@R:
            email = "m.noetel@uq.edu.au",
            comment = c(ORCID = "0000-0002-6563-8203")),
     person(given = c("Caspar", "J."),
-           family = "Van Lissa", 
+           family = "Van Lissa",
            role = c("aut"),
            email = "c.j.vanlissa@tilburguniversity.edu",
            comment = c(ORCID = "0000-0002-0808-5024"))
     )
-Description: Extracts tagged text from markdown manuscripts for inclusion in dynamically generated revision letters. Provides an R markdown template based on papaja::revision_letter_pdf() with comment cross-referencing, a system for managing multiple sections of extracted text, and a way to automatically determine the page number of quoted sections from PDF manuscripts.
+Description: Extracts tagged passages from Markdown and Word manuscripts for
+    use in revision letters. Creates PDF, Word, or plain-text letters with
+    reviewer comments and manuscript excerpts. The PDF format is based on
+    papaja::revision_letter_pdf() and can include page references matched
+    against the rendered manuscript.
 License: MIT + file LICENCE
 URL: https://github.com/conig/revise
 BugReports: https://github.com/conig/revise/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Depends:
     R (>= 4.1.0)
-Imports: 
+Imports:
     bookdown,
-    dplyr,
     glue,
     knitr,
     papaja,
@@ -49,12 +52,9 @@ Imports:
     stringr,
     pdftools,
     officer,
-    xml2,
-    worcs,
-    cli
-Suggests: 
+    xml2
+Suggests:
     googledrive,
-    docxtractr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-SystemRequirements: pandoc (>= 1.14) - http://pandoc.org
+SystemRequirements: Pandoc (>= 2.8); LaTeX for PDF output

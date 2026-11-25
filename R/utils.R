@@ -1,105 +1,78 @@
-checksum_exists <- function(corpus, checksum){
-  UseMethod("checksum_exists", corpus)
-}
-#' @export
-checksum_exists.revise_corpus <- function(corpus, checksum){
-  all_csums <- sapply(corpus, `[[`, "checksum")
-  return(isTRUE(checksum %in% all_csums))
-}
-
-#' @export
-checksum_exists.revise_manuscript <- function(corpus, checksum){
-  return(isTRUE(checksum == corpus[["checksum"]]))
-}
-
-#' read_md
-#'
-#' Read in a markdown document for further analysis
-#' @param path to markdown manuscript
-
-read_md <- function(path){
-  unname(unlist(utils::read.delim(path, sep = "\n", quote = "", header = FALSE)))
-}
-
 #' extract_refs
 #'
 #' Extract table and figure references
-#' @param path to markdown manuscript
+#' @param text Markdown manuscript text
 
-extract_refs <- function(path){
-  lines <- read_md(path)
-  lines <- paste(lines, collapse = "\n")
-  references <- unlist(stringr::str_extract_all(lines, "\\\\\\@ref.+?\\)"))
-  figures <- data.frame(text = unique(grep("fig:",references, value = TRUE)))
-  tables <- data.frame(text = unique(grep("tab:",references, value = TRUE)))
-  figures$ref <- seq_along(figures[,1])
-  tables$ref <- seq_along(tables[,1])
+extract_refs <- function(text) {
+  references <- unlist(stringr::str_extract_all(text, "\\\\\\@ref.+?\\)"))
+  figures <- data.frame(text = unique(grep("fig:", references, value = TRUE)))
+  tables <- data.frame(text = unique(grep("tab:", references, value = TRUE)))
+  figures$ref <- seq_along(figures[, 1])
+  tables$ref <- seq_along(tables[, 1])
   list(figures = figures, tables = tables)
-
 }
 
 
 #' @export
-#' @importFrom cli cli_h2
-print.revise_manuscript = function(x, ...){
-  cli::cli_h2("<Manuscript>")
-  cli_msg("*" = "{length(x$sec)} section{c('s', '')[(length(x$sec) == 1)+1L]}")
-  if(is.null(x$PDF)){
-    cli_msg("x" = "No PDF attached")
-  }else{
-    cli_msg("*" = "{nrow(x$PDF)} pages")
+print.revise_manuscript <- function(x, ...) {
+  cat("<Manuscript>\n")
+  if (!isTRUE(getOption("usethis.quiet", !interactive()))) {
+    n <- length(x$sections)
+    cat(n, if (n == 1L) "section\n" else "sections\n")
+    cat(if (is.null(x$PDF)) "No PDF attached" else paste(nrow(x$PDF), "pages"), "\n", sep = "")
   }
+  invisible(x)
 }
 
-# evaluate_inline
-#
-# Evaluates embedded rchunks within a string of text
-# @param string a section of text with includes inline elements
-# @examples
-# revise:::evaluate_inline("1+1 = `r 1+1`")
+#' evaluate_inline
+#'
+#' Evaluates embedded inline r code within a string of text
+#' @param string a section of text containing inline `r` elements
+#' @param envir the environment in which to evaluate the code
+#' @param trust_manuscript logical. Should inline `r` code be trusted and
+#'   evaluated? Defaults to `FALSE`. When called via [get_revision()], the default
+#'   comes from `getOption("revise_trust_manuscript", FALSE)`.
+#' @return A character string with inline `r` code evaluated.
+#' @details
+#' [glue::glue()] detects inline R expressions delimited by backticks.
+#' If inline `r` chunks are present and `trust_manuscript` is not `TRUE`,
+#' this function errors with the inline code that would have been evaluated.
+#' Set `options(revise_trust_manuscript = TRUE)` and call [get_revision()], or pass
+#' `trust_manuscript = TRUE` directly, or disable evaluation in
+#' [get_revision()] by setting `evaluate = FALSE`.
+#'
+#' @examples
+#' revise:::evaluate_inline("1+1 = `r 1+1`", trust_manuscript = TRUE)
 
-evaluate_inline <- function(string){
-  glue::glue(string, .open = "`r ", .close = "`")
-}
-
-# process_pdf
-#
-# process pdf file
-# @param path path to pdf
-
-process_pdf <- function(path){
-  ext <- tolower(tools::file_ext(path))
-  if(!ext %in% c("pdf")){
-    stop("Extracting page numbers only works for pdf documents")
+evaluate_inline <- function(
+  string,
+  envir = parent.frame(),
+  trust_manuscript = FALSE
+) {
+  expressions <- character()
+  transformer <- if (isTRUE(trust_manuscript)) {
+    glue::identity_transformer
+  } else {
+    function(text, envir) {
+      # Use glue's own parser to report exactly what it would evaluate.
+      expressions <<- c(expressions, trimws(text))
+      ""
+    }
   }
-  doc <- get_pdf_text(path)
-  running_head = gsub("\n.*","",doc$text[2])
-  running_head = trimws(gsub("[0-9]","",running_head))
-  running_head = gsub("\\s{1,}"," ", running_head)
-  is_head <- unlist(lapply(doc$text, function(x) grepl(running_head,x)))
-  prop_head <- prop.table(table(is_head))["TRUE"]
-
-  doc$text <- tolower(doc$text)
-  if(!is.null(running_head)){
-    doc$text <- stringr::str_remove_all(doc$text, tolower(glue::glue("^{running_head}")))
-  }
-
-  doc <-  dplyr::summarise(
-    dplyr::group_by(doc, page_id),
-    text = paste(text, collapse = " "),
-    .groups = "drop"
+  result <- glue::glue(
+    string, .open = "`r ", .close = "`", .envir = envir, .transformer = transformer
   )
-
-  doc$text <- trimws(stringr::str_remove_all(doc$text, "[[:digit:]]")) # remove all numbers
-  doc$text <- stringr::str_remove_all(doc$text, "\\[.{0,50}\\]") # remove square brackets
-  doc$text <- stringr::str_remove_all(doc$text, "\\(.{0,50}\\)") # remove parentheses
-  doc$text <- trimws(stringr::str_remove_all(doc$text, "[[:punct:]]")) # remove all punctuation
-  if(prop_head > .7){
-    attr(doc, "running_head") <- running_head
-  }else{
-    attr(doc, "running_head") <- NULL
+  if (length(expressions)) {
+    stop(
+      "revise has detected inline r code to evaluate:\n",
+      paste0("  - `", unique(expressions), "`", collapse = "\n"),
+      "\nOnly allow evaluation if you trust the manuscript. Set ",
+      "trust_manuscript = TRUE (or options(revise_trust_manuscript = TRUE) ",
+      "for get_revision()). To insert the excerpt without running code, ",
+      "use get_revision(..., evaluate = FALSE)."
+    )
   }
-  doc
+  as.character(result)
 }
 
 # find_pages
@@ -109,8 +82,12 @@ process_pdf <- function(path){
 # @param string the string to find
 # @export
 
-find_pages <- function(manuscript, string){
-  if(is.null(manuscript$PDF)) stop("No PDF attached to the manuscript object: not possible to identify page numbers.")
+find_pages <- function(manuscript, string) {
+  if (is.null(manuscript$PDF)) {
+    stop(
+      "No PDF attached to the manuscript object: not possible to identify page numbers."
+    )
+  }
   get_pdf_pagenumber(string, pdf_text = manuscript$PDF)
 }
 
@@ -119,58 +96,13 @@ find_pages <- function(manuscript, string){
 # Cleaning steps for identifying strings
 # @param string string to clean
 
-clean_string <- function(string){
-  string <- gsub("\\[.{0,50}\\]","",string) # remove square brackets
+clean_string <- function(string) {
+  string <- gsub("\\[.{0,50}\\]", "", string) # remove square brackets
   string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
-  string <- gsub("[0-9]","", string) # remove numbers
   string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
-  string <- gsub("[[:punct:]]", "", tolower(string)) # remove parentheses
-  string <- gsub("\\s{2,}", " ", string) # remove additional spaces
   string <- gsub("\\n", " ", string)
-  string
-}
-
-# get_page_number
-#
-# Finds page number from pdf based on text matching
-# @param string text to match
-# @param pdf_text text to search
-# @param max.distance argument passed to agrep
-
-get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
-
-  string <- clean_string(string)
-
-  doc <- clean_string(pdf_text$text)
-
-  pnum <- agrep(string, doc, ignore.case = TRUE, max.distance = max.distance)
-
-  if(length(pnum) > 0) return(paste(pnum, collapse = ", "))
-
-  l <- lapply(seq_len(length(doc)), function(p){ # look at combinations of pages if no match
-
-    pages = sapply(c(doc[p], doc[p + 1]), function(x){
-      tolower(unlist(x))
-    })
-
-    pages <- lapply(seq_along(pages), function(i){
-      page <- pages[[i]]
-      page <- gsub("\\\n", " ", page)
-      page <- gsub(r"(\s{2,})", " ", page)
-      page <- trimws(page)
-      page
-    })
-
-    data.frame(
-      page_id = glue::glue("{p}-{p + 1}"),
-      text = trimws(paste(pages, collapse = " "))
-    )
-  }) # ---
-
-  doc <- do.call(rbind, l)
-  pnum <- agrep(string, doc$text, ignore.case = TRUE, max.distance = max.distance)
-  doc$page_id[pnum]
-
+  string <- gsub("[[:punct:]]", "", tolower(string)) # remove punctuation
+  trimws(gsub("\\s{2,}", " ", string)) # remove additional spaces
 }
 
 # header_to_bold
@@ -179,50 +111,43 @@ get_pdf_pagenumber = function(string, pdf_text, max.distance = .15){
 # @param string a string
 # @return string
 
-header_to_bold = function(string){
-
-  while(grepl("(?<!\\{)#{1,}.{0,100}\\\n",string, perl = TRUE)){
-    target <- stringr::str_extract(string, "(?<!\\{)#{1,}.+?(\\n){1,}")
-    n_hash <- sum(strsplit(target, split = "")[[1]]=="#")
-    replacement <- gsub("(?<!\\{)#{1,}\\s?","**", target, perl = TRUE)
-    if(n_hash < 3){
-      replacement <- gsub("\\n{1,}","**\\\n\\\n", replacement)
-    } else{
-      replacement <- gsub("\\n{1,}",".** ", replacement)
-    }
-    string <- gsub(target, replacement, string)
-  }
-
-  string
-
+header_to_bold <- function(string) {
+  stringr::str_replace_all(string, "(?m)^(#{1,6})[ \\t]+([^\\n]+)(\\n+|$)", function(heading) {
+    parts <- stringr::str_match(heading, "^(#+)[ \\t]+([^\\n]+)(\\n*)$")
+    major <- nchar(parts[, 2]) < 3L
+    suffix <- ifelse(nzchar(parts[, 4]), ifelse(major, "\n\n", " "), "")
+    paste0("**", parts[, 3], ifelse(major, "**", ".**"), suffix)
+  })
 }
 
+utils::globalVariables(".revise_manuscripts")
 
-utils::globalVariables(c("text", "page_id", ".revise_manuscripts"))
+check_dup_sections <- function(
+  sect_nams,
+  revise_errors = getOption("revise_errors")
+) {
+  if (any(duplicated(sect_nams))) {
+    m <- paste(
+      "The following sections have duplicate names. When referencing sections by name, the first section with that name will be selected. Please use unique section names:\n",
+      paste0("  '", sect_nams[duplicated(sect_nams)], "'\n")
+    )
 
-check_dup_sections <- function(sect_nams, revise_errors = getOption("revise_errors")){
-  if(any(duplicated(sect_nams))){
-    m <- paste("The following sections have duplicate names. When referencing sections by name, the first section with that name will be selected. Please use unique section names:\n", paste0("  '", sect_nams[duplicated(sect_nams)], "'\n"))
-
-    if(!revise_errors){
-    warning(m, call. = FALSE)
-    }else{
+    if (!revise_errors) {
+      warning(m, call. = FALSE)
+    } else {
       stop(m, call. = FALSE)
     }
-
   }
 }
 
-.onLoad <- function(libname, pkgname){
-
-  if(is.null(getOption("revise_errors"))){
+.onLoad <- function(libname, pkgname) {
+  if (is.null(getOption("revise_errors"))) {
     options(revise_errors = TRUE)
   }
 
-  if(is.null(getOption("reviewer_chunkname"))){
+  if (is.null(getOption("reviewer_chunkname"))) {
     options(reviewer_chunkname = c("asis", "reviewer"))
   }
-
 }
 
 # path

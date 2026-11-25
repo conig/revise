@@ -1,48 +1,23 @@
-#' drive_comments
+#' Read Comments from Google Docs
 #'
-#' Extract comments from a google docs document
-#' @param url URL to drive document
-#' @param email drive email account. Can be set with options(gargle_oath_email)
-#' @param cache_credentials bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)
-#' @return A list with a length equal to the number of comments. Each element corresponds to one comment: the element's name is the comment text, and its value is the text that was bounded by the comment.
+#' Download a Google Docs document as Word (.docx) and extract its comments.
+#' Unlike [read_manuscript()], this function does not filter for `Revise::` tags.
+#' @param url URL of the Google Docs document.
+#' @param email Google account email, passed to [googledrive::drive_auth()].
+#'   When omitted, use the authentication default.
+#' @param cache_credentials Whether to use cached credentials, passed as
+#'   `cache` to [googledrive::drive_auth()] when supplied.
+#' @return A list named by comment text, with the selected manuscript text as
+#'   each value. Returns `NULL` if the optional googledrive package is not installed.
 #' @export
 
-drive_comments <- function(url, email = NULL, cache_credentials = NULL){
+drive_comments <- function(url, email = NULL, cache_credentials = NULL) {
+  if (!requireNamespace("googledrive", quietly = TRUE)) return(NULL)
 
-if(!isTRUE(requireNamespace("docxtractr", quietly = TRUE) & requireNamespace("googledrive", quietly = TRUE))){
-    return(NULL)
-  }
-
-  if(!is.null(email)){
-  options(gargle_oauth_email = email)
-  }
-
-  if(!is.null(cache_credentials)){
-    options(gargle_oauth_cache = cache_credentials)
-  }
-
-  # Ensure authorisation is set up
-  googledrive::drive_auth()
-
-  temppath <- tempfile(fileext = ".docx")
-
-  doc <- googledrive::as_id(url)
-  doc <- suppressMessages(googledrive::drive_download(doc, path = temppath, overwrite = TRUE))
-
-  doc <- docxtractr::read_docx(temppath)
-  comments <- docxtractr::docx_extract_all_cmnts(doc, include_text = TRUE)
-  comment_list <- as.list(comments$word_src)
-  names(comment_list) <- comments$comment_text
-  unlink(temppath)
-
-  # Some redundant spaces are introduced
-  comment_list <- lapply(comment_list, function(x){
-    x <- gsub("\\s\\.",".",x)
-    x <- gsub("\\]\\s\\,","],",x)
-    x <- gsub("\\(\\s", "(", x)
-    x <- gsub("\\s\\)", ")", x)
-    x
-  })
-
-  comment_list
+  auth <- Filter(Negate(is.null), list(email = email, cache = cache_credentials))
+  do.call(googledrive::drive_auth, auth)
+  path <- tempfile(fileext = ".docx")
+  on.exit(unlink(path))
+  suppressMessages(googledrive::drive_download(googledrive::as_id(url), path = path))
+  get_docx_comments(officer::read_docx(path), markdown = FALSE)
 }

@@ -28,4 +28,22 @@ test_that(".revise_manuscripts retrieves sections from both manuscripts", {
   expect_true(is.null(get_revision("SpanTest3", envir = test_env)))
 })
 
+test_that("adding, rereading and editing manuscripts preserves the rest of the corpus", {
+  env <- new.env(parent = emptyenv())
+  files <- vapply(1:3, function(i) {
+    path <- tempfile(fileext = ".md")
+    writeLines(sprintf("[Revision %d]{#tag%d}", i, i), path)
+    read_manuscript(path, envir = env)
+    path
+  }, character(1))
+  expect_identical(list_manuscripts(env), basename(files))
+  expect_identical(get_revision("tag3", envir = env), ">Revision 3")
 
+  read_manuscript(files[1], envir = env)
+  writeLines("[Edited revision]{#tag2}", files[2])
+  read_manuscript(files[2], envir = env)
+  expect_identical(list_manuscripts(env), basename(files))
+  expect_identical(get_revision("tag2", envir = env), ">Edited revision")
+  expect_true(remove_manuscript(basename(files[2]), env))
+  expect_identical(list_manuscripts(env), basename(files[c(1, 3)]))
+})

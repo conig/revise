@@ -4,3 +4,5 @@
 ^README\.Rmd$
 ^\.github$
 ^.*\.Rproj$
+^README\.html$
+^\.(codex|agents|aws)$

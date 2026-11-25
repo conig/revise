@@ -8,9 +8,9 @@
 [![R-CMD-check](https://github.com/conig/revise/workflows/R-CMD-check/badge.svg)](https://github.com/conig/revise/actions)
 <!-- badges: end -->
 
-The goal of revise is to support authors in responding to revise and
-resubmit requests. These functions are designed to work with
-[crsh/papaja](https://github.com/crsh/papaja).
+revise inserts tagged passages from a manuscript into a revision letter.
+It reads Markdown, R Markdown, and Word manuscripts and produces PDF,
+Word, or plain-text letters.
 
 ## Installation
 
@@ -22,57 +22,104 @@ You can install the development version of {revise} from
 remotes::install_github("conig/revise")
 ```
 
-# Starting a revision document
+## Start a revision letter
 
-## ReviewerComment addin
-
-We have included an addin so you can mark text as a reviewer comment. If
-a YAML header is not detected in document the addin will add it. Fields
-will automatically be filled in if there is a .rmd file in the working
-directory. Additionally, selected text will be marked as a reviewer
-comment by including it within an “asis” chunk. Text below this chunk
-will be tagged as an author response. A hotkey can be set for this addin
-(e.g. Ctrl+Shift+R).
+Use `revise::revise_letter_pdf`, `revise::revise_letter_docx`, or
+`revise::revise_letter_txt` as the R Markdown output format. In RStudio,
+the **ReviewerComment** addin wraps selected text in an `asis` reviewer
+chunk and adds a YAML header if one is missing. Rendering requires
+Pandoc, and PDF letters also require LaTeX. For plain-text letters, set
+`title`, `authors`, `journal`, and `manuscript` (the manuscript ID) in
+the YAML header.
 
 <figure>
 <img src="man/figures/README/ReviewerComment.gif"
-alt="animation of ReviewerComment addin" />
-<figcaption aria-hidden="true">animation of ReviewerComment
+alt="Animation of the ReviewerComment addin" />
+<figcaption aria-hidden="true">Animation of the ReviewerComment
 addin</figcaption>
 </figure>
 
-# Loading a manuscript
+## Tag the manuscript
 
-You can use rmd or docx files with revise. To load either, simply call
-revise::read_manuscript(“your_file.rmd”)
+In a Word manuscript, select the excerpt and add a comment containing
+only `Revise::section-name`. In Markdown or R Markdown, use one of these
+forms:
 
-For example. Here is an example docx where content has been tagged with
-comment boxes. E.g, Revise::hard
+``` md
+[An inline excerpt.]{#short}
+
+<span id="html-excerpt">
+An excerpt marked with an HTML span.
+</span>
+
+::: {#long}
+## A longer excerpt
+
+Use a fenced div to include multiple paragraphs or headings.
+:::
+```
+
+## Insert an excerpt
+
+Load the manuscript with `revise::read_manuscript()`, then use inline R
+in the letter to insert an excerpt by its tag:
+
+```` markdown
+---
+output: revise::revise_letter_docx
+---
+
+```{r setup, include = FALSE}
+man <- revise::read_manuscript("manuscript.docx", to_envir = FALSE)
+```
+
+```{asis reviewer-method}
+Reviewer comment
+```
+
+In response to \Comment{reviewer-method}, we revised the passage as follows:
+
+`r revise::get_revision("section-name", man)`
+````
+
+Pass `trust_manuscript = TRUE` to `get_revision()` only after reviewing
+or writing the manuscript’s inline R code. To insert the excerpt without
+running that code, set `evaluate = FALSE`.
+
+To explore the tags in the bundled Word example:
 
 ``` r
 docx_path <- system.file("examples/word_test.docx", package = "revise")
-
-man <- read_manuscript(docx_path)
-man
-#> <Manuscript>
-#> [34m- 6 sections[39m
-#> [31mNo PDF attached[39m
-```
-
-We can see all tagged sections by running
-
-``` r
-names(man$sections)
-#> [1] "track_changes" "section"       "multi_lines"   "bullets"       "hard"          "numbered"
-```
-
-Then we can retrieve using a section name
-
-``` r
-revision <- get_revision("hard", man)
-revision
+man <- revise::read_manuscript(docx_path, to_envir = FALSE)
+cat(paste(names(man$sections), collapse = ", "), "\n", sep = "")
+#> track_changes, section, multi_lines, bullets, hard, numbered
+revise::get_revision("hard", man)
 #> [1] ">Hard example\n>\n>This section has all features:\n>\n>* Bullet1\n>\n>* Bullet2\n>\n>* Bullet3\n>\n>Some more text is here."
 ```
 
-This content can then be put directly into a response document using
-single backticks.
+## Add manuscript page references
+
+For a PDF revision letter, attach the PDF rendered from the current
+manuscript:
+
+``` r
+man <- revise::read_manuscript("manuscript.Rmd", PDF = "manuscript.pdf",
+                               to_envir = FALSE)
+```
+
+Use `PDF = TRUE` if the PDF sits alongside the manuscript and shares its
+base name. `get_revision()` adds the matching page or page range. If it
+cannot locate the excerpt, it warns and prints `Pg. ?`. Page references
+are LaTeX; set `include_pgnum = FALSE` in `get_revision()` when reusing
+that manuscript in a Word or plain-text letter.
+
+## Number reviewer comments across sections
+
+PDF reviewer comment numbers reset at section headings by default. To
+keep numbering continuous, use this YAML:
+
+``` yaml
+output:
+  revise::revise_letter_pdf:
+    comment_reset_by_section: false
+```

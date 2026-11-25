@@ -28,3 +28,12 @@ test_that("read_manuscript works when there are no bracket sections", {
   out <- revise::read_manuscript(tmp, to_envir = FALSE)
   expect_equal(names(out$sections), "test")
 })
+
+test_that("empty Markdown and untagged Word manuscripts have no excerpts", {
+  path <- tempfile(fileext = ".md")
+  file.create(path)
+  expect_null(get_revision("tag", read_manuscript(path, to_envir = FALSE)))
+  path <- tempfile(fileext = ".docx")
+  print(officer::body_add_par(officer::read_docx(), "No comments."), target = path)
+  expect_null(get_revision("tag", read_manuscript(path, to_envir = FALSE)))
+})

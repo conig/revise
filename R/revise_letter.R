@@ -1,68 +1,110 @@
-set_engine <- function(process_chunk) {
-  envir <- parent.frame()
+with_reviewer_engine <- function(format, engine, reset = NULL) {
+  pre_knit <- format$pre_knit
+  on_exit <- format$on_exit
+  previous_engines <- list()
 
-  command <- glue::glue(
-    "knitr::knit_engines$set({getOption('reviewer_chunkname')} = {process_chunk})"
-  )
+  format$pre_knit <- function(input, ...) {
+    if (is.function(pre_knit)) pre_knit(input = input, ...)
+    # rmarkdown also calls pre_knit for plain Markdown, without on_exit.
+    if (!tolower(tools::file_ext(input)) %in% c("r", "rmd", "rmarkdown", "qmd")) {
+      return(invisible(NULL))
+    }
+    if (!is.null(reset)) reset()
+    engines <- getOption("reviewer_chunkname")
+    previous_engines <<- knitr::knit_engines$set(
+      stats::setNames(rep(list(engine), length(engines)), engines)
+    )
+  }
+  format$on_exit <- function() {
+    knitr::knit_engines$delete(names(previous_engines))
+    knitr::knit_engines$set(Filter(Negate(is.null), previous_engines))
+    if (is.function(on_exit)) on_exit()
+  }
 
-  for (i in command) eval(str2lang(i), envir = envir)
+  format
 }
 
-#' Dynamic PDF Revision Letter
+#' Dynamic PDF revision letter output
 #'
-#' Template for creating journal revision letters
-#' with dynamic excerpts from a manuscript.
-#' @param ... Arguments passed on to [papaja::revision_letter_pdf()].
-#' @details This function wraps [papaja::revision_letter_pdf()].
+#' R Markdown output format for creating PDF journal revision letters with
+#' dynamic excerpts from a tagged manuscript.
+#' @param ... Additional arguments passed on to [papaja::revision_letter_pdf()].
+#'   `revise_letter_pdf()` supplies the `includes` argument so that revise's
+#'   LaTeX header is used; callers should not pass `includes` through `...`.
+#' @param comment_reset_by_section Logical scalar. Should reviewer comment
+#'   numbering reset at each section header (for example, for each reviewer)?
+#'   Defaults to `TRUE`. Pass `comment_reset_by_section = FALSE` by name for continuous numbering.
+#' @return An R Markdown output format object for [rmarkdown::render()].
+#' @details This function wraps [papaja::revision_letter_pdf()], installs the
+#'   revise knitr engine for PDF revision chunks, and adds the package LaTeX
+#'   header required for reviewer-comment cross-references.
 #' @seealso [papaja::revision_letter_pdf()], [bookdown::pdf_document2()], [rmarkdown::pdf_document()]
-#' @inherit papaja::apa6_pdf return
 #' @export
-revise_letter_pdf <- function(...) {
-  extra_tex <-
-    rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
+revise_letter_pdf <- function(..., comment_reset_by_section = TRUE) {
+  if (!is.logical(comment_reset_by_section) || length(comment_reset_by_section) != 1L || is.na(comment_reset_by_section)) {
+    stop("`comment_reset_by_section` must be TRUE or FALSE.")
+  }
 
-  knitr::opts_chunk$set(escape = TRUE)
-
-  set_engine("process_chunk_pdf")
-
-  papaja::revision_letter_pdf(...,
-    includes = extra_tex
+  headers <- "header.tex"
+  if (!comment_reset_by_section) headers <- c(headers, "header_no_section_reset.tex")
+  format <- papaja::revision_letter_pdf(
+    ..., includes = rmarkdown::includes(
+      in_header = system.file(headers, package = "revise")
+    )
   )
+  format$knitr$opts_chunk$escape <- TRUE
+  with_reviewer_engine(format, process_chunk_pdf)
 }
 
-#' Dynamic docx Revision Letter
+#' Dynamic DOCX revision letter output
 #'
-#' Template for creating journal revision letters
-#' with dynamic excerpts from a manuscript.
-#' @param ... Arguments passed on to [bookdown::word_document2()].
-#' @details This function wraps [bookdown::word_document2()].
+#' R Markdown output format for creating Word journal revision letters with
+#' dynamic excerpts from a tagged manuscript.
+#' @param ... Additional arguments passed on to [bookdown::word_document2()].
+#'   `revise_letter_docx()` supplies the `reference_docx` argument so that
+#'   revise's response-letter template is used; callers should not pass
+#'   `reference_docx` through `...`.
+#' @return An R Markdown output format object for [rmarkdown::render()].
+#' @details This function wraps [bookdown::word_document2()], installs the
+#'   revise knitr engine for DOCX revision chunks, and converts reviewer-comment
+#'   cross-references to numbered plain text.
 #' @seealso [bookdown::word_document2()]
-#' @inherit bookdown::word_document2 return
 #' @export
 revise_letter_docx <- function(...) {
-  set_engine("process_chunk_docx")
-
-  bookdown::word_document2(...,
-    reference_docx = system.file("response_letter_template.docx", package = "revise")
+  format <- bookdown::word_document2(
+    ..., reference_docx = system.file("response_letter_template.docx", package = "revise")
   )
+
+  labels <- character()
+  format <- with_reviewer_engine(format, function(options) {
+    labels <<- c(labels, options$label)
+    process_chunk_docx(options, length(labels))
+  }, reset = function() labels <<- character())
+
+  document_hook <- format$knitr$knit_hooks$document
+  format$knitr$knit_hooks$document <- function(x) {
+    if (is.function(document_hook)) x <- document_hook(x)
+    # All labels are now known, including references to later chunks.
+    replace_docx_comment_macros(x, labels)
+  }
+  format
 }
 
-#' Dynamic txt Revision Letter
+#' Dynamic plain-text revision letter output
 #'
-#' Template for creating journal revision letters
-#' with dynamic excerpts from a manuscript.
-#' @param ... Arguments passed on to [rmarkdown::output_format()].
-#' @details This function wraps [rmarkdown::output_format()].
+#' R Markdown output format for creating plain-text journal revision letters
+#' with dynamic excerpts from a tagged manuscript.
+#' @param ... Additional arguments passed on to [rmarkdown::output_format()].
+#'   `revise_letter_txt()` supplies the knitr options, pandoc options, and
+#'   post-processor required for revise's plain-text output; callers should not
+#'   pass `knitr`, `pandoc`, or `post_processor` through `...`.
+#' @return An R Markdown output format object for [rmarkdown::render()].
+#' @details This function wraps [rmarkdown::output_format()] and installs the
+#'   revise knitr engine for plain-text revision chunks.
 #' @seealso [rmarkdown::output_format()]
-#' @inherit rmarkdown::output_format return
 #' @export
 revise_letter_txt <- function(...) {
-  extra_tex <-
-    rmarkdown::includes(in_header = system.file("header.tex", package = "revise"))
-
-  set_engine("process_chunk_txt")
-
-  rmarkdown::output_format(
+  format <- rmarkdown::output_format(
     rmarkdown::knitr_options(opts_chunk = list(
       echo = FALSE,
       format = "txt"
@@ -71,12 +113,12 @@ revise_letter_txt <- function(...) {
     post_processor = letter_post_txt,
     ...
   )
+  with_reviewer_engine(format, process_chunk_txt)
 }
 
 letter_post_txt <- function(front_matter, input, output_file, clean, quiet = FALSE) {
   lines <- readLines(output_file, encoding = "UTF-8")
-  unlink(output_file)
-  output_file <- gsub("\\.plain", ".txt", output_file)
+  target <- sub("\\.plain$", ".txt", output_file)
 
   letter_head <- readLines(system.file("header.txt", package = "revise"))
 
@@ -87,8 +129,9 @@ letter_post_txt <- function(front_matter, input, output_file, clean, quiet = FAL
 
   lines <- c(letter_head, lines)
 
-  write(lines, output_file)
-  output_file
+  write(lines, target)
+  if (target != output_file) unlink(output_file)
+  target
 }
 
 # letter

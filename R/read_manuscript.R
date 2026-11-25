@@ -1,31 +1,36 @@
-#' Read 'Rmarkdown' Manuscript
+#' Read a Tagged Manuscript
 #'
-#' Reads an 'Rmarkdown' manuscript and, if possible, an associated PDF.
-#' @param path Character, path to the 'Rmarkdown' file.
-#' @param PDF Logical or character. Default `FALSE` does nothing. If set to `TRUE`, attempts to determine PDF file path from `YAML` front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.
-#' @param to_envir Logical, indicating whether or not the manuscript should
-#' be invisibly assigned to an environment variable names `.revise_manuscript`.
-#' Defaults to `TRUE`. Can be disabled by setting `options(revise_use_envir = FALSE)`.
-#' @param envir The environment to which the manuscript should be assigned.
-#' @return Invisibly returns a list of class `manuscript`, containing
-#' the following elements:
+#' Read tagged excerpts from a Markdown, R Markdown, or Word (.docx) manuscript.
+#' @param path Character path to the manuscript.
+#' @param PDF Use `FALSE` (the default) to skip PDF page lookup, `TRUE` to
+#'   look for a PDF alongside the manuscript with the same base name, or a
+#'   character path to the matching PDF.
+#' @param to_envir Logical. Register the manuscript in `envir` for later
+#'   lookup? Defaults to `getOption("revise_use_envir", TRUE)`.
+#' @param envir Environment in which to register the manuscript.
+#' @return Invisibly returns a list of class `revise_manuscript` with these
+#'   elements:
 #'
-#' * $sections: Extracted revisions
-#' * $PDF: Optionally, the PDF document
-#' * $refs: References to figures and tables
-#' * $rmd: The raw rmarkdown
-#' * $mtime: When the rmarkdown file was last modified
-#' * $checksum: A checksum of the rmarkdown file
-#' * $filename: The filename of the rmarkdown file
-#' @details If `to_envir` is `TRUE`, the manuscript is invisibly assigned to the specified environment for later use by other revise functions. For example, this allows `get_revision` to work without specifying a manuscript. This behaviour can be disabled by setting `options(revise_use_envir = FALSE)`.
+#' * `sections`: Tagged excerpts, named by tag ID.
+#' * `PDF`: Extracted page text, or `NULL` when no PDF was supplied.
+#' * `refs`: Figure and table references, or `NULL` for Word manuscripts.
+#' * `rmd`: Raw Markdown source, or `NULL` for Word manuscripts.
+#' * `mtime`, `checksum`, and `filename`: The source file's modification time,
+#'   checksum, and base name.
+#' @details In Markdown, use `[excerpt]{#id}`, an HTML span with an `id`
+#'   attribute, or a fenced div such as `::: {#id}` for longer excerpts. In
+#'   Word, select the excerpt and add a comment containing `Revise::id`.
+#'
+#'   By default, the manuscript is registered as `.revise_manuscripts` in
+#'   `envir`, so [get_revision()] can find it without a `manuscript` argument.
+#'   Rereading a file with the same base name replaces its registered copy.
+#'   Set `to_envir = FALSE` to use the returned object without registering it.
 #' @examples
-#' tempfile <- tempfile("tmp", fileext = ".txt")
-#' writeLines("[Maecenas mollis consectetur purus.]{#test}", con = tempfile)
-#' read_manuscript(tempfile)
-#' @seealso
-#'  \code{\link[rmarkdown]{yaml_front_matter}}
-#'  \code{\link[tools]{fileutils}}
-#' @rdname read_manuscript
+#' path <- tempfile(fileext = ".md")
+#' writeLines("[A revised passage.]{#example}", path)
+#' manuscript <- read_manuscript(path, to_envir = FALSE)
+#' get_revision("example", manuscript)
+#' @seealso [get_revision()], [list_manuscripts()], [remove_manuscript()]
 #' @export
 #' @importFrom rmarkdown yaml_front_matter
 #' @importFrom tools file_ext
@@ -34,8 +39,9 @@ read_manuscript <- function(path, PDF = FALSE, to_envir = getOption("revise_use_
   if(!is_docx(path)){
     rmd <- paste0(readLines(path, encoding = "UTF8"), collapse = "\n")
     sections <- c(extract_sections(rmd),
-                extract_sections(rmd, is_span = TRUE))
-    refs <- extract_refs(path)
+                extract_sections(rmd, is_span = TRUE),
+                extract_fenced_sections(rmd))
+    refs <- extract_refs(rmd)
   }else{
    sections <- read_docx(path)
    rmd <- NULL
@@ -44,30 +50,14 @@ read_manuscript <- function(path, PDF = FALSE, to_envir = getOption("revise_use_
 
 
   check_dup_sections(names(sections), revise_errors = FALSE)
-  if(!is.null(PDF)) {
-    if (PDF == TRUE) {
-
-      floats_in_text <-
-        tryCatch({
-          rmarkdown::yaml_front_matter(path)$floatsintext
-        }, error = function(e) return(FALSE))
-
-      if(is.null(floats_in_text)) floats_in_text <- FALSE
-
-      if(floats_in_text){
-        warning("floatsintext is set to TRUE in target rmarkdown. This may disrupt page number matching where target strings cross pages.")
-      }
-
-      PDF <- gsub(tools::file_ext(path), "pdf", path)
+  if (isTRUE(PDF)) {
+    if (!is.null(rmd) && isTRUE(tryCatch(rmarkdown::yaml_front_matter(path)$floatsintext,
+                                         error = function(e) FALSE))) {
+      warning("floatsintext is set to TRUE in target rmarkdown. This may disrupt page number matching where target strings cross pages.")
     }
-    if (inherits(PDF, "character")) {
-      PDF <- process_pdf(PDF)
-    } else{
-      PDF <- NULL
-    }
-  } else{
-    PDF <- NULL
+    PDF <- paste0(tools::file_path_sans_ext(path), ".pdf")
   }
+  PDF <- if (is.character(PDF)) process_pdf(PDF)
 
   # Prepare output object
   manuscript <- list(sections = sections,
@@ -87,28 +77,18 @@ read_manuscript <- function(path, PDF = FALSE, to_envir = getOption("revise_use_
 }
 
 add_to_envir <- function(manuscript, envir){
-  if(exists(".revise_manuscripts", envir = envir)){
-    .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
-    # Check that this doc is not yet in .revise_manuscripts
-    if(!isTRUE(checksum_exists(.revise_manuscripts, manuscript[["checksum"]]))){
-      newname <- basename(manuscript[["filename"]])
-      if(inherits(.revise_manuscripts, "revise_manuscript")){
-        manuscript <- list(.revise_manuscripts, manuscript)
-        names(manuscript) <- c(basename(.revise_manuscripts$filename),
-                               newname)
-        class(manuscript) <- c("revise_corpus", class(manuscript))
-      } else {
-        manuscript <- c(.revise_manuscripts, list(manuscript))
-        names(manuscript)[length(manuscript)] <- newname
-      }
-    }
+  corpus <- get0(".revise_manuscripts", envir = envir, inherits = FALSE)
+  if (inherits(corpus, "revise_manuscript")) {
+    corpus <- stats::setNames(list(corpus), corpus$filename)
   }
-  assign(".revise_manuscripts", manuscript, envir = envir)
+  corpus[[manuscript$filename]] <- manuscript
+  value <- if (length(corpus) == 1L) corpus[[1L]] else structure(corpus, class = c("revise_corpus", "list"))
+  assign(".revise_manuscripts", value, envir = envir)
 }
 
 remove_from_envir <- function(manuscript, envir){
   if(!inherits(manuscript, "character")) stop("Manuscript must be the name of a manuscript in the environment.")
-  if(!exists(".revise_manuscripts", envir = envir)) stop("No manuscripts in environment.")
+  if(!exists(".revise_manuscripts", envir = envir, inherits = FALSE)) stop("No manuscripts in environment.")
   .revise_manuscripts <- get(".revise_manuscripts", envir = envir)
   if(inherits(.revise_manuscripts, "revise_corpus")){
     if(!manuscript %in% names(.revise_manuscripts)) stop("Named manuscript does not exist in environment.")

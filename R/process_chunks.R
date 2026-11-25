@@ -1,3 +1,14 @@
+replace_docx_comment_macros <- function(text, labels) {
+  pattern <- "\\\\{1,2}([Cc]omment)\\{([^{}]+)\\}"
+  stringr::str_replace_all(text, pattern, function(tokens) {
+    parts <- stringr::str_match(tokens, pattern)
+    label <- parts[, 3]
+    # If knitr permits duplicate labels, resolve them to the last occurrence.
+    index <- match(label, rev(labels))
+    paste(parts[, 2], ifelse(is.na(index), label, length(labels) - index + 1L))
+  })
+}
+
 process_chunk_pdf <- function(options) {
 
   code <- paste(options$code, collapse = "\n")
@@ -27,22 +38,10 @@ process_chunk_txt <- function(options) {
 
 }
 
-process_chunk_docx <- function(options) {
-
+process_chunk_docx <- function(options, number) {
   code <- options$code
-  code[nchar(code) > 0] <- paste0("**",code[nchar(code) > 0],"**")
-
+  nonempty <- nzchar(code)
+  code[nonempty] <- paste0("**", code[nonempty], "**")
   code <- paste(code, collapse = "\n")
-
-    comment_label <- options$label
-
-    if(grepl("unnamed-chunk", comment_label)) {
-      comment_label <-
-        as.numeric(paste(unlist(
-          stringr::str_extract_all(comment_label, "[0-9]")
-        ), collapse = ""))
-    }
-
-    glue::glue("____\n<span class='underline'>**COMMENT {comment_label}**</span>\n\n \n**RC:**\n{code}</br>\n\n")
-
+  glue::glue("____\n<span class='underline'>**COMMENT {number}**</span>\n\n \n**RC:**\n{code}</br>\n\n")
 }
