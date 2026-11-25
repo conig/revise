@@ -22,3 +22,19 @@ test_that("read_manuscript picks up fenced div sections", {
   out <- revise::read_manuscript(tmp, to_envir = FALSE)
   expect_equal(names(out$sections), "multiline")
 })
+
+test_that("a hash in a fenced div attribute value is not a section ID", {
+  path <- tempfile(fileext = ".Rmd")
+  writeLines(c(
+    '::: {data-label="a #decoy" #real}',
+    "Tagged text.",
+    ":::",
+    '::: {data-label="just #another-decoy"}',
+    "Untagged text.",
+    ":::"
+  ), path)
+
+  manuscript <- read_manuscript(path, to_envir = FALSE)
+  expect_named(manuscript$sections, "real")
+  expect_identical(get_revision("real", manuscript, quote = FALSE), "Tagged text.")
+})

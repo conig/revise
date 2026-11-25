@@ -13,3 +13,23 @@ test_that("inline r evaluation requires trust", {
     fixed = TRUE
   )
 })
+
+test_that("inline evaluation uses the supplied environment and respects evaluate", {
+  path <- tempfile(fileext = ".Rmd")
+  writeLines("[Value: `r { evaluated <- TRUE; value }`]{#section}", path)
+  manuscript <- read_manuscript(path, to_envir = FALSE)
+  env <- list2env(list(value = 42, evaluated = FALSE))
+
+  expect_error(get_revision("section", manuscript, envir = env, trust_manuscript = FALSE),
+               "evaluated <- TRUE", fixed = TRUE)
+  expect_identical(
+    get_revision("section", manuscript, quote = FALSE, evaluate = FALSE),
+    "Value: `r { evaluated <- TRUE; value }`"
+  )
+  expect_false(env$evaluated)
+  expect_identical(
+    get_revision("section", manuscript, quote = FALSE, envir = env, trust_manuscript = TRUE),
+    "Value: 42"
+  )
+  expect_true(env$evaluated)
+})

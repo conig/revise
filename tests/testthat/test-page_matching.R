@@ -110,3 +110,55 @@ test_that("get_revision formats page ranges with double hyphens", {
 
   expect_match(out, "Pg\\. 1--2")
 })
+
+test_that("an excerpt with no searchable text gets an unknown page", {
+  manuscript <- make_test_manuscript("[@citation]", c("main text", "appendix"))
+  expect_warning(
+    output <- get_revision("target", manuscript, split_string = TRUE),
+    "Couldn't match the extracted text"
+  )
+  expect_match(output, "Pg. ?", fixed = TRUE)
+})
+
+test_that("a complete page match takes precedence over a repeated opening", {
+  section <- "We asked participants about their experiences. Only the second page contains these results."
+  manuscript <- make_test_manuscript(section, c(
+    "We asked participants about their experiences. This page describes the pilot.",
+    section
+  ))
+  out <- get_revision("target", manuscript, search_length = 20)
+  expect_match(out, "Pg. 2\\end", fixed = TRUE)
+})
+
+test_that("a one-page PDF can be used to cite an excerpt", {
+  pdf <- tempfile(fileext = ".pdf")
+  path <- tempfile(fileext = ".Rmd")
+  writeLines("[Only one page of results.]{#results}", path)
+  grDevices::pdf(pdf)
+  graphics::plot.new()
+  graphics::text(.5, .5, "Only one page of results.")
+  grDevices::dev.off()
+
+  manuscript <- read_manuscript(path, PDF = pdf, to_envir = FALSE)
+  expect_match(get_revision("results", manuscript), "Pg. 1\\end", fixed = TRUE)
+})
+
+test_that("printed headers are literal text and blank PDF pages keep their IDs", {
+  pdf <- tempfile(fileext = ".pdf")
+  path <- tempfile(fileext = ".Rmd")
+  writeLines("[Final observations.]{#results}", path)
+  grDevices::pdf(pdf)
+  for (i in 1:5) {
+    graphics::plot.new()
+    if (i == 3) next
+    graphics::text(.5, .9, paste("Study [draft", i))
+    graphics::text(.5, .5, if (i == 5) "Final observations." else "Other results.")
+  }
+  grDevices::dev.off()
+
+  manuscript <- read_manuscript(path, PDF = pdf, to_envir = FALSE)
+  expect_identical(manuscript$PDF$page_id, 1:5)
+  expect_identical(manuscript$PDF$text[3], "")
+  expect_false(any(grepl("draft", manuscript$PDF$text)))
+  expect_match(get_revision("results", manuscript), "Pg. 5\\end", fixed = TRUE)
+})

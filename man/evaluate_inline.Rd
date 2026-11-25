@@ -13,7 +13,7 @@ evaluate_inline(string, envir = parent.frame(), trust_manuscript = FALSE)
 
 \item{trust_manuscript}{logical. Should inline \code{r} code be trusted and
 evaluated? Defaults to \code{FALSE}. When called via \code{\link[=get_revision]{get_revision()}}, the default
-comes from \code{getOption("revise_trust_manuscript")}.}
+comes from \code{getOption("revise_trust_manuscript", FALSE)}.}
 }
 \value{
 A character string with inline \code{r} code evaluated.
@@ -22,8 +22,7 @@ A character string with inline \code{r} code evaluated.
 Evaluates embedded inline r code within a string of text
 }
 \details{
-Inline \code{r} code is detected using backticks and evaluated via
-\code{\link[glue:glue]{glue::glue()}} with \verb{.open = "}r "\code{and}.close = "\verb{"}.
+\code{\link[glue:glue]{glue::glue()}} detects inline R expressions delimited by backticks.
 If inline \code{r} chunks are present and \code{trust_manuscript} is not \code{TRUE},
 this function errors with the inline code that would have been evaluated.
 Set \code{options(revise_trust_manuscript = TRUE)} and call \code{\link[=get_revision]{get_revision()}}, or pass
@@ -31,5 +30,5 @@ Set \code{options(revise_trust_manuscript = TRUE)} and call \code{\link[=get_rev
 \code{\link[=get_revision]{get_revision()}} by setting \code{evaluate = FALSE}.
 }
 \examples{
-revise:::evaluate_inline("1+1 = `r 1+1`")
+revise:::evaluate_inline("1+1 = `r 1+1`", trust_manuscript = TRUE)
 }

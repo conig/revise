@@ -40,7 +40,6 @@ Depends:
     R (>= 4.1.0)
 Imports:
     bookdown,
-    dplyr,
     glue,
     knitr,
     papaja,

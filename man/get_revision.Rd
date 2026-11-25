@@ -28,19 +28,22 @@ is found in the environment.}
 
 \item{evaluate}{logical. Should inline rchunks be executed?}
 
-\item{split_string}{should only the start and end of the string be searched for?}
+\item{split_string}{Also match the start and end of the excerpt separately.
+This is done automatically for excerpts longer than \code{search_length}.}
 
-\item{search_length}{numeric. Searches for the first n and n characters in a string. Shorten if difficult to find passages split by floats.}
+\item{search_length}{Approximate length in characters of each start or end
+excerpt used for matching. Shorten if floats interrupt the passage.}
 
 \item{include_pgnum}{logical. include PDF page number? Requires a PDF to be provided to the manuscript object.}
 
 \item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
 
-\item{envir}{The environment in which to find the manuscript.}
+\item{envir}{The environment in which to find a loaded manuscript and evaluate
+its inline R code.}
 
 \item{trust_manuscript}{logical. If \code{TRUE}, allow inline \code{r} code in
 the manuscript to be evaluated when \code{evaluate = TRUE}. Defaults to
-\verb{getOption("revise_trust_manuscript") which when unset is assumed to be FALSE}.}
+\code{getOption("revise_trust_manuscript", FALSE)}.}
 }
 \value{
 A character vector of length 1 containing the text extracted from the manuscript that was tagged with \code{id}, including any modifications as specified by the arguments.

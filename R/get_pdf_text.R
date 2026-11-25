@@ -1,13 +1,27 @@
 #' @importFrom pdftools pdf_text
-get_pdf_text <- function (file, ...){
-  text <- pdftools::pdf_text(file, ...)
-  Encoding(text) <- "UTF-8"
-  text <- strsplit(text, split = "\\r\\n")
+process_pdf <- function(path) {
+  if (tolower(tools::file_ext(path)) != "pdf") {
+    stop("Extracting page numbers only works for pdf documents")
+  }
+  pages <- pdftools::pdf_text(path)
+  lines <- lapply(strsplit(pages, "\r\n|\r|\n"), function(x) {
+    x <- trimws(x)
+    x[nzchar(x)]
+  })
 
-  text <- lapply(text, function(x) x[!grepl("^\\s*$", x)])
-  out <- data.frame(page_id = rep(seq_along(text), sapply(text,
-                                                          length)), element_id = unlist(sapply(text, function(x) seq_len(length(x)))),
-                    text = unlist(text), stringsAsFactors = FALSE)
-  out[["text"]] <- trimws(out[["text"]])
-  out
+  # Only remove a first line when it recurs across pages with body text.
+  # Compare it literally: punctuation in a printed title isn't a regex.
+  first <- vapply(lines, function(x) if (length(x) > 1L) x[1] else "", character(1))
+  headers <- trimws(gsub("[[:space:]]+", " ", gsub("[0-9]", "", first)))
+  counts <- table(headers[nzchar(headers)])
+  head <- names(counts)[counts >= 2L & counts > .7 * length(pages)]
+  if (length(head)) {
+    matched <- headers == head
+    lines[matched] <- lapply(lines[matched], `[`, -1L)
+  }
+
+  text <- vapply(lines, paste, character(1), collapse = " ")
+  doc <- data.frame(page_id = seq_along(pages), text = clean_string(text))
+  if (length(head)) attr(doc, "running_head") <- head
+  doc
 }

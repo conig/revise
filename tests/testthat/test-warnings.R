@@ -14,7 +14,7 @@ lnz <- c("---","title: \"test doc\"", "format: \"github_document\"", "---", "",
          "options(revise_errors = TRUE)",
             paste0("man <- read_manuscript('", gsub("\\", "\\\\", original, fixed = T), "')"),
             "```",
-            "`r revise::get_revision(\"doesntexist\", man, trust_manuscript = TRUE)`",
+            "`r revise::get_revision(\"doesntexist\", man)`",
             "")
 no_error <- tempfile("noerror", fileext = ".Rmd")
 allow_error <- tempfile("error", fileext = ".Rmd")
