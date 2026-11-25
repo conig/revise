@@ -9,7 +9,7 @@ drive_comments(url, email = NULL, cache_credentials = NULL)
 \arguments{
 \item{url}{URL to drive document}
 
-\item{email}{drive email account. Can be set with options(gargle_oath_email)}
+\item{email}{drive email account. Can be set with options(gargle_oauth_email)}
 
 \item{cache_credentials}{bool. Should cached credentials be used? Can be set with options(gargle_oauth_cache)}
 }

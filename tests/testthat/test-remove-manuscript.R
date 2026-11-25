@@ -1,0 +1,11 @@
+test_that("removing manuscripts reports success without losing other manuscripts", {
+  env <- new.env(parent = emptyenv())
+  path <- tempfile(fileext = ".Rmd")
+  writeLines("[Example]{#example}", path)
+  read_manuscript(path, envir = env)
+  expect_identical(remove_manuscript("missing.Rmd", env), FALSE)
+  expect_identical(list_manuscripts(env), basename(path))
+  result <- withVisible(remove_manuscript(basename(path), env))
+  expect_identical(result, list(value = TRUE, visible = FALSE))
+  expect_null(list_manuscripts(env))
+})

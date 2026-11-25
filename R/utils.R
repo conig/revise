@@ -44,15 +44,14 @@ extract_refs <- function(path) {
 
 
 #' @export
-#' @importFrom cli cli_h2
-print.revise_manuscript = function(x, ...) {
-  cli::cli_h2("<Manuscript>")
-  cli_msg("*" = "{length(x$sec)} section{c('s', '')[(length(x$sec) == 1)+1L]}")
-  if (is.null(x$PDF)) {
-    cli_msg("x" = "No PDF attached")
-  } else {
-    cli_msg("*" = "{nrow(x$PDF)} pages")
+print.revise_manuscript <- function(x, ...) {
+  cat("<Manuscript>\n")
+  if (!isTRUE(getOption("usethis.quiet", !interactive()))) {
+    n <- length(x$sections)
+    cat(n, if (n == 1L) "section\n" else "sections\n")
+    cat(if (is.null(x$PDF)) "No PDF attached" else paste(nrow(x$PDF), "pages"), "\n", sep = "")
   }
+  invisible(x)
 }
 
 #' evaluate_inline

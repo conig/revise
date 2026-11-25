@@ -48,12 +48,9 @@ Imports:
     stringr,
     pdftools,
     officer,
-    xml2,
-    worcs,
-    cli
+    xml2
 Suggests:
     googledrive,
-    docxtractr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 SystemRequirements: pandoc (>= 1.14) - http://pandoc.org

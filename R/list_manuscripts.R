@@ -48,10 +48,9 @@ list_manuscripts <- function(envir = parent.frame(1)){
 #' @rdname remove_manuscript
 #' @export
 remove_manuscript <- function(manuscript = NULL, envir = parent.frame(1)){
-  with_cli_try("Removing manuscript {.val {manuscript}} from environment.", {
-    if(!inherits(manuscript, "character")) stop()
-    for(n in manuscript){
-      remove_from_envir(n, envir)
-    }
-  })
+  if (!is.character(manuscript)) return(invisible(FALSE))
+  invisible(tryCatch({
+    for (name in manuscript) remove_from_envir(name, envir)
+    TRUE
+  }, error = function(e) FALSE))
 }
