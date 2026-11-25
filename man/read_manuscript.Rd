@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_manuscript.R
 \name{read_manuscript}
 \alias{read_manuscript}
-\title{Read 'Rmarkdown' Manuscript}
+\title{Read a Tagged Manuscript}
 \usage{
 read_manuscript(
   path,
@@ -12,41 +12,48 @@ read_manuscript(
 )
 }
 \arguments{
-\item{path}{Character, path to the 'Rmarkdown' file.}
+\item{path}{Character path to the manuscript.}
 
-\item{PDF}{Logical or character. Default \code{FALSE} does nothing. If set to \code{TRUE}, attempts to determine PDF file path from \code{YAML} front matter. If character, should be the path to the PDF rendered from the 'Rmarkdown' file. This PDF will be loaded for page matching.}
+\item{PDF}{Use \code{FALSE} (the default) to skip PDF page lookup, \code{TRUE} to
+look for a PDF alongside the manuscript with the same base name, or a
+character path to the matching PDF.}
 
-\item{to_envir}{Logical, indicating whether or not the manuscript should
-be invisibly assigned to an environment variable names \code{.revise_manuscript}.
-Defaults to \code{TRUE}. Can be disabled by setting \code{options(revise_use_envir = FALSE)}.}
+\item{to_envir}{Logical. Register the manuscript in \code{envir} for later
+lookup? Defaults to \code{getOption("revise_use_envir", TRUE)}.}
 
-\item{envir}{The environment to which the manuscript should be assigned.}
+\item{envir}{Environment in which to register the manuscript.}
 }
 \value{
-Invisibly returns a list of class \code{manuscript}, containing
-the following elements:
+Invisibly returns a list of class \code{revise_manuscript} with these
+elements:
 \itemize{
-\item $sections: Extracted revisions
-\item $PDF: Optionally, the PDF document
-\item $refs: References to figures and tables
-\item $rmd: The raw rmarkdown
-\item $mtime: When the rmarkdown file was last modified
-\item $checksum: A checksum of the rmarkdown file
-\item $filename: The filename of the rmarkdown file
+\item \code{sections}: Tagged excerpts, named by tag ID.
+\item \code{PDF}: Extracted page text, or \code{NULL} when no PDF was supplied.
+\item \code{refs}: Figure and table references, or \code{NULL} for Word manuscripts.
+\item \code{rmd}: Raw Markdown source, or \code{NULL} for Word manuscripts.
+\item \code{mtime}, \code{checksum}, and \code{filename}: The source file's modification time,
+checksum, and base name.
 }
 }
 \description{
-Reads an 'Rmarkdown' manuscript and, if possible, an associated PDF.
+Read tagged excerpts from a Markdown, R Markdown, or Word (.docx) manuscript.
 }
 \details{
-If \code{to_envir} is \code{TRUE}, the manuscript is invisibly assigned to the specified environment for later use by other revise functions. For example, this allows \code{get_revision} to work without specifying a manuscript. This behaviour can be disabled by setting \code{options(revise_use_envir = FALSE)}.
+In Markdown, use \verb{[excerpt]\{#id\}}, an HTML span with an \code{id}
+attribute, or a fenced div such as \verb{::: \{#id\}} for longer excerpts. In
+Word, select the excerpt and add a comment containing \code{Revise::id}.
+
+By default, the manuscript is registered as \code{.revise_manuscripts} in
+\code{envir}, so \code{\link[=get_revision]{get_revision()}} can find it without a \code{manuscript} argument.
+Rereading a file with the same base name replaces its registered copy.
+Set \code{to_envir = FALSE} to use the returned object without registering it.
 }
 \examples{
-tempfile <- tempfile("tmp", fileext = ".txt")
-writeLines("[Maecenas mollis consectetur purus.]{#test}", con = tempfile)
-read_manuscript(tempfile)
+path <- tempfile(fileext = ".md")
+writeLines("[A revised passage.]{#example}", path)
+manuscript <- read_manuscript(path, to_envir = FALSE)
+get_revision("example", manuscript)
 }
 \seealso{
-\code{\link[rmarkdown]{yaml_front_matter}}
-\code{\link[tools]{fileutils}}
+\code{\link[=get_revision]{get_revision()}}, \code{\link[=list_manuscripts]{list_manuscripts()}}, \code{\link[=remove_manuscript]{remove_manuscript()}}
 }

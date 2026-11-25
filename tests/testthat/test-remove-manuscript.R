@@ -9,3 +9,12 @@ test_that("removing manuscripts reports success without losing other manuscripts
   expect_identical(result, list(value = TRUE, visible = FALSE))
   expect_null(list_manuscripts(env))
 })
+
+test_that("removal from a child environment cannot remove a parent's registration", {
+  env <- new.env(parent = emptyenv())
+  path <- tempfile(fileext = ".md")
+  writeLines("[Passage]{#tag}", path)
+  read_manuscript(path, envir = env)
+  expect_false(remove_manuscript(basename(path), new.env(parent = env)))
+  expect_identical(list_manuscripts(env), basename(path))
+})

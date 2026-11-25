@@ -66,3 +66,27 @@ test_that("get_revision handles overlapping markdown and span tags", {
   expect_match(inner, "Inner text", fixed = TRUE)
   expect_match(inner, "Still inner.", fixed = TRUE)
 })
+
+test_that("nested tags retain ordinary brackets but not tag wrappers", {
+  path <- tempfile(fileext = ".md")
+  writeLines("[Outer [inner [sic]]{#inner} and [link](url).]{#outer}", path)
+  m <- read_manuscript(path, to_envir = FALSE)
+  expect_identical(get_revision("outer", m, quote = FALSE),
+                   "Outer inner [sic] and [link](url).")
+})
+
+test_that("only spans with an id register a manuscript section", {
+  path <- tempfile(fileext = ".md")
+  writeLines('<span>Plain</span> <span id="tag">Tagged</span>', path)
+  m <- read_manuscript(path, to_envir = FALSE)
+  expect_identical(m$sections, list(tag = "Tagged"))
+})
+
+test_that("headings are formatted literally, including at the end of an excerpt", {
+  path <- tempfile(fileext = ".md")
+  writeLines(c("::: {#tag}", "## Results [preliminary", "Item #one is unchanged.",
+               "### Conclusion (revised)", ":::"), path)
+  m <- read_manuscript(path, to_envir = FALSE)
+  expect_identical(get_revision("tag", m, quote = FALSE),
+                   "**Results [preliminary**\n\nItem #one is unchanged.\n**Conclusion (revised).**")
+})

@@ -162,3 +162,66 @@ test_that("printed headers are literal text and blank PDF pages keep their IDs",
   expect_false(any(grepl("draft", manuscript$PDF$text)))
   expect_match(get_revision("results", manuscript), "Pg. 5\\end", fixed = TRUE)
 })
+
+test_that("PDF = TRUE changes only the final extension of the manuscript path", {
+  dir <- tempfile(pattern = "md-project-")
+  dir.create(dir)
+  path <- file.path(dir, "study.md")
+  writeLines("[A revised passage.]{#tag}", path)
+  grDevices::pdf(file.path(dir, "study.pdf"))
+  graphics::plot.new()
+  graphics::text(.5, .5, "A revised passage.")
+  grDevices::dev.off()
+  man <- read_manuscript(path, PDF = TRUE, to_envir = FALSE)
+  expect_match(get_revision("tag", man), "Pg. 1\\end", fixed = TRUE)
+})
+
+test_that("PDF lookup distinguishes revised numbers and whole words", {
+  man <- make_test_manuscript("We retained 278 responses.", c(
+    "We retained 143 responses. This is a scatterplot.",
+    "We retained 278 responses. The cat returned."
+  ))
+  expect_match(get_revision("target", man), "Pg. 2\\end", fixed = TRUE)
+  man$sections$target <- "cat"
+  expect_match(get_revision("target", man), "Pg. 2\\end", fixed = TRUE)
+})
+
+test_that("separated PDF anchors cite both ends, and minor typos can still match", {
+  man <- make_test_manuscript("An opening phrase and a closing observation", c(
+    "An opening phrase", "A figure and its caption", "a closing observation"
+  ))
+  expect_match(get_revision("target", man, search_length = 14), "Pg. 1--3\\end", fixed = TRUE)
+  man$sections$target <- "A closing observatoin"
+  expect_match(get_revision("target", man), "Pg. 3\\end", fixed = TRUE)
+})
+
+test_that("printed page numbers do not interrupt a short cross-page excerpt", {
+  dir <- tempfile()
+  dir.create(dir)
+  path <- file.path(dir, "paper.md")
+  writeLines("[We met.]{#tag}", path)
+  grDevices::pdf(file.path(dir, "paper.pdf"))
+  for (i in 1:2) {
+    graphics::plot.new()
+    graphics::text(.5, .5, c("We", "met.")[i])
+    graphics::text(.5, .1, as.character(i))
+  }
+  grDevices::dev.off()
+  man <- read_manuscript(path, PDF = TRUE, to_envir = FALSE)
+  expect_match(get_revision("tag", man), "Pg. 1--2\\end", fixed = TRUE)
+})
+
+test_that("different numeric results on the first line are not mistaken for a running head", {
+  path <- tempfile(fileext = ".md")
+  pdf <- tempfile(fileext = ".pdf")
+  writeLines("[We retained 278 responses.]{#sample}", path)
+  grDevices::pdf(pdf)
+  for (n in c(143, 278)) {
+    graphics::plot.new()
+    graphics::text(.5, .9, paste("We retained", n, "responses."))
+    graphics::text(.5, .6, "Results follow.")
+  }
+  grDevices::dev.off()
+  m <- read_manuscript(path, PDF = pdf, to_envir = FALSE)
+  expect_match(get_revision("sample", m), "Pg. 2\\end", fixed = TRUE)
+})

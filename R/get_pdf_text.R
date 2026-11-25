@@ -9,10 +9,22 @@ process_pdf <- function(path) {
     x[nzchar(x)]
   })
 
+  # Keep numbers in body text for matching, but not a printed folio at the
+  # edge of a page: it would break a quote that continues on the next page.
+  lines <- Map(function(x, page) {
+    if (length(x) < 2L) return(x)
+    edge <- c(1L, length(x))
+    x[setdiff(seq_along(x), edge[x[edge] == as.character(page)])]
+  }, lines, seq_along(lines))
+
   # Only remove a first line when it recurs across pages with body text.
   # Compare it literally: punctuation in a printed title isn't a regex.
-  first <- vapply(lines, function(x) if (length(x) > 1L) x[1] else "", character(1))
-  headers <- trimws(gsub("[[:space:]]+", " ", gsub("[0-9]", "", first)))
+  headers <- vapply(seq_along(lines), function(page) {
+    x <- lines[[page]]
+    if (length(x) < 2L) return("")
+    title <- gsub("[[:space:]]+", " ", x[1])
+    sub(sprintf("^%d | %d$", page, page), "", title)
+  }, character(1))
   counts <- table(headers[nzchar(headers)])
   head <- names(counts)[counts >= 2L & counts > .7 * length(pages)]
   if (length(head)) {

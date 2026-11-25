@@ -24,7 +24,7 @@ word_windows <- function(words, size) {
 }
 
 exact_pdf_page <- function(target, candidates) {
-  matches <- which(grepl(target, candidates, fixed = TRUE))
+  matches <- which(grepl(paste("", target, ""), paste("", candidates, ""), fixed = TRUE))
   names(candidates)[utils::head(matches, 1L)]
 }
 
@@ -33,7 +33,8 @@ fuzzy_pdf_page <- function(target, candidates, max.distance = .15) {
   phrases <- unique(word_windows(words, min(length(words), 8L)))
   # Phrase coverage tolerates missing text around floats or citations.
   hits <- integer(length(candidates))
-  for (phrase in phrases) hits <- hits + grepl(phrase, candidates, fixed = TRUE)
+  padded <- paste("", candidates, "")
+  for (phrase in phrases) hits <- hits + grepl(paste("", phrase, ""), padded, fixed = TRUE)
   best <- which.max(hits)
   if (hits[best] / length(phrases) >= .3) return(names(candidates)[best])
 

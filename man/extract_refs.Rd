@@ -4,10 +4,10 @@
 \alias{extract_refs}
 \title{extract_refs}
 \usage{
-extract_refs(path)
+extract_refs(text)
 }
 \arguments{
-\item{path}{to markdown manuscript}
+\item{text}{Markdown manuscript text}
 }
 \description{
 Extract table and figure references

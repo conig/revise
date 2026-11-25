@@ -18,36 +18,51 @@ get_revision(
 )
 }
 \arguments{
-\item{id}{the id as a character string from a html or markdown tag}
+\item{id}{Character ID of the manuscript tag.}
 
-\item{manuscript}{Optional; a revise_manuscript object in which to search
-for \code{id}. Defaults to \code{NULL}, in which case the manuscript object
-is found in the environment.}
+\item{manuscript}{A \code{revise_manuscript} or \code{revise_corpus} in which to look
+for \code{id}. If \code{NULL}, use the manuscripts registered in \code{envir}.}
 
-\item{quote}{should the output string be quoted by inserting '>' before the string?}
+\item{quote}{Logical. Format the excerpt as a Markdown block quote?}
 
-\item{evaluate}{logical. Should inline rchunks be executed?}
+\item{evaluate}{Logical. Evaluate inline R if present? Set to \code{FALSE} to
+insert the excerpt without running code.}
 
-\item{split_string}{Also match the start and end of the excerpt separately.
-This is done automatically for excerpts longer than \code{search_length}.}
+\item{split_string}{Logical. Also try matching the start and end of the
+excerpt separately when looking for its PDF pages? This is tried
+automatically if the excerpt is longer than \code{search_length} and an exact
+match for the full excerpt is not found.}
 
-\item{search_length}{Approximate length in characters of each start or end
-excerpt used for matching. Shorten if floats interrupt the passage.}
+\item{search_length}{Approximate length in characters of the start and end
+excerpts used for PDF matching. Shorten if floats interrupt the passage.}
 
-\item{include_pgnum}{logical. include PDF page number? Requires a PDF to be provided to the manuscript object.}
+\item{include_pgnum}{Logical. Append a LaTeX page reference for a PDF
+revision letter if the manuscript has an associated PDF?}
 
-\item{revise_errors}{logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.}
+\item{revise_errors}{Logical. When \code{FALSE}, duplicate IDs or a missing ID in
+a single manuscript give a warning instead of an error.}
 
-\item{envir}{The environment in which to find a loaded manuscript and evaluate
-its inline R code.}
+\item{envir}{Environment for manuscript lookup and inline R evaluation.}
 
-\item{trust_manuscript}{logical. If \code{TRUE}, allow inline \code{r} code in
-the manuscript to be evaluated when \code{evaluate = TRUE}. Defaults to
+\item{trust_manuscript}{Logical. Allow inline R to run when \code{evaluate = TRUE}?
+Set to \code{TRUE} only after reviewing the manuscript's code. Defaults to
 \code{getOption("revise_trust_manuscript", FALSE)}.}
 }
 \value{
-A character vector of length 1 containing the text extracted from the manuscript that was tagged with \code{id}, including any modifications as specified by the arguments.
+A character string containing the formatted excerpt. Returns \code{NULL}
+if no manuscript is registered, the manuscript has no tagged sections, or
+no manuscript in a corpus contains the ID. For an unknown ID in a single
+manuscript, \code{revise_errors = FALSE} returns a diagnostic string.
 }
 \description{
-Retrieves and formats a specified section from a revise_manuscript object based on its ID.
+Retrieve and format an excerpt from a manuscript loaded with \code{\link[=read_manuscript]{read_manuscript()}}.
+}
+\details{
+Page matching uses the text extracted from the PDF. If it cannot
+locate the excerpt, it warns and appends \verb{Pg. ?}. Use a PDF rendered from
+the current manuscript. Set \code{include_pgnum = FALSE} for Word or plain-text
+revision letters when the manuscript also has a PDF attached.
+}
+\seealso{
+\code{\link[=read_manuscript]{read_manuscript()}}, \code{\link[=revise_letter_pdf]{revise_letter_pdf()}}
 }

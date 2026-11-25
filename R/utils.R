@@ -1,40 +1,10 @@
-checksum_exists <- function(corpus, checksum) {
-  UseMethod("checksum_exists", corpus)
-}
-#' @export
-checksum_exists.revise_corpus <- function(corpus, checksum) {
-  all_csums <- sapply(corpus, `[[`, "checksum")
-  return(isTRUE(checksum %in% all_csums))
-}
-
-#' @export
-checksum_exists.revise_manuscript <- function(corpus, checksum) {
-  return(isTRUE(checksum == corpus[["checksum"]]))
-}
-
-#' read_md
-#'
-#' Read in a markdown document for further analysis
-#' @param path to markdown manuscript
-
-read_md <- function(path) {
-  unname(unlist(utils::read.delim(
-    path,
-    sep = "\n",
-    quote = "",
-    header = FALSE
-  )))
-}
-
 #' extract_refs
 #'
 #' Extract table and figure references
-#' @param path to markdown manuscript
+#' @param text Markdown manuscript text
 
-extract_refs <- function(path) {
-  lines <- read_md(path)
-  lines <- paste(lines, collapse = "\n")
-  references <- unlist(stringr::str_extract_all(lines, "\\\\\\@ref.+?\\)"))
+extract_refs <- function(text) {
+  references <- unlist(stringr::str_extract_all(text, "\\\\\\@ref.+?\\)"))
   figures <- data.frame(text = unique(grep("fig:", references, value = TRUE)))
   tables <- data.frame(text = unique(grep("tab:", references, value = TRUE)))
   figures$ref <- seq_along(figures[, 1])
@@ -129,7 +99,6 @@ find_pages <- function(manuscript, string) {
 clean_string <- function(string) {
   string <- gsub("\\[.{0,50}\\]", "", string) # remove square brackets
   string <- gsub("\\*|\\#", "", string) # remove rmarkdown formatting
-  string <- gsub("[0-9]", "", string) # remove numbers
   string <- gsub("\\(.{0,50}\\)", "", tolower(string)) # remove parentheses
   string <- gsub("\\n", " ", string)
   string <- gsub("[[:punct:]]", "", tolower(string)) # remove punctuation
@@ -142,22 +111,14 @@ clean_string <- function(string) {
 # @param string a string
 # @return string
 
-header_to_bold = function(string) {
-  while (grepl("(?<!\\{)#{1,}.{0,100}\\\n", string, perl = TRUE)) {
-    target <- stringr::str_extract(string, "(?<!\\{)#{1,}.+?(\\n){1,}")
-    n_hash <- sum(strsplit(target, split = "")[[1]] == "#")
-    replacement <- gsub("(?<!\\{)#{1,}\\s?", "**", target, perl = TRUE)
-    if (n_hash < 3) {
-      replacement <- gsub("\\n{1,}", "**\\\n\\\n", replacement)
-    } else {
-      replacement <- gsub("\\n{1,}", ".** ", replacement)
-    }
-    string <- gsub(target, replacement, string)
-  }
-
-  string
+header_to_bold <- function(string) {
+  stringr::str_replace_all(string, "(?m)^(#{1,6})[ \\t]+([^\\n]+)(\\n+|$)", function(heading) {
+    parts <- stringr::str_match(heading, "^(#+)[ \\t]+([^\\n]+)(\\n*)$")
+    major <- nchar(parts[, 2]) < 3L
+    suffix <- ifelse(nzchar(parts[, 4]), ifelse(major, "\n\n", " "), "")
+    paste0("**", parts[, 3], ifelse(major, "**", ".**"), suffix)
+  })
 }
-
 
 utils::globalVariables(".revise_manuscripts")
 

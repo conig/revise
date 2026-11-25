@@ -1,24 +1,35 @@
 #' Extract Tagged Text from a Manuscript
 #'
-#' Retrieves and formats a specified section from a revise_manuscript object based on its ID.
-#' @param id the id as a character string from a html or markdown tag
-#' @param manuscript Optional; a revise_manuscript object in which to search
-#' for `id`. Defaults to `NULL`, in which case the manuscript object
-#' is found in the environment.
-#' @param quote should the output string be quoted by inserting '>' before the string?
-#' @param evaluate logical. Should inline rchunks be executed?
-#' @param split_string Also match the start and end of the excerpt separately.
-#'   This is done automatically for excerpts longer than `search_length`.
-#' @param search_length Approximate length in characters of each start or end
-#'   excerpt used for matching. Shorten if floats interrupt the passage.
-#' @param include_pgnum logical. include PDF page number? Requires a PDF to be provided to the manuscript object.
-#' @param revise_errors logical. If FALSE, failure to match manuscript sections will result in warnings rather than errors.
-#' @param envir The environment in which to find a loaded manuscript and evaluate
-#'   its inline R code.
-#' @param trust_manuscript logical. If `TRUE`, allow inline `r` code in
-#' the manuscript to be evaluated when `evaluate = TRUE`. Defaults to
-#' `getOption("revise_trust_manuscript", FALSE)`.
-#' @return A character vector of length 1 containing the text extracted from the manuscript that was tagged with `id`, including any modifications as specified by the arguments.
+#' Retrieve and format an excerpt from a manuscript loaded with [read_manuscript()].
+#' @param id Character ID of the manuscript tag.
+#' @param manuscript A `revise_manuscript` or `revise_corpus` in which to look
+#'   for `id`. If `NULL`, use the manuscripts registered in `envir`.
+#' @param quote Logical. Format the excerpt as a Markdown block quote?
+#' @param evaluate Logical. Evaluate inline R if present? Set to `FALSE` to
+#'   insert the excerpt without running code.
+#' @param split_string Logical. Also try matching the start and end of the
+#'   excerpt separately when looking for its PDF pages? This is tried
+#'   automatically if the excerpt is longer than `search_length` and an exact
+#'   match for the full excerpt is not found.
+#' @param search_length Approximate length in characters of the start and end
+#'   excerpts used for PDF matching. Shorten if floats interrupt the passage.
+#' @param include_pgnum Logical. Append a LaTeX page reference for a PDF
+#'   revision letter if the manuscript has an associated PDF?
+#' @param revise_errors Logical. When `FALSE`, duplicate IDs or a missing ID in
+#'   a single manuscript give a warning instead of an error.
+#' @param envir Environment for manuscript lookup and inline R evaluation.
+#' @param trust_manuscript Logical. Allow inline R to run when `evaluate = TRUE`?
+#'   Set to `TRUE` only after reviewing the manuscript's code. Defaults to
+#'   `getOption("revise_trust_manuscript", FALSE)`.
+#' @return A character string containing the formatted excerpt. Returns `NULL`
+#'   if no manuscript is registered, the manuscript has no tagged sections, or
+#'   no manuscript in a corpus contains the ID. For an unknown ID in a single
+#'   manuscript, `revise_errors = FALSE` returns a diagnostic string.
+#' @details Page matching uses the text extracted from the PDF. If it cannot
+#'   locate the excerpt, it warns and appends `Pg. ?`. Use a PDF rendered from
+#'   the current manuscript. Set `include_pgnum = FALSE` for Word or plain-text
+#'   revision letters when the manuscript also has a PDF attached.
+#' @seealso [read_manuscript()], [revise_letter_pdf()]
 #' @export
 
 get_revision <- function(
@@ -49,7 +60,7 @@ get_revision <- function(
   } else {
     check_dup_sections(names(manuscript$sections), revise_errors)
   }
-  if (is.null(manuscript$sections)) return(NULL)
+  if (!length(manuscript$sections)) return(NULL)
   string <- manuscript$sections[[id]]
 
   if (is.null(string)) {
@@ -115,6 +126,14 @@ missing_section_message <- function(id, section_names) {
 }
 
 sanitize_pandoc_tag_artifacts <- function(string) {
+  if (grepl("]{#", string, fixed = TRUE)) {
+    tags <- section_tags(string)
+    # Drop matched opening brackets as well; leave ordinary Markdown intact.
+    if (nrow(tags)) {
+      chars <- strsplit(string, "", fixed = TRUE)[[1]]
+      string <- paste(chars[-tags$open], collapse = "")
+    }
+  }
   # Overlapping tag styles can leave partial wrappers in the extracted text.
   string <- gsub("\\]?\\{#[-A-Za-z0-9_:.]+\\}|<span\\b[^>]*>|</span>",
                  "", string, perl = TRUE)
