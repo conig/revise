@@ -22,51 +22,46 @@ You can install the development version of {revise} from
 remotes::install_github("conig/revise")
 ```
 
-# Starting a revision document
+## Start a revision letter
 
-You can use rmd or docx files with revise. To load either, simply call
-revise::read_manuscript(“your_file.rmd”)
+Use `revise::revise_letter_pdf`, `revise::revise_letter_docx`, or
+`revise::revise_letter_txt` as the R Markdown output format. In RStudio,
+the **ReviewerComment** addin wraps selected text in an `asis` reviewer
+chunk and adds a YAML header if one is missing.
 
-For example. Here is an example docx where content has been tagged with
-comment boxes. E.g, Revise::hard
+<figure>
+<img src="man/figures/README/ReviewerComment.gif"
+alt="Animation of the ReviewerComment addin" />
+<figcaption aria-hidden="true">Animation of the ReviewerComment
+addin</figcaption>
+</figure>
 
-``` r
-docx_path <- system.file("examples/word_test.docx", package = "revise")
+## Tag the manuscript
 
-man <- read_manuscript(docx_path)
-man
-#> 
-#> ── <Manuscript> ──
-#> 
-#> • 6 sections
-#> ✖ No PDF attached
+In a Word manuscript, select the excerpt and add a comment containing
+only `Revise::section-name`. In Markdown or R Markdown, use one of these
+forms:
+
+``` md
+[An inline excerpt.]{#short}
+
+<span id="html-excerpt">
+An excerpt marked with an HTML span.
+</span>
+
+::: {#long}
+## A longer excerpt
+
+Use a fenced div to include multiple paragraphs or headings.
+:::
 ```
 
-We can see all tagged sections by running
+## Insert an excerpt
 
-``` r
-names(man$sections)
-#> [1] "track_changes" "section"       "multi_lines"   "bullets"      
-#> [5] "hard"          "numbered"
-```
+Load the manuscript with `revise::read_manuscript()`, then use inline R
+in the letter to insert an excerpt by its tag:
 
-Then we can retrieve using a section name
-
-``` r
-revision <- get_revision("hard", man)
-revision
-#> [1] ">Hard example\n>\n>This section has all features:\n>\n>* Bullet1\n>\n>* Bullet2\n>\n>* Bullet3\n>\n>Some more text is here."
-```
-
-This content can then be put directly into a response document using
-single backticks.
-
-To tag text in a Word manuscript, add a comment whose text starts with
-`Revise::section-name` to the passage you want to reuse. To render a
-response letter as a Word document, set the output format to
-`revise::revise_letter_docx` and insert excerpts with inline R:
-
-```` md
+```` markdown
 ---
 output: revise::revise_letter_docx
 ---
@@ -75,41 +70,26 @@ output: revise::revise_letter_docx
 man <- revise::read_manuscript("manuscript.docx")
 ```
 
-```{asis}
+```{asis reviewer-method}
 Reviewer comment
 ```
 
-Our response references the tagged excerpt: `r revise::get_revision("hard", man)`
+We revised the passage as follows:
+
+`r revise::get_revision("section-name", man)`
 ````
 
-# Tagging sections in a manuscript for extraction
+Pass `trust_manuscript = TRUE` to `get_revision()` only after reviewing
+or writing the manuscript’s inline R code. To insert the excerpt without
+running that code, set `evaluate = FALSE`.
 
-There are two methods to tag sections in manuscript for extraction. We
-support using id attributes in html spans:
+To explore the tags in the bundled Word example:
 
-``` md
-<span id="multi-line">
-This is a multi-line section of text.
-
-We have tagged it with the section name "multi-line".
-</span>
+``` r
+docx_path <- system.file("examples/word_test.docx", package = "revise")
+man <- revise::read_manuscript(docx_path, to_envir = FALSE)
+cat(paste(names(man$sections), collapse = ", "), "\n", sep = "")
+#> track_changes, section, multi_lines, bullets, hard, numbered
+revise::get_revision("hard", man)
+#> [1] ">Hard example\n>\n>This section has all features:\n>\n>* Bullet1\n>\n>* Bullet2\n>\n>* Bullet3\n>\n>Some more text is here."
 ```
-
-We also support a markdown variant for quick inline tagging:
-
-``` md
-[This is a single line of text we have tagged using markdown.]{#single-line-example}
-```
-
-For multi-line sections using markdown span tags, use fenced divs:
-
-``` md
-::: {#multiline}
-## Heading 1
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pulvinar felis scelerisque auctor mattis. Interdum et malesuada fames ac ante ipsum primis in faucibus.
-:::
-```
-
-In all cases pandoc ignores these tags when rendering the document, but
-they can be used by revise to extract content.
