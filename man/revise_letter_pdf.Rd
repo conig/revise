@@ -2,27 +2,31 @@
 % Please edit documentation in R/revise_letter.R
 \name{revise_letter_pdf}
 \alias{revise_letter_pdf}
-\title{Dynamic PDF Revision Letter}
+\title{Dynamic PDF revision letter output}
 \usage{
 revise_letter_pdf(comment_reset_by_section = TRUE, ...)
 }
 \arguments{
-\item{comment_reset_by_section}{Should reviewer comment numbering reset at each
-section header (e.g., each reviewer)? Defaults to \code{TRUE} for current
-behavior. Set to \code{FALSE} to keep numbering continuous across reviewers.}
+\item{comment_reset_by_section}{Logical scalar. Should reviewer comment
+numbering reset at each section header (for example, for each reviewer)?
+Defaults to \code{TRUE}. Set to \code{FALSE} for continuous numbering.}
 
-\item{...}{Arguments passed on to \code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}.}
+\item{...}{Additional arguments passed on to \code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}.
+\code{revise_letter_pdf()} supplies the \code{includes} argument so that revise's
+LaTeX header is used; callers should not pass \code{includes} through \code{...}.}
 }
 \value{
-R Markdown output format to pass to \code{\link[rmarkdown:render]{rmarkdown::render()}}.
+An R Markdown output format object for \code{\link[rmarkdown:render]{rmarkdown::render()}}.
 }
 \description{
-Template for creating journal revision letters
-with dynamic excerpts from a manuscript.
+R Markdown output format for creating PDF journal revision letters with
+dynamic excerpts from a tagged manuscript.
 }
 \details{
-This function wraps \code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}.
+This function wraps \code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}, installs the
+revise knitr engine for PDF revision chunks, and adds the package LaTeX
+header required for reviewer-comment cross-references.
 }
 \seealso{
-\code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}, \code{\link[bookdown:html_document2]{bookdown::pdf_document2()}}, \code{\link[rmarkdown:pdf_document]{rmarkdown::pdf_document()}}
+\code{\link[papaja:revision_letter_pdf]{papaja::revision_letter_pdf()}}, \code{\link[bookdown:pdf_document2]{bookdown::pdf_document2()}}, \code{\link[rmarkdown:pdf_document]{rmarkdown::pdf_document()}}
 }

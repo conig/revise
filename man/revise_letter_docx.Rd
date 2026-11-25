@@ -2,24 +2,28 @@
 % Please edit documentation in R/revise_letter.R
 \name{revise_letter_docx}
 \alias{revise_letter_docx}
-\title{Dynamic docx Revision Letter}
+\title{Dynamic DOCX revision letter output}
 \usage{
 revise_letter_docx(...)
 }
 \arguments{
-\item{...}{Arguments passed on to \code{\link[bookdown:html_document2]{bookdown::word_document2()}}.}
+\item{...}{Additional arguments passed on to \code{\link[bookdown:word_document2]{bookdown::word_document2()}}.
+\code{revise_letter_docx()} supplies the \code{reference_docx} argument so that
+revise's response-letter template is used; callers should not pass
+\code{reference_docx} through \code{...}.}
 }
 \value{
-An R Markdown output format object to be passed to
-  \code{rmarkdown::\link[rmarkdown]{render}()}.
+An R Markdown output format object for \code{\link[rmarkdown:render]{rmarkdown::render()}}.
 }
 \description{
-Template for creating journal revision letters
-with dynamic excerpts from a manuscript.
+R Markdown output format for creating Word journal revision letters with
+dynamic excerpts from a tagged manuscript.
 }
 \details{
-This function wraps \code{\link[bookdown:html_document2]{bookdown::word_document2()}}.
+This function wraps \code{\link[bookdown:word_document2]{bookdown::word_document2()}}, installs the
+revise knitr engine for DOCX revision chunks, and converts reviewer-comment
+cross-references to numbered plain text.
 }
 \seealso{
-\code{\link[bookdown:html_document2]{bookdown::word_document2()}}
+\code{\link[bookdown:word_document2]{bookdown::word_document2()}}
 }

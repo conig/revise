@@ -1,32 +1,29 @@
-test_that("docx comments are numbered sequentially even with tagged labels", {
-  on.exit(options(revise.docx_comment_state = NULL), add = TRUE)
-  revise:::init_docx_comment_state()
+test_that("DOCX rendering resolves reviewer references and restarts numbering", {
+  skip_if_not(rmarkdown::pandoc_available("3.6"))
+  dir <- tempfile()
+  dir.create(dir)
+  on.exit(unlink(dir, recursive = TRUE))
+  input <- file.path(dir, "response.Rmd")
+  writeLines(c(
+    "---", "title: Response", "---", "",
+    "See \\Comment{later} and \\comment{missing}.", "",
+    "```{reviewer first}",
+    "As noted in \\comment{later}.",
+    "```", "",
+    "# Another reviewer", "",
+    "```{asis later}",
+    "Second reviewer comment.",
+    "```", "",
+    "In reply to \\comment{first}."
+  ), input)
 
-  first <- revise:::process_chunk_docx(list(
-    code = "First reviewer comment",
-    label = "rev_a_comment_primary"
-  ))
-  second <- revise:::process_chunk_docx(list(
-    code = "Second reviewer comment",
-    label = "rev_b_comment_secondary"
-  ))
-
-  expect_match(first, "COMMENT 1", fixed = TRUE)
-  expect_match(second, "COMMENT 2", fixed = TRUE)
-})
-
-test_that("docx comment references are converted from latex macros", {
-  on.exit(options(revise.docx_comment_state = NULL), add = TRUE)
-  revise:::init_docx_comment_state()
-
-  revise:::process_chunk_docx(list(code = "First", label = "c1"))
-  revise:::process_chunk_docx(list(code = "Second", label = "c2"))
-
-  converted <- revise:::process_docx_document(
-    "Please see \\\\comment{c1}, \\\\Comment{c2}, and \\\\comment{unknown_label}."
-  )
-
-  expect_match(converted, "comment 1", fixed = TRUE)
-  expect_match(converted, "Comment 2", fixed = TRUE)
-  expect_match(converted, "comment unknown_label", fixed = TRUE)
+  format <- revise_letter_docx()
+  for (i in seq_len(2)) {
+    path <- rmarkdown::render(input, output_format = format, quiet = TRUE)
+    paragraphs <- officer::docx_summary(officer::read_docx(path))$text
+    expect_true(all(c("COMMENT 1", "COMMENT 2") %in% paragraphs))
+    expect_true("See Comment 2 and comment missing." %in% paragraphs)
+    expect_true(any(grepl("As noted in comment 2.", paragraphs, fixed = TRUE)))
+    expect_true("In reply to comment 1." %in% paragraphs)
+  }
 })

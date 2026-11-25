@@ -14,8 +14,8 @@ test_that("Users can change reviewer chunknames", {
     "Author response",
     ""), con = rmdPath)
 
-  options(reviewer_chunkname = "examplechunk",
-          warn = 2)
+  old <- options(reviewer_chunkname = "examplechunk", warn = 2)
+  on.exit(options(old))
 
   # Min version pandoc 3.6
   if(rmarkdown::pandoc_available("3.6")) {
@@ -23,7 +23,6 @@ test_that("Users can change reviewer chunknames", {
                                                 quiet = TRUE))
   }
 
-  options(warn = 1)
 })
 
 }

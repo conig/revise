@@ -2,23 +2,26 @@
 % Please edit documentation in R/revise_letter.R
 \name{revise_letter_txt}
 \alias{revise_letter_txt}
-\title{Dynamic txt Revision Letter}
+\title{Dynamic plain-text revision letter output}
 \usage{
 revise_letter_txt(...)
 }
 \arguments{
-\item{...}{Arguments passed on to \code{\link[rmarkdown:output_format]{rmarkdown::output_format()}}.}
+\item{...}{Additional arguments passed on to \code{\link[rmarkdown:output_format]{rmarkdown::output_format()}}.
+\code{revise_letter_txt()} supplies the knitr options, pandoc options, and
+post-processor required for revise's plain-text output; callers should not
+pass \code{knitr}, \code{pandoc}, or \code{post_processor} through \code{...}.}
 }
 \value{
-An R Markdown output format definition that can be passed to
-  \code{\link[rmarkdown]{render}}.
+An R Markdown output format object for \code{\link[rmarkdown:render]{rmarkdown::render()}}.
 }
 \description{
-Template for creating journal revision letters
-with dynamic excerpts from a manuscript.
+R Markdown output format for creating plain-text journal revision letters
+with dynamic excerpts from a tagged manuscript.
 }
 \details{
-This function wraps \code{\link[rmarkdown:output_format]{rmarkdown::output_format()}}.
+This function wraps \code{\link[rmarkdown:output_format]{rmarkdown::output_format()}} and installs the
+revise knitr engine for plain-text revision chunks.
 }
 \seealso{
 \code{\link[rmarkdown:output_format]{rmarkdown::output_format()}}
